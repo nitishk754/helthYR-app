@@ -9,6 +9,8 @@ import 'package:health_wellness/splash_screen.dart';
 import 'package:health_wellness/water_tracker.dart';
 import 'package:health_wellness/welcome_page.dart';
 
+var userInput = <String, dynamic>{};
+
 void main() {
   runApp(const MyApp());
 }
@@ -33,9 +35,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: WelcomePage(),
+      home: const WelcomePage(),
     );
   }
 }
-
-

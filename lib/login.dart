@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 import 'package:health_wellness/reset_pass.dart';
+
+import 'services/api_services.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,15 +14,23 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  bool isChecked = false;
+  var isChecked = false;
+  var isLoading = false;
+
+  final controllerPassword = TextEditingController();
+  final controllerEmail = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF6F8F7),
       appBar: null,
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(30.0, 100.0, 30.0, 30.0),
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
+          padding: const EdgeInsets.fromLTRB(30.0, 100.0, 30.0, 30.0),
           children: [
             SizedBox(
                 height: 250,
@@ -37,13 +48,22 @@ class _LoginState extends State<Login> {
             Container(
               margin: EdgeInsets.only(top: 25),
               child: TextFormField(
-                  textInputAction: TextInputAction.next,
+                  controller: controllerEmail,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value!.isEmpty ||
+                        !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(value)) {
+                      return 'Enter a valid email!';
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
-                    filled: true, //<-- SEE HERE
+                    filled: true,
+                    //<-- SEE HERE
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5)),
-
                     hintText: 'Enter your Email',
                     labelText: "Email",
                   )),
@@ -51,10 +71,18 @@ class _LoginState extends State<Login> {
             Container(
               margin: EdgeInsets.only(top: 18),
               child: TextFormField(
-                obscureText: true,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value!.isEmpty || value.length < 3) {
+                      return 'Enter a valid password!';
+                    }
+                    return null;
+                  },
+                  controller: controllerPassword,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    filled: true, //<-- SEE HERE
+                    filled: true,
+                    //<-- SEE HERE
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5)),
@@ -78,34 +106,52 @@ class _LoginState extends State<Login> {
               margin: EdgeInsets.only(top: 5),
               child: SizedBox(
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                       Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ResetPass()));
-                    });
-                  },
-                  child: const Text(
-                    '  Login  ',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7.0)),
-                    backgroundColor: Color(0xFFF6A03D),
-                    // onSurface:
-                    //     Colors.transparent,
-                    shadowColor: Colors.red.shade300,
-                  ),
-                ),
+                child: isLoading
+                    ? CupertinoActivityIndicator()
+                    : ElevatedButton(
+                        onPressed: () async {
+                          final isValid = _formKey.currentState!.validate();
+                          if (isValid && isChecked) {
+                            setState(() => isLoading = true);
+                            var email = controllerEmail.text;
+                            var password = controllerPassword.text;
+                            var result =
+                                await ApiService().getUser(email, password);
+                            if (result.containsKey('errors')) {
+                              setState(() => isLoading = false);
+                              return;
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) {
+                                var login_histories = result['data']['user']
+                                    ['login_histories'] as List;
+                                return login_histories.isEmpty
+                                    ? ResetPass(result)
+                                    : DashboardScreen(result);
+                              }),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          '  Login  ',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.0)),
+                          backgroundColor: Color(0xFFF6A03D),
+                          // onSurface:
+                          //     Colors.transparent,
+                          shadowColor: Colors.red.shade300,
+                        ),
+                      ),
               ),
             ),
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text("Forget Password?",style: TextStyle(fontSize: 15)),
+                child: Text("Forget Password?", style: TextStyle(fontSize: 15)),
               ),
             ),
           ],
