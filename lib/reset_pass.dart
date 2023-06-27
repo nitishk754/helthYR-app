@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 
 class ResetPass extends StatefulWidget {
-  const ResetPass({super.key});
+  final Map userData;
+
+  const ResetPass(this.userData, {super.key});
 
   @override
   State<ResetPass> createState() => _ResetPassState();
@@ -12,6 +14,7 @@ class ResetPass extends StatefulWidget {
 class _ResetPassState extends State<ResetPass> {
   bool passenable = true;
   bool passenableCnfrm = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,13 +48,13 @@ class _ResetPassState extends State<ResetPass> {
                   textInputAction: TextInputAction.next,
                   obscureText: passenable,
                   decoration: InputDecoration(
-                    filled: true, //<-- SEE HERE
+                    filled: true,
+                    //<-- SEE HERE
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5)),
                     hintText: 'Password',
                     labelText: "Password",
-                    
                   )),
             ),
             Container(
@@ -60,13 +63,13 @@ class _ResetPassState extends State<ResetPass> {
                   textInputAction: TextInputAction.next,
                   obscureText: passenableCnfrm,
                   decoration: InputDecoration(
-                    filled: true, //<-- SEE HERE
+                    filled: true,
+                    //<-- SEE HERE
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5)),
                     hintText: 'Confirm Password',
                     labelText: "Confirm Password",
-                    
                   )),
             ),
             Container(
@@ -76,10 +79,12 @@ class _ResetPassState extends State<ResetPass> {
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                       Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DashboardScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                DashboardScreen(widget.userData)),
+                      );
                     });
                   },
                   child: const Text(

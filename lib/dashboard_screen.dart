@@ -10,7 +10,9 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'constants/colors.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final Map userData;
+
+  const DashboardScreen(this.userData, {super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -30,12 +32,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:(_selectedIndex == 0)? AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: 135,
-        backgroundColor: Colors.white,
-        flexibleSpace: customAppBar(context),
-      ):null,
+      appBar: (_selectedIndex == 0)
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: 135,
+              backgroundColor: Colors.white,
+              flexibleSpace: customAppBar(context),
+            )
+          : null,
       body: ListView(
         children: [
           (_selectedIndex == 0)
