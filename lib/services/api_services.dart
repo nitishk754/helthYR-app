@@ -52,4 +52,24 @@ class ApiService {
 
     return jsonDecode(userData.data.toString());
   }
+
+  Future<Map> resetPassword(
+      String auth, String password, String passwordConfirmation) async {
+    // var formData = jsonEncode({"email": email, "password": pass});
+    var formData = jsonEncode(
+        {"password": "nitish123", "password_confirmation": "nitish123"});
+
+    dio.options.headers['Authorization'] = 'Bearer $auth';
+    Response userData =
+        await dio.post(baseUrl + userResetPassword, data: formData);
+
+    // Prints the raw data returned by the server
+
+    print('User Info: ${userData.data}');
+
+    // Parsing the raw JSON data to the User class
+    // Login user = Login.fromJson(userData.data);
+
+    return jsonDecode(userData.data.toString());
+  }
 }
