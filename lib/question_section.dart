@@ -1,6 +1,7 @@
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/constants/colors.dart';
 import 'package:health_wellness/custom_radio_button_2.dart';
 import 'package:health_wellness/login.dart';
@@ -25,9 +26,6 @@ class _QuestionSectionState extends State<QuestionSection> {
   String _goalWeight = 'kg';
   String _height = 'Fit';
 
-  String? chooseReligion;
-  double questionval = 0.0;
-  double totalQuestions = 0.0;
   QuestionModel? questionModel;
 
   @override
@@ -38,13 +36,16 @@ class _QuestionSectionState extends State<QuestionSection> {
 
   void _getData() async {
     questionModel = (await ApiService().getQuestion());
-    print("hefhfrehff ${questionModel!.data.data.length}");
     Future.delayed(const Duration(seconds: 0)).then((value) => setState(() {
           _initial = 1.0 / questionModel!.data.data.length;
-          totalQuestions = 1.0 / questionModel!.data.data.length;
-          questionval = 1.0 / questionModel!.data.data.length;
-          // saveAns.length = questionModel!.data.length;
         }));
+  }
+
+  String capitalize(String? value) {
+    if (value == null || value.isEmpty) {
+      return '';
+    }
+    return "${value[0].toUpperCase()}${value.substring(1).toLowerCase()}";
   }
 
   int _currentAge = 23;
@@ -87,7 +88,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                     ExpandablePageView(
                       controller: controller,
                       children: questionModel!.data.data.map((model) {
-                        debugPrint('qType ==> ${model.qTxt}');
+                        //
+                        // debugPrint('qType ==> ${model.qTxt}');
                         return ListView(
                           shrinkWrap: true,
                           physics: ClampingScrollPhysics(),
@@ -191,20 +193,27 @@ class _QuestionSectionState extends State<QuestionSection> {
                                 const EdgeInsets.fromLTRB(10.0, 5.0, 30.0, 5.0),
                             child: ElevatedButton(
                               onPressed: () {
-                                int page = controller.page?.toInt() ?? 0;
-                                setState(() {
-                                  if (_initial != 1.0) {
-                                    _initial = _initial + 0.20;
+                                var page = controller.page?.toInt() ?? 0;
+                                var length = userInput.values.length;
+                                debugPrint('page => $page, length => $length');
+                                if (length > page) {
+                                  setState(() {
+                                    if (_initial != 1.0) {
+                                      _initial = _initial + 0.20;
+                                    }
+                                  });
+                                  controller.nextPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.ease);
+                                  if (page == 5) {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Login()));
                                   }
-                                });
-                                controller.nextPage(
-                                    duration: Duration(milliseconds: 500),
-                                    curve: Curves.ease);
-                                if (page == 5) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Login()));
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: 'Please give answer to continue');
                                 }
                               },
                               child: const Text(
@@ -414,6 +423,8 @@ class _QuestionSectionState extends State<QuestionSection> {
   }
 
   ListView heightScreen(Datum model) {
+    var controller = TextEditingController();
+    var textFromValue = '';
     return ListView(
       shrinkWrap: true,
       physics: ClampingScrollPhysics(),
@@ -451,15 +462,9 @@ class _QuestionSectionState extends State<QuestionSection> {
                 padding: const EdgeInsets.all(0.0),
                 child: TextFormField(
                   maxLength: 4,
+                  controller: controller,
                   textAlign: TextAlign.center,
                   textInputAction: TextInputAction.next,
-                  onChanged: (value) {
-                    userInput['${model.id}'] = {
-                      "question": model.qTxt,
-                      "question_id": model.id,
-                      "answer_text": '$value $_height',
-                    };
-                  },
                   decoration: InputDecoration(
                       contentPadding: EdgeInsets.zero,
                       filled: true,
@@ -488,6 +493,81 @@ class _QuestionSectionState extends State<QuestionSection> {
               groupValue: _height,
               onChanged: (value) => setState(() => _height = value!),
             ),
+          ],
+        ),
+        SizedBox(
+          height: 90,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: 15),
+            Text("",
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                )),
+            SizedBox(width: 15),
+            StatefulBuilder(builder: (context, setState) {
+              controller.addListener(() {
+                if (_height == 'cm') {
+                  double inches = 0.3937 * double.parse(controller.text);
+                  double feet = inches / 12;
+                  double leftover = inches % 12;
+                  textFromValue = '${feet.toInt()}`${leftover.toInt()}';
+                  userInput['${model.id}'] = {
+                    "question": model.qTxt,
+                    "question_id": model.id,
+                    "answer_text": '${feet.toInt()}fit${leftover.toInt()}in',
+                  };
+                } else {
+                  double feet = 1 * double.parse(controller.text);
+                  textFromValue = feet.toStringAsFixed(2);
+                  userInput['${model.id}'] = {
+                    "question": model.qTxt,
+                    "question_id": model.id,
+                    "answer_text": '${textFromValue}fit0in',
+                  };
+                }
+                setState(() => false);
+              });
+              return SizedBox(
+                width: 120,
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: TextFormField(
+                    maxLength: 4,
+                    enabled: false,
+                    onChanged: (value) {
+
+                    },
+                    controller: TextEditingController(text: textFromValue),
+                    textAlign: TextAlign.center,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.zero,
+                        filled: true,
+                        //<-- SEE HERE
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(width: 1)),
+                        hintText: '',
+                        labelText: "",
+                        counterText: ""),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            }),
+            SizedBox(width: 20),
+            Text('Fit',
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.bold,
+                )),
           ],
         ),
       ],
@@ -522,7 +602,7 @@ class _QuestionSectionState extends State<QuestionSection> {
             var choice = model.choice[choiceIndex].choiceText.toLowerCase();
             return MyRadioListTile<String>(
               value: choice,
-              leading: choice,
+              leading: capitalize(choice),
               groupValue: _choice,
               onChanged: (value) => setState(() {
                 _choice = value!;

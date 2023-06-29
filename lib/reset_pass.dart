@@ -111,12 +111,13 @@ class _ResetPassState extends State<ResetPass> {
                           final isValid = _formKey.currentState!.validate();
                           if (isValid) {
                             setState(() => isLoading = true);
-                            var email = controllerEmail.text;
-                            var password = controllerPassword.text;
                             var token = widget.userData['data']['token'];
                             debugPrint('user token ==> $token');
                             var result = await ApiService()
-                                .resetPassword(token, email, password);
+                                .resetPassword(token, {
+                              "password": controllerEmail.text,
+                              "password_confirmation": controllerPassword.text,
+                            });
                             if (result.containsKey('errors')) {
                               setState(() => isLoading = false);
                               return;
