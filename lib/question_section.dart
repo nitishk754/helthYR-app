@@ -20,23 +20,15 @@ class QuestionSection extends StatefulWidget {
 
 class _QuestionSectionState extends State<QuestionSection> {
   double _initial = 1.0;
-  int _gender = 0;
-  int _value2 = 0;
-  int _value3 = 0;
+  String _choice = '';
+  String _currentWeight = 'kg';
+  String _goalWeight = 'kg';
+  String _height = 'Fit';
+
   String? chooseReligion;
   double questionval = 0.0;
   double totalQuestions = 0.0;
   QuestionModel? questionModel;
-
-  List<String> menuItems = [
-    "kg",
-    "lb",
-  ];
-
-  List<String> menuItems2 = [
-    "kg",
-    "lb",
-  ];
 
   @override
   void initState() {
@@ -131,6 +123,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                                                   setState(() =>
                                                       _currentAge = value);
                                                   userInput['${model.id}'] = {
+                                                    "question": model.qTxt,
                                                     "question_id": model.id,
                                                     "answer_text": _currentAge
                                                   };
@@ -238,139 +231,11 @@ class _QuestionSectionState extends State<QuestionSection> {
     );
   }
 
-  Row goalWeight() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 24,
-          width: 24,
-          child: Image(image: AssetImage("assets/Images/goalIcon.png")),
-        ),
-        SizedBox(
-          width: 5,
-        ),
-        Text("Goal Weight",
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-            )),
-        SizedBox(
-          width: 15,
-        ),
-        SizedBox(
-          width: 80,
-          height: 35,
-          child: Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: TextFormField(
-              maxLength: 4,
-              textAlign: TextAlign.center,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                  contentPadding: EdgeInsets.zero,
-                  filled: true,
-                  //<-- SEE HERE
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide(width: 1)),
-                  hintText: '',
-                  labelText: "",
-                  counterText: ""),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        MyRadioListTile2<int>(
-          value: 1,
-          groupValue: _value2,
-          leading: 'kg',
-          title: Text('One'),
-          onChanged: (value) => setState(() => _value2 = value!),
-        ),
-        MyRadioListTile2<int>(
-          value: 2,
-          groupValue: _value2,
-          leading: 'lbs',
-          title: Text('One'),
-          onChanged: (value) => setState(() => _value2 = value!),
-        ),
-      ],
-    );
-  }
-
-  Row currentWeight() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 24,
-          width: 24,
-          child: Image(image: AssetImage("assets/Images/weightIcon.png")),
-        ),
-        SizedBox(
-          width: 5,
-        ),
-        Text("Weight",
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-            )),
-        SizedBox(
-          width: 15,
-        ),
-        SizedBox(
-          width: 80,
-          height: 35,
-          child: Padding(
-            padding: const EdgeInsets.all(0.0),
-            child: TextFormField(
-              maxLength: 4,
-              textAlign: TextAlign.center,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                  contentPadding: EdgeInsets.zero,
-                  filled: true,
-                  //<-- SEE HERE
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide(width: 1)),
-                  hintText: '',
-                  labelText: "",
-                  counterText: ""),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        MyRadioListTile2<int>(
-          value: 3,
-          groupValue: _value3,
-          leading: 'kg',
-          title: Text('One'),
-          onChanged: (value) => setState(() => _value3 = value!),
-        ),
-        MyRadioListTile2<int>(
-          value: 4,
-          groupValue: _value3,
-          leading: 'lbs',
-          title: Text('One'),
-          onChanged: (value) => setState(() => _value3 = value!),
-        ),
-      ],
-    );
-  }
-
   ListView weightScreen(Datum model) {
+    var goalWeight = questionModel?.data.data.firstWhere(
+            (e) => e.qTxt.toLowerCase().contains('goal weight'),
+            orElse: () => model) ??
+        model;
     return ListView(
       shrinkWrap: true,
       physics: ClampingScrollPhysics(),
@@ -390,7 +255,74 @@ class _QuestionSectionState extends State<QuestionSection> {
         SizedBox(
           height: 30,
         ),
-        currentWeight(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Image(image: AssetImage("assets/Images/weightIcon.png")),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text("Weight",
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                )),
+            SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 80,
+              height: 35,
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: TextFormField(
+                  maxLength: 4,
+                  textAlign: TextAlign.center,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    userInput['${model.id}'] = {
+                      "question": model.qTxt,
+                      "question_id": model.id,
+                      "answer_text": '$value $_currentWeight'
+                    };
+                  },
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                      filled: true,
+                      //<-- SEE HERE
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: BorderSide(width: 1)),
+                      hintText: '',
+                      labelText: "",
+                      counterText: ""),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 20,
+            ),
+            MyRadioListTile2<String>(
+              value: 'kg',
+              leading: 'kg',
+              groupValue: _currentWeight,
+              onChanged: (value) => setState(() => _currentWeight = value!),
+            ),
+            MyRadioListTile2<String>(
+              value: 'lbs',
+              leading: 'lbs',
+              groupValue: _currentWeight,
+              onChanged: (value) => setState(() => _currentWeight = value!),
+            ),
+          ],
+        ),
         SizedBox(
           height: 50,
         ),
@@ -409,7 +341,74 @@ class _QuestionSectionState extends State<QuestionSection> {
         SizedBox(
           height: 30,
         ),
-        goalWeight(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Image(image: AssetImage("assets/Images/goalIcon.png")),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text("Goal Weight",
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                )),
+            SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 80,
+              height: 35,
+              child: Padding(
+                padding: const EdgeInsets.all(0.0),
+                child: TextFormField(
+                  maxLength: 4,
+                  textAlign: TextAlign.center,
+                  onChanged: (value) {
+                    userInput['${goalWeight.id}'] = {
+                      "question": goalWeight.qTxt,
+                      "question_id": goalWeight.id,
+                      "answer_text": '$value $_goalWeight'
+                    };
+                  },
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                      filled: true,
+                      //<-- SEE HERE
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: BorderSide(width: 1)),
+                      hintText: '',
+                      labelText: "",
+                      counterText: ""),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 20,
+            ),
+            MyRadioListTile2<String>(
+              value: 'kg',
+              leading: 'kg',
+              groupValue: _goalWeight,
+              onChanged: (value) => setState(() => _goalWeight = value!),
+            ),
+            MyRadioListTile2<String>(
+              value: 'lbs',
+              leading: 'lbs',
+              groupValue: _goalWeight,
+              onChanged: (value) => setState(() => _goalWeight = value!),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -454,10 +453,11 @@ class _QuestionSectionState extends State<QuestionSection> {
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   textInputAction: TextInputAction.next,
-                  onChanged: (value){
+                  onChanged: (value) {
                     userInput['${model.id}'] = {
+                      "question": model.qTxt,
                       "question_id": model.id,
-                      "answer_text": _currentAge
+                      "answer_text": '$value $_height',
                     };
                   },
                   decoration: InputDecoration(
@@ -476,19 +476,17 @@ class _QuestionSectionState extends State<QuestionSection> {
               ),
             ),
             SizedBox(width: 20),
-            MyRadioListTile2<int>(
-              value: 3,
-              groupValue: _value3,
+            MyRadioListTile2<String>(
+              value: 'Fit',
               leading: 'Fit',
-              title: Text('One'),
-              onChanged: (value) => setState(() => _value3 = value!),
+              groupValue: _height,
+              onChanged: (value) => setState(() => _height = value!),
             ),
-            MyRadioListTile2<int>(
-              value: 4,
-              groupValue: _value3,
+            MyRadioListTile2<String>(
+              value: 'cm',
               leading: 'cm',
-              title: Text('One'),
-              onChanged: (value) => setState(() => _value3 = value!),
+              groupValue: _height,
+              onChanged: (value) => setState(() => _height = value!),
             ),
           ],
         ),
@@ -516,43 +514,24 @@ class _QuestionSectionState extends State<QuestionSection> {
         SizedBox(
           height: 50,
         ),
-        // ListView(
-        //   shrinkWrap: true,
-        //   physics: ClampingScrollPhysics(),
-        //   children: [
-        //     MyRadioListTile<int>(
-        //       value: 1,
-        //       groupValue: _value,
-        //       leading: 'Male',
-        //       title: Text('One'),
-        //       onChanged: (value) => setState(() => _value = value!),
-        //     ),
-        //     MyRadioListTile<int>(
-        //       value: 2,
-        //       groupValue: _value,
-        //       leading: 'Female',
-        //       title: Text('One'),
-        //       onChanged: (value) => setState(() => _value = value!),
-        //     )
-        //   ],
-        // )
         ListView.builder(
           shrinkWrap: true,
           physics: ClampingScrollPhysics(),
           itemCount: model.choice.length,
           itemBuilder: (BuildContext context, int choiceIndex) {
-            return MyRadioListTile<int>(
-              value: model.choice[choiceIndex].id,
-              groupValue: _gender,
-              leading: model.choice[choiceIndex].choiceText,
-              // title: Text('One'),
+            var choice = model.choice[choiceIndex].choiceText.toLowerCase();
+            return MyRadioListTile<String>(
+              value: choice,
+              leading: choice,
+              groupValue: _choice,
               onChanged: (value) => setState(() {
-                _gender = value!;
+                _choice = value!;
                 userInput['${model.id}'] = {
+                  "question": model.qTxt,
                   "question_id": model.id,
-                  "answer_text": _gender
+                  "answer_text": _choice
                 };
-                debugPrint("selectedVal: $_gender");
+                debugPrint("selectedVal: $_choice");
               }),
             );
           },

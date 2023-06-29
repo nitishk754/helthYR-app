@@ -37,8 +37,8 @@ class ApiService {
   Future<Map> getUser(String email, String password) async {
     // var formData = jsonEncode({"email": email, "password": pass});
     var formData = jsonEncode({
-      "email": email, // "ernitish1993@gmail.com",
-      "password": password, // "nitish123",
+      "email": email, //"ernitish1993@gmail.com",
+      "password": password, //"nitish123",
       "role": "user"
     });
     Response userData = await dio.post(baseUrl + userLogin, data: formData);
@@ -54,12 +54,18 @@ class ApiService {
   }
 
   Future<Map> resetPassword(
-      String auth, String password, String passwordConfirmation) async {
+    String authorization,
+    String password,
+    String passwordConfirmation,
+  ) async {
     // var formData = jsonEncode({"email": email, "password": pass});
-    var formData = jsonEncode(
-        {"password": "nitish123", "password_confirmation": "nitish123"});
+    var formData = jsonEncode({
+      "password": password,
+      "password_confirmation": passwordConfirmation,
+    });
 
-    dio.options.headers['Authorization'] = 'Bearer $auth';
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer $authorization';
     Response userData =
         await dio.post(baseUrl + userResetPassword, data: formData);
 
@@ -69,6 +75,17 @@ class ApiService {
 
     // Parsing the raw JSON data to the User class
     // Login user = Login.fromJson(userData.data);
+
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> saveQuestions(String authorization, inputs) async {
+    var formData = jsonEncode(inputs);
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer $authorization';
+    Response userData =
+        await dio.post(baseUrl + userSaveQuestions, data: formData);
 
     return jsonDecode(userData.data.toString());
   }

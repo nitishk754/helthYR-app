@@ -113,7 +113,8 @@ class _ResetPassState extends State<ResetPass> {
                             setState(() => isLoading = true);
                             var email = controllerEmail.text;
                             var password = controllerPassword.text;
-                            var token = widget.userData['user']['token'];
+                            var token = widget.userData['data']['token'];
+                            debugPrint('user token ==> $token');
                             var result = await ApiService()
                                 .resetPassword(token, email, password);
                             if (result.containsKey('errors')) {
