@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 import 'package:health_wellness/reset_pass.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'main.dart';
 import 'services/api_services.dart';
@@ -111,6 +112,7 @@ class _LoginState extends State<Login> {
                     ? CupertinoActivityIndicator()
                     : ElevatedButton(
                         onPressed: () async {
+                          final SharedPreferences prefs = await SharedPreferences.getInstance();
                           final isValid = _formKey.currentState!.validate();
                           if (isValid && isChecked) {
                             setState(() => isLoading = true);
@@ -118,10 +120,13 @@ class _LoginState extends State<Login> {
                             var password = controllerPassword.text;
                             var result =
                                 await ApiService().getUser(email, password);
+                                print("resultresult_${result}");
                             if (result.containsKey('errors')) {
                               setState(() => isLoading = false);
                               return;
                             }
+
+                            prefs.setString("_token", result['data']['token']);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) {

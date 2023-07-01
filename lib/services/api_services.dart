@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:health_wellness/model/question_model.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/urls.dart';
 
@@ -72,4 +74,79 @@ class ApiService {
 
     return jsonDecode(userData.data.toString());
   }
+  Future<Map> addWaterIntake(String intakeAmount) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    var formData = jsonEncode({
+      "intake_amount": intakeAmount,
+      "intake_measurement": "ltr"
+    });
+    Response userData = await dio.post(baseUrl + waterIntake, data: formData);
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> getSevenDaysWaterIntake(String intakeAmount) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    var formData = jsonEncode({
+      "intake_amount": intakeAmount,
+      "intake_measurement": "ltr"
+    });
+    Response userData = await dio.get(baseUrl + waterIntake, data: formData);
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> loadActivity() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response userData = await dio.get("${baseUrl + activity}?range=today");
+    print(userData);
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> saveActivity(String activityType, String duration, String intensity) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    var formData = jsonEncode({
+      "date": getCurrentDate(),
+      "activity_type": activityType,
+      "duration": duration == "" ? "0":duration,
+      "intensity": intensity
+    });
+    print(formData);
+    Response userData = await dio.post(baseUrl + activity, data: formData);
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> meals() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response userData = await dio.get(baseUrl + mealPlan);
+    print(userData);
+    return jsonDecode(userData.data.toString());
+  }
+}
+
+String getCurrentDate() {
+  var date = DateTime.now();
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+  // var dateParse = DateTime.parse(date);
+
+  // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
+  return formatter.format(date);
 }

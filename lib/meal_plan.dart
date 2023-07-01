@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:health_wellness/services/api_services.dart';
 import 'package:horizontal_calendar/horizontal_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'constants/colors.dart';
-
+ 
 class MealPlan extends StatefulWidget {
   const MealPlan({super.key});
 
@@ -17,12 +18,32 @@ class _MealPlanState extends State<MealPlan>
     with SingleTickerProviderStateMixin {
   int tabIndex = 0;
   late TabController tabController;
+  bool _spinner = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     tabController = TabController(length: 1, vsync: this);
+    _meals();
+  }
+
+  _meals() async {
+    setState(() =>_spinner = true);
+    await ApiService().meals().then((value) {
+      var res = value["data"];
+      setState(() => _spinner = false);
+      print(res);
+      if (!res.containsKey('errors')) {
+        if(res["data"].length > 0){
+          //setState(() => caloriesBurned = res["data"][0]["calories_burned"].toString());
+        }
+      }
+      
+      final snackBar = SnackBar(content: Text(res["message"]));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    });
   }
 
   @override
@@ -78,7 +99,7 @@ class _MealPlanState extends State<MealPlan>
             height: 10,
           ),
           SizedBox(
-            height: 50,
+            height: 60,
             child: Card(
               child: HorizontalCalendar(
                 date: DateTime.now(),
@@ -156,7 +177,7 @@ class _MealPlanState extends State<MealPlan>
                                 Container(
                                   margin: EdgeInsets.fromLTRB(
                                       12.0, 5.5, 12.0, 5.5),
-                                  height: 80,
+                                  height: 90,
                                   width: MediaQuery.of(context).size.width,
                                   child: Row(
                                     children: [

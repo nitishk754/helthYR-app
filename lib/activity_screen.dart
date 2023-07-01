@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:health_wellness/constants/urls.dart';
+import 'package:health_wellness/services/api_services.dart';
 import 'package:horizontal_calendar/horizontal_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -18,17 +20,55 @@ class _ActivityWidgetState extends State<ActivityWidget>
   int tabIndex = 0;
   late TabController tabController;
 
-  final List<String> items = [
-    'Normal',
-    'High',
-  ];
-  String? selectedValue;
+  
+  final walkingMintueController = TextEditingController();
+  final runningMintueController = TextEditingController();
+  late String _walkingIntensity = "";
+  late String _runningIntensity = "";
+  bool _spinner = false;
+  String caloriesBurned = "0";
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     tabController = TabController(length: 1, vsync: this);
+    _loadActivity();
+  }
+  _updateActivity(String activityType, String duration, String intensity) async {
+    setState(() {
+      _spinner = true;
+    });
+    await ApiService().saveActivity(activityType, duration, intensity).then((value) {
+      var res = value["data"];
+       setState(() => _spinner = false);
+      if (!res.containsKey('errors')) {
+        _loadActivity();
+      }
+      final snackBar = SnackBar(content: Text(res["message"]));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    });
+
+  }
+
+  _loadActivity() async {
+    setState(() =>_spinner = true);
+    await ApiService().loadActivity().then((value) {
+      var res = value["data"];
+      setState(() => _spinner = false);
+
+      if (!res.containsKey('errors')) {
+        if(res["data"].length > 0){
+          setState(() => caloriesBurned = res["data"][0]["calories_burned"].toString());
+        }
+      }
+      
+      final snackBar = SnackBar(content: Text(res["message"]));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    });
   }
 
   @override
@@ -44,10 +84,15 @@ class _ActivityWidgetState extends State<ActivityWidget>
             padding: const EdgeInsets.all(10.0),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 30,
-                  color: Color(blueColor),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 30,
+                    color: Color(blueColor),
+                  ),
                 )),
           ),
           Align(
@@ -84,7 +129,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
             height: 10,
           ),
           SizedBox(
-            height: 50,
+            height: 60,
             child: Card(
               child: HorizontalCalendar(
                 date: DateTime.now(),
@@ -137,8 +182,8 @@ class _ActivityWidgetState extends State<ActivityWidget>
                           ),
                           color: Colors.white,
                           child: Center(
-                            child: Text(
-                              "3000",
+                            child: _spinner ? CircularProgressIndicator() : Text(
+                              "${caloriesBurned}",
                               style: TextStyle(
                                   fontSize: 38,
                                   color: Color(orangeShade),
@@ -157,12 +202,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: ClampingScrollPhysics(),
-                      itemCount: 2,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
+                  Padding(
                           padding:
                               const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
                           child: SizedBox(
@@ -175,14 +215,14 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                     Row(
                                       children: [
                                         Icon(
-                                          Icons.run_circle_outlined,
+                                          Icons.nordic_walking_outlined,
                                           size: 40,
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                            "Running",
-                                            style: TextStyle(fontSize: 25),
+                                            "Walking",
+                                            style: TextStyle(fontSize: 18),
                                           ),
                                         ),
                                       ],
@@ -213,6 +253,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                                 padding:
                                                     const EdgeInsets.all(0.0),
                                                 child: TextFormField(
+                                                  controller: walkingMintueController,
                                                   maxLength: 4,
                                                   textAlign: TextAlign.center,
                                                   textInputAction:
@@ -243,24 +284,45 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                               ),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8.0, 0.0, 8.0, 0.0),
-                                            child: Container(
-                                                padding: EdgeInsets.all(8.0),
-                                                decoration: BoxDecoration(
-                                                    //                              color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
-                                                    border: Border.all(
-                                                        color:
-                                                            Color(blueColor))),
-                                                child: Text(
-                                                  "Intensity",
-                                                  style:
-                                                      TextStyle(fontSize: 15),
-                                                )),
+                                          Container(
+                                            height: 35.0, // Set the desired height
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: Colors.grey),
+                                              borderRadius: BorderRadius.circular(5.0),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              
+                                              child: DropdownButton(
+                                                value: _walkingIntensity,
+                                                padding: EdgeInsets.only(left: 5),
+                                                // DropdownButton properties...
+                                                underline: Container(), // Hide the underline
+                                                items: [
+                                                  DropdownMenuItem(
+                                                    value: "",
+                                                    child: Text('Intensity'), // Displayed when selectedValue is null
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'high',
+                                                    child: Text('High'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'medium',
+                                                    child: Text('Medium'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'low',
+                                                    child: Text('Low'),
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _walkingIntensity = value.toString();
+                                                  });
+                                                  _updateActivity("walking", walkingMintueController.text, _walkingIntensity);
+                                                },
+                                              ),
+                                            ),
                                           )
                                         ],
                                       ),
@@ -270,8 +332,138 @@ class _ActivityWidgetState extends State<ActivityWidget>
                               ),
                             ),
                           ),
-                        );
-                      })
+                        ),
+
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+                          child: SizedBox(
+                            height: 70,
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Stack(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.run_circle_outlined,
+                                          size: 40,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            "Running",
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              "min",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Color(orangeShade)),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: SizedBox(
+                                              width: 60,
+                                              height: 35,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(0.0),
+                                                child: TextFormField(
+                                                  controller: runningMintueController,
+                                                  maxLength: 4,
+                                                  textAlign: TextAlign.center,
+                                                  textInputAction:
+                                                      TextInputAction.next,
+                                                  decoration: InputDecoration(
+                                                      contentPadding:
+                                                          EdgeInsets.zero,
+                                                      filled:
+                                                          true, //<-- SEE HERE
+                                                      fillColor: Colors.white,
+                                                      border:
+                                                          OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          5),
+                                                              borderSide:
+                                                                  BorderSide(
+                                                                      width:
+                                                                          0.1)),
+                                                      hintText: '',
+                                                      labelText: "",
+                                                      counterText: ""),
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 35.0, // Set the desired height
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: Colors.grey),
+                                              borderRadius: BorderRadius.circular(5.0),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton(
+                                                padding: EdgeInsets.only(left: 5),
+                                                value: _runningIntensity,
+                                                // DropdownButton properties...
+                                                underline: Container(), // Hide the underline
+                                                items: [
+                                                  DropdownMenuItem(
+                                                    value: "",
+                                                    child: Text('Intensity'), // Displayed when selectedValue is null
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'high',
+                                                    child: Text('High'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'medium',
+                                                    child: Text('Medium'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'low',
+                                                    child: Text('Low'),
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                 setState(() {
+                                                    _runningIntensity = value.toString();
+                                                  });
+                                                  _updateActivity("running", runningMintueController.text, _runningIntensity);
+                                                },
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                 ],
               );
             } else {
