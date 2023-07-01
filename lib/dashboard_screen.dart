@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:health_wellness/activity_screen.dart';
+import 'package:health_wellness/main.dart';
 import 'package:health_wellness/meal_plan.dart';
 import 'package:health_wellness/profile_view.dart';
+import 'package:health_wellness/services/api_services.dart';
 import 'package:health_wellness/water_tracker.dart';
 import 'package:intl/intl.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
@@ -26,6 +28,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    var inputs = userInput.values.toList();
+    var token = widget.userData['data']['token'];
+
+    debugPrint('saveQuestions token ==> $token');
+    debugPrint('saveQuestions inputs ==> ${{'res': inputs}}');
+    ApiService().saveQuestions(token,  {'res': inputs}).then((outputs) {
+      debugPrint('saveQuestions outputs ==> $outputs');
     });
   }
 

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:health_wellness/model/question_model.dart';
@@ -37,10 +36,11 @@ class ApiService {
   Future<Map> getUser(String email, String password) async {
     // var formData = jsonEncode({"email": email, "password": pass});
     var formData = jsonEncode({
-      "email": email, // "ernitish1993@gmail.com",
-      "password": password, // "nitish123",
+      "email": email, //"ernitish1993@gmail.com",
+      "password": password, //"nitish123",
       "role": "user"
     });
+
     Response userData = await dio.post(baseUrl + userLogin, data: formData);
 
     // Prints the raw data returned by the server
@@ -49,6 +49,26 @@ class ApiService {
 
     // Parsing the raw JSON data to the User class
     // Login user = Login.fromJson(userData.data);
+
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> resetPassword(String authorization, inputs) async {
+    var formData = jsonEncode(inputs);
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer $authorization';
+    var userData = await dio.post(baseUrl + userResetPassword, data: formData);
+
+    return jsonDecode(userData.data.toString());
+  }
+
+  Future<Map> saveQuestions(String authorization, inputs) async {
+    var formData = jsonEncode(inputs);
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] = 'Bearer $authorization';
+    var userData = await dio.post(baseUrl + questions, data: formData);
 
     return jsonDecode(userData.data.toString());
   }

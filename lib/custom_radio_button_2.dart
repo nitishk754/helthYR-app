@@ -5,7 +5,6 @@ class MyRadioListTile2<T> extends StatelessWidget {
   final T value;
   final T groupValue;
   final String leading;
-  final Widget? title;
   final ValueChanged<T?> onChanged;
 
   const MyRadioListTile2({
@@ -13,12 +12,10 @@ class MyRadioListTile2<T> extends StatelessWidget {
     required this.groupValue,
     required this.onChanged,
     required this.leading,
-    this.title,
   });
 
   @override
   Widget build(BuildContext context) {
-    final title = this.title;
     return InkWell(
       onTap: () => onChanged(value),
       child: Padding(
@@ -29,7 +26,6 @@ class MyRadioListTile2<T> extends StatelessWidget {
           child: Row(
             children: [
               _customRadioButton,
-             
             ],
           ),
         ),

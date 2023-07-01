@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 import 'package:health_wellness/reset_pass.dart';
 
+import 'main.dart';
 import 'services/api_services.dart';
 
 class Login extends StatefulWidget {
@@ -126,6 +127,9 @@ class _LoginState extends State<Login> {
                               MaterialPageRoute(builder: (context) {
                                 var login_histories = result['data']['user']
                                     ['login_histories'] as List;
+                                var token = result['data']['token'];
+                                debugPrint('user token ==> $token');
+                                debugPrint('user token ==> $userInput');
                                 return login_histories.isEmpty
                                     ? ResetPass(result)
                                     : DashboardScreen(result);
