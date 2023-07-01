@@ -196,7 +196,9 @@ class _QuestionSectionState extends State<QuestionSection> {
                                 var page = controller.page?.toInt() ?? 0;
                                 var length = userInput.values.length;
                                 debugPrint('page => $page, length => $length');
-                                if (length > page) {
+                                if (page > 2
+                                    ? length > page + 1
+                                    : length > page) {
                                   setState(() {
                                     if (_initial != 1.0) {
                                       _initial = _initial + 0.20;
@@ -540,9 +542,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                   child: TextFormField(
                     maxLength: 4,
                     enabled: false,
-                    onChanged: (value) {
-
-                    },
+                    onChanged: (value) {},
                     controller: TextEditingController(text: textFromValue),
                     textAlign: TextAlign.center,
                     textInputAction: TextInputAction.next,
