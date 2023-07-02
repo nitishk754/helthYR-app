@@ -137,7 +137,7 @@ class ApiService {
     dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
     Response userData = await dio.get(baseUrl + mealPlan);
-    print(userData);
+    
     return jsonDecode(userData.data.toString());
   }
 }

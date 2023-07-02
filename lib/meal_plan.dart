@@ -19,6 +19,8 @@ class _MealPlanState extends State<MealPlan>
   int tabIndex = 0;
   late TabController tabController;
   bool _spinner = false;
+  Map mealPlanData = {};
+  List allResult = [];
 
   @override
   void initState() {
@@ -33,12 +35,19 @@ class _MealPlanState extends State<MealPlan>
     await ApiService().meals().then((value) {
       var res = value["data"];
       setState(() => _spinner = false);
-      print(res);
+      
       if (!res.containsKey('errors')) {
-        if(res["data"].length > 0){
-          //setState(() => caloriesBurned = res["data"][0]["calories_burned"].toString());
+        if(res["status"] == "success"){
+          setState(() => mealPlanData = res["data"]);
         }
       }
+       mealPlanData.keys.forEach((key) {
+       
+        allResult.add({
+          "meal_duration": key,
+          "meal_data": mealPlanData[key]
+        });
+      });
       
       final snackBar = SnackBar(content: Text(res["message"]));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -122,14 +131,14 @@ class _MealPlanState extends State<MealPlan>
           ),
           Builder(builder: (_) {
             if (tabIndex == 0) {
-              return ListView(
+              return _spinner ? Center(child: CircularProgressIndicator()) : ListView(
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
                 children: [
-                  mealWidget(),
-                  mealWidget(),
-                  mealWidget(),
-                  mealWidget(),
+                  for(var i=0; i<allResult.length; i++)...[
+                     mealWidget(allResult[i]),
+                  ]
+                 
                 ],
               );
             } else {
@@ -141,7 +150,7 @@ class _MealPlanState extends State<MealPlan>
     );
   }
 
-  ListView mealWidget() {
+  ListView mealWidget(Map _data) {
     return ListView(
                   shrinkWrap: true,
                   physics: ClampingScrollPhysics(),
@@ -149,7 +158,7 @@ class _MealPlanState extends State<MealPlan>
                     Padding(
                       padding:
                           const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
-                      child: Text("Breakfast",
+                      child: Text("${capitalizeFirstLetter(_data['meal_duration'])}",
                           style: TextStyle(
                               fontSize: 25,
                               color: Colors.black,
@@ -167,8 +176,9 @@ class _MealPlanState extends State<MealPlan>
                     ListView.builder(
                         shrinkWrap: true,
                         physics: ClampingScrollPhysics(),
-                        itemCount: 2,
+                        itemCount: _data["meal_data"].length,
                         itemBuilder: (BuildContext context, int index) {
+                          Map mealData = _data["meal_data"][index];
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(
                                 20.0, 2.5, 20.0, 2.5),
@@ -177,7 +187,7 @@ class _MealPlanState extends State<MealPlan>
                                 Container(
                                   margin: EdgeInsets.fromLTRB(
                                       12.0, 5.5, 12.0, 5.5),
-                                  height: 90,
+                                  height: 100,
                                   width: MediaQuery.of(context).size.width,
                                   child: Row(
                                     children: [
@@ -200,49 +210,58 @@ class _MealPlanState extends State<MealPlan>
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 3.0),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    "2 Egg",
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0),
-                                                    child: Text("400 Cal",
+                                            Container(
+                                              //width: MediaQuery.of(context).size.width,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 3.0),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      width: 150,
+                                                      child: Text(
+                                                        "${mealData['name']}",
                                                         style: TextStyle(
-                                                            fontSize: 12,
-                                                            color: Color(
-                                                                orangeShade),
+                                                            fontSize: 16,
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .bold)),
-                                                  )
-                                                ],
+                                                                FontWeight.bold),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      width: 70,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                left: 8.0),
+                                                        child: Text("${mealData['total_nutrition_value']} Cal",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Color(
+                                                                    orangeShade),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold)),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                             Padding(
                                               padding:
                                                   const EdgeInsets.all(1.0),
                                               child:
-                                                  Text("prep time: 10 mins"),
+                                                  Text("prep time: ${mealData['prep_time']} mins"),
                                             ),
                                             Padding(
                                               padding:
                                                   const EdgeInsets.all(1.0),
                                               child:
-                                                  Text("cook time: 35 mins"),
+                                                  Text("cook time: ${mealData['cook_time']} mins"),
                                             )
                                           ],
                                         ),
@@ -305,3 +324,6 @@ class _MealPlanState extends State<MealPlan>
     return formatter.format(date);
   }
 }
+
+String capitalizeFirstLetter(String s) =>
+  (s.isNotEmpty ?? false) ? '${s[0].toUpperCase()}${s.substring(1)}' : s;

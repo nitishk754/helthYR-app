@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -125,7 +127,7 @@ class _LoginState extends State<Login> {
                               setState(() => isLoading = false);
                               return;
                             }
-
+                             prefs.setString("_result", jsonEncode(result));
                             prefs.setString("_token", result['data']['token']);
                             Navigator.push(
                               context,
