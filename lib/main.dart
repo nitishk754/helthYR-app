@@ -56,6 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _auth();
     super.initState();
   }
+  
   _auth() async {
     
               
