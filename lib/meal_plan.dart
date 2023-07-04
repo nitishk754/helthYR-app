@@ -68,11 +68,15 @@ class _MealPlanState extends State<MealPlan>
             padding: const EdgeInsets.all(10.0),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Icon(
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(
                   Icons.arrow_back_ios_new,
                   size: 30,
                   color: Color(blueColor),
-                )),
+                ))),
           ),
           Align(
             alignment: Alignment.topLeft,
@@ -187,7 +191,7 @@ class _MealPlanState extends State<MealPlan>
                                 Container(
                                   margin: EdgeInsets.fromLTRB(
                                       12.0, 5.5, 12.0, 5.5),
-                                  height: 100,
+                                  height: 120,
                                   width: MediaQuery.of(context).size.width,
                                   child: Row(
                                     children: [

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 import 'package:health_wellness/reset_pass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,7 +117,11 @@ class _LoginState extends State<Login> {
                         onPressed: () async {
                           final SharedPreferences prefs = await SharedPreferences.getInstance();
                           final isValid = _formKey.currentState!.validate();
-                          if (isValid && isChecked) {
+                          if (isValid) {
+                            if(!isChecked){
+                              Fluttertoast.showToast(msg: "Please check term & condition");
+                              return;
+                            }
                             setState(() => isLoading = true);
                             var email = controllerEmail.text;
                             var password = controllerPassword.text;
@@ -124,10 +129,16 @@ class _LoginState extends State<Login> {
                                 await ApiService().getUser(email, password);
                                 print("resultresult_${result}");
                             if (result.containsKey('errors')) {
-                              setState(() => isLoading = false);
+                              Fluttertoast.showToast(msg: result["errors"]["email"][0]);
+                              setState(() {
+                                  isLoading = false;
+                              });
                               return;
                             }
-                             prefs.setString("_result", jsonEncode(result));
+                            setState(() {
+                                isLoading = false;
+                            });
+                            prefs.setString("_result", jsonEncode(result));
                             prefs.setString("_token", result['data']['token']);
                             Navigator.push(
                               context,

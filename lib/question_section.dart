@@ -28,6 +28,9 @@ class _QuestionSectionState extends State<QuestionSection> {
 
   QuestionModel? questionModel;
 
+  final currentWeightController = TextEditingController();
+  final goalWeightController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -195,25 +198,61 @@ class _QuestionSectionState extends State<QuestionSection> {
                               onPressed: () {
                                 var page = controller.page?.toInt() ?? 0;
                                 var length = userInput.values.length;
+                                
                                 debugPrint('page => $page, length => $length');
                                 if (length > page) {
-                                  setState(() {
-                                    if (_initial != 1.0) {
-                                      _initial = _initial + 0.20;
+                                  // if(goalWeightController.text == "" && page == 3){
+                                  //     Fluttertoast.showToast(msg: 'Please enter your goal weight');
+                                  // }else{
+                                    setState(() {
+                                      if (_initial != 1.0) {
+                                        _initial = _initial + 0.20;
+                                      }
+                                    }); 
+                                    controller.nextPage(
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.ease);
+                                    if (page == 5) {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Login()));
                                     }
-                                  });
-                                  controller.nextPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.ease);
-                                  if (page == 5) {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Login()));
-                                  }
+                                  //}
+                                  
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: 'Please give answer to continue');
+                                  switch(page){
+                                    case 0:
+                                      Fluttertoast.showToast(
+                                      msg: 'Please select your biological sex');
+                                    break;
+                                    case 1:
+                                      Fluttertoast.showToast(
+                                      msg: 'Please select your age');
+                                    break;
+                                    case 2:
+                                      Fluttertoast.showToast(
+                                      msg: 'Please enter your height');
+                                    break;
+                                    case 3:
+                                      if(goalWeightController.text == ""){
+                                        Fluttertoast.showToast(msg: 'Please enter your goal weight');
+                                      }else{
+                                        Fluttertoast.showToast(msg: 'Please enter your current weight');
+                                      }
+                                      
+                                    break;
+                                    case 4:
+                                      Fluttertoast.showToast(
+                                      msg: 'Please select your typical day');
+                                    break;
+                                    case 5:
+                                      Fluttertoast.showToast(
+                                      msg: 'Please select your diet follow');
+                                    break;
+                                  }
+                                  
+                                
                                 }
                               },
                               child: const Text(
@@ -290,6 +329,7 @@ class _QuestionSectionState extends State<QuestionSection> {
               child: Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: TextFormField(
+                  controller: currentWeightController,
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   textInputAction: TextInputAction.next,
@@ -376,6 +416,7 @@ class _QuestionSectionState extends State<QuestionSection> {
               child: Padding(
                 padding: const EdgeInsets.all(0.0),
                 child: TextFormField(
+                  controller: goalWeightController,
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   onChanged: (value) {

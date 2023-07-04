@@ -128,11 +128,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         Padding(
           padding: const EdgeInsets.all(15.0),
-          child: GridView.count(
-            shrinkWrap: true,
-            crossAxisCount: 2,
-            mainAxisSpacing: 15.0,
-            crossAxisSpacing: 15.0,
+          child: Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
                 onTap: () {
@@ -143,9 +140,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             builder: (context) => WaterTracker()));
                   });
                 },
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  height: 170,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 200,
                   child: Card(
                     elevation: 2.5,
                     shape: RoundedRectangleBorder(
@@ -169,9 +166,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     fontWeight: FontWeight.bold),
                               )),
                         ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 2,
-                          height: 170,
+                        Container(
+                          margin: EdgeInsets.only(top: 70),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -217,10 +213,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             builder: (context) => ActivityWidget()));
                   });
                 },
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
                   height: 200,
-                  child: Card(
+                  child:  Card(
                     elevation: 2.5,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
@@ -245,7 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         Center(
                           child: Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.all(0.0),
                             child: Container(
                               child: SleekCircularSlider(
                                 appearance: CircularSliderAppearance(
