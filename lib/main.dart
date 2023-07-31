@@ -32,11 +32,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'HELTHYR',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'Poppins',
       ),
       home: const SplashScreen(),
+       builder: (context, child) {
+            return MediaQuery(
+              child: child!,
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 0.8),
+            );
+       }
       //home: const MealPlan(),
     );
   }
@@ -93,9 +100,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Image.asset(
-        'assets/splash/splash.png',
-      ),
+      // body: Image.asset(
+      //   'assets/splash/splash.png',
+      // ),
     );
   }
 }

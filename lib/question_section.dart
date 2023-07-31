@@ -20,16 +20,19 @@ class QuestionSection extends StatefulWidget {
 }
 
 class _QuestionSectionState extends State<QuestionSection> {
-  double _initial = 1.0;
+  double _initial = 0.0;
   String _choice = '';
-  String _currentWeight = 'kg';
-  String _goalWeight = 'kg';
-  String _height = 'Fit';
+  String _weight = 'lbs';
+  // String _goalWeight = 'kg';
+  String _height = 'Ft';
+  String _heightIn = 'In';
+  double totalQuestions = 0.0;
 
   QuestionModel? questionModel;
 
   final currentWeightController = TextEditingController();
   final goalWeightController = TextEditingController();
+  ScrollController _controllerScroll = new ScrollController();
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _QuestionSectionState extends State<QuestionSection> {
     questionModel = (await ApiService().getQuestion());
     Future.delayed(const Duration(seconds: 0)).then((value) => setState(() {
           _initial = 1.0 / questionModel!.data.data.length;
+          totalQuestions = 1.0 / questionModel!.data.data.length;
         }));
   }
 
@@ -57,6 +61,7 @@ class _QuestionSectionState extends State<QuestionSection> {
   Widget build(BuildContext context) {
     final PageController controller = PageController(initialPage: 0);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: null,
       backgroundColor: Color(0xFFF6F8F7),
       body: (questionModel == null)
@@ -65,10 +70,13 @@ class _QuestionSectionState extends State<QuestionSection> {
             )
           : Stack(children: [
               Padding(
-                padding: const EdgeInsets.all(25.0),
+                padding: const EdgeInsets.all(18.0),
                 child: ListView(
+                  controller: _controllerScroll,
+                  // shrinkWrap: true,
+                  physics: AlwaysScrollableScrollPhysics(),
                   children: [
-                    SizedBox(height: 50),
+                    SizedBox(height: 25),
                     Text(
                       "HELTHYR",
                       textAlign: TextAlign.center,
@@ -89,6 +97,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                       ),
                     ),
                     ExpandablePageView(
+                      physics: NeverScrollableScrollPhysics(),
                       controller: controller,
                       children: questionModel!.data.data.map((model) {
                         //
@@ -97,12 +106,18 @@ class _QuestionSectionState extends State<QuestionSection> {
                           shrinkWrap: true,
                           physics: ClampingScrollPhysics(),
                           children: [
-                            SizedBox(height: 50),
+                            SizedBox(height: 30),
                             (model.qType == "open-ended")
-                                ? (model.qTxt.contains("weight"))
-                                    ? weightScreen(model)
-                                    : (model.qTxt.contains("tall"))
-                                        ? heightScreen(model)
+                                ? (model.qTxt.contains("Weight") ||
+                                        model.qTxt.contains("weight"))
+                                    ? SingleChildScrollView(
+                                      physics: AlwaysScrollableScrollPhysics(),
+                                      child: weightScreen(model))
+                                    : (model.qTxt.contains("Tall") ||
+                                            model.qTxt.contains("tall"))
+                                        ? SingleChildScrollView(
+                                          physics: AlwaysScrollableScrollPhysics(),
+                                          child: heightScreen(model))
                                         : Column(
                                             children: [
                                               Padding(
@@ -110,18 +125,23 @@ class _QuestionSectionState extends State<QuestionSection> {
                                                     const EdgeInsets.fromLTRB(
                                                         10.0, 5.0, 10.0, 5.0),
                                                 child: Text(
-                                                  "What is your age?",
+                                                  model.qTxt,
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: Colors.grey[800],
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 30,
+                                                    fontSize: 28,
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(height: 30),
+                                              SizedBox(height: 25),
                                               NumberPicker(
                                                 value: _currentAge,
+                                                itemHeight: 60,
+                                                // itemWidth: 100,
+                                                textStyle: TextStyle(color: Colors.grey[400],fontSize: 30, fontWeight: FontWeight.bold),
+                                                selectedTextStyle: TextStyle(color: Color(orangeShade),fontSize: 44, fontWeight: FontWeight.bold),
+                                                itemCount: 5,
                                                 minValue: 12,
                                                 maxValue: 65,
                                                 onChanged: (value) {
@@ -173,7 +193,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                               },
                               child: const Text(
                                 '  Back  ',
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500),
+                                
                               ),
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -196,19 +217,29 @@ class _QuestionSectionState extends State<QuestionSection> {
                                 const EdgeInsets.fromLTRB(10.0, 5.0, 30.0, 5.0),
                             child: ElevatedButton(
                               onPressed: () {
+                                print("weightValue: $_weight");
+                                FocusManager.instance.primaryFocus?.unfocus();
                                 var page = controller.page?.toInt() ?? 0;
                                 var length = userInput.values.length;
-                                
+
                                 debugPrint('page => $page, length => $length');
                                 if (length > page) {
-                                  // if(goalWeightController.text == "" && page == 3){
-                                  //     Fluttertoast.showToast(msg: 'Please enter your goal weight');
-                                  // }else{
+                                  if (goalWeightController.text == "" &&
+                                      page == 3) {
+                                    Fluttertoast.showToast(
+                                        msg: 'Please enter your goal weight');
+                                  } else if (page == 4 && length == 5) {
+                                    Fluttertoast.showToast(
+                                        msg: 'Please select your typical day');
+                                  } else if (page == 5 && length == 6) {
+                                    Fluttertoast.showToast(
+                                        msg: 'Please select your diet follow ');
+                                  } else {
                                     setState(() {
                                       if (_initial != 1.0) {
                                         _initial = _initial + 0.20;
                                       }
-                                    }); 
+                                    });
                                     controller.nextPage(
                                         duration: Duration(milliseconds: 500),
                                         curve: Curves.ease);
@@ -218,46 +249,90 @@ class _QuestionSectionState extends State<QuestionSection> {
                                           MaterialPageRoute(
                                               builder: (context) => Login()));
                                     }
-                                  //}
-                                  
+                                  }
                                 } else {
-                                  switch(page){
+                                  switch (page) {
                                     case 0:
                                       Fluttertoast.showToast(
-                                      msg: 'Please select your biological sex');
-                                    break;
+                                          msg:
+                                              'Please select your biological sex');
+                                      break;
                                     case 1:
                                       Fluttertoast.showToast(
-                                      msg: 'Please select your age');
-                                    break;
+                                          msg: 'Please select your age');
+                                      break;
                                     case 2:
                                       Fluttertoast.showToast(
-                                      msg: 'Please enter your height');
-                                    break;
+                                          msg: 'Please enter your height');
+                                      break;
                                     case 3:
-                                      if(goalWeightController.text == ""){
-                                        Fluttertoast.showToast(msg: 'Please enter your goal weight');
-                                      }else{
-                                        Fluttertoast.showToast(msg: 'Please enter your current weight');
+                                      if (length < 5) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                'Please enter your current weight');
+                                        debugPrint("one");
+                                        break;
                                       }
-                                      
-                                    break;
+                                      // if (length<5) {
+                                      //   Fluttertoast.showToast(
+                                      //       msg:
+                                      //           'Please enter your goal weight');
+                                      //   debugPrint("two");
+                                      //   // break;
+                                      // }
+
+                                      break;
                                     case 4:
                                       Fluttertoast.showToast(
-                                      msg: 'Please select your typical day');
-                                    break;
+                                          msg:
+                                              'Please select your typical day');
+                                      break;
                                     case 5:
                                       Fluttertoast.showToast(
-                                      msg: 'Please select your diet follow');
-                                    break;
+                                          msg:
+                                              'Please select your diet follow');
+                                      break;
                                   }
-                                  
-                                
+
+                                  // if (questionModel!.data.data[page].qTxt
+                                  //     .contains("Goal Weight")) {
+                                  //   questionModel!.data.data.removeAt(page);
+
+                                  //   switch (
+                                  //       questionModel!.data.data[page].qType) {
+                                  //     case "open-ended":
+                                  //       if (questionModel!.data.data[page].qTxt
+                                  //           .contains("Weight")) {
+                                  //         if (goalWeightController.text == "") {
+                                  //           Fluttertoast.showToast(
+                                  //               msg:
+                                  //                   'Please enter your goal weight');
+                                  //           break;
+                                  //         }
+                                  //         if (currentWeightController.text ==
+                                  //             "") {
+                                  //           Fluttertoast.showToast(
+                                  //               msg:
+                                  //                   'Please enter your current weight');
+                                  //           break;
+                                  //         }
+                                  //       } else {
+                                  //         Fluttertoast.showToast(
+                                  //             msg:
+                                  //                 'Please enter your response');
+                                  //       }
+                                  //       break;
+                                  //     case "single-choice":
+                                  //       Fluttertoast.showToast(
+                                  //           msg: 'Please select your response');
+                                  //       break;
+                                  //   }
+                                  // }
                                 }
                               },
                               child: const Text(
                                 '  Continue  ',
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                               ),
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -279,314 +354,333 @@ class _QuestionSectionState extends State<QuestionSection> {
     );
   }
 
-  ListView weightScreen(Datum model) {
+  Padding weightScreen(Datum model) {
     var goalWeight = questionModel?.data.data.firstWhere(
             (e) => e.qTxt.toLowerCase().contains('goal weight'),
             orElse: () => model) ??
         model;
-    return ListView(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-          child: Text(
-            "What Is Your Current Weight?",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 24,
-              width: 24,
-              child: Image(image: AssetImage("assets/Images/weightIcon.png")),
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Text("Weight",
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                )),
-            SizedBox(
-              width: 15,
-            ),
-            SizedBox(
-              width: 80,
-              height: 35,
-              child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: TextFormField(
-                  controller: currentWeightController,
-                  maxLength: 4,
-                  textAlign: TextAlign.center,
-                  textInputAction: TextInputAction.next,
-                  onChanged: (value) {
-                    userInput['${model.id}'] = {
-                      "question": model.qTxt,
-                      "question_id": model.id,
-                      "answer_text": '$value $_currentWeight'
-                    };
-                  },
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      filled: true,
-                      //<-- SEE HERE
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide: BorderSide(width: 1)),
-                      hintText: '',
-                      labelText: "",
-                      counterText: ""),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        // shrinkWrap: true,
+        // physics: ClampingScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(5.0, 5.0, 5.0, 5.0),
+            child: Text(
+              model.qTxt,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
               ),
             ),
-            SizedBox(
-              width: 20,
-            ),
-            MyRadioListTile2<String>(
-              value: 'kg',
-              leading: 'kg',
-              groupValue: _currentWeight,
-              onChanged: (value) => setState(() => _currentWeight = value!),
-            ),
-            MyRadioListTile2<String>(
-              value: 'lbs',
-              leading: 'lbs',
-              groupValue: _currentWeight,
-              onChanged: (value) => setState(() => _currentWeight = value!),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 50,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-          child: Text(
-            "What Is Your Goal Weight?",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
-            ),
           ),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 24,
-              width: 24,
-              child: Image(image: AssetImage("assets/Images/goalIcon.png")),
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Text("Goal Weight",
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                )),
-            SizedBox(
-              width: 15,
-            ),
-            SizedBox(
-              width: 80,
-              height: 35,
-              child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: TextFormField(
-                  controller: goalWeightController,
-                  maxLength: 4,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    userInput['${goalWeight.id}'] = {
-                      "question": goalWeight.qTxt,
-                      "question_id": goalWeight.id,
-                      "answer_text": '$value $_goalWeight'
-                    };
-                  },
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      filled: true,
-                      //<-- SEE HERE
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide: BorderSide(width: 1)),
-                      hintText: '',
-                      labelText: "",
-                      counterText: ""),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          SizedBox(
+            height: 25,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                flex: 1,
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: Image(image: AssetImage("assets/Images/weightIcon.png")),
                 ),
               ),
+              SizedBox(
+                width: 4,
+              ),
+              Flexible(
+                flex: 1,
+                child: Text("Weight",
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    )),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                flex: 0,
+                child: SizedBox(
+                  width: 80,
+                  height: 35,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0.0),
+                    child: TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller: currentWeightController,
+                      maxLength: 4,
+                      textAlign: TextAlign.center,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) {
+                        setState(() {
+                          userInput['${model.id}'] = {
+                            "question": model.qTxt,
+                            "question_id": model.id,
+                            "answer_text": '$value $_weight'
+                          };
+                        });
+                      },
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          filled: true,
+                          //<-- SEE HERE
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(width: 1)),
+                          hintText: '',
+                          labelText: "",
+                          counterText: ""),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                flex: 0,
+                child: Row(
+                  children: [
+                    MyRadioListTile2<String>(
+                      value: 'kg',
+                      leading: 'kg',
+                      groupValue: _weight,
+                      onChanged: (value) {
+                        setState(() {
+                          _weight = value!;
+                           userInput['${model.id}'] = {
+                              "question": model.qTxt,
+                              "question_id": model.id,
+                              "answer_text": '${currentWeightController.text} $_weight'
+                            };
+              
+                            userInput['${goalWeight.id}'] = {
+                              "question": goalWeight.qTxt,
+                              "question_id": goalWeight.id,
+                              "answer_text": '${goalWeightController.text} $_weight'
+                            };
+                        });
+                      },
+                    ),
+                    MyRadioListTile2<String>(
+                      value: 'lbs',
+                      leading: 'lbs',
+                      groupValue: _weight,
+                      onChanged: (value){
+                        setState(() {
+                          _weight = value!;
+                           userInput['${model.id}'] = {
+                              "question": model.qTxt,
+                              "question_id": model.id,
+                              "answer_text": '${currentWeightController.text} $_weight'
+                            };
+              
+                            userInput['${goalWeight.id}'] = {
+                              "question": goalWeight.qTxt,
+                              "question_id": goalWeight.id,
+                              "answer_text": '${goalWeightController.text} $_weight'
+                            };
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+            child: Text(
+              goalWeight.qTxt,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+              ),
             ),
-            SizedBox(
-              width: 20,
-            ),
-            MyRadioListTile2<String>(
-              value: 'kg',
-              leading: 'kg',
-              groupValue: _goalWeight,
-              onChanged: (value) => setState(() => _goalWeight = value!),
-            ),
-            MyRadioListTile2<String>(
-              value: 'lbs',
-              leading: 'lbs',
-              groupValue: _goalWeight,
-              onChanged: (value) => setState(() => _goalWeight = value!),
-            ),
-          ],
-        ),
-      ],
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: Image(image: AssetImage("assets/Images/goalIcon.png")),
+                ),
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Flexible(
+                child: Text("Goal Weight",
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    )),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                child: SizedBox(
+                  width: 80,
+                  height: 35,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0.0),
+                    child: TextFormField(
+                      controller: goalWeightController,
+                      maxLength: 4,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        setState(() {
+                          userInput['${goalWeight.id}'] = {
+                            "question": goalWeight.qTxt,
+                            "question_id": goalWeight.id,
+                            "answer_text": '$value $_weight'
+                          };
+                        });
+                      },
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          filled: true,
+                          //<-- SEE HERE
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(width: 1)),
+                          hintText: '',
+                          labelText: "",
+                          counterText: ""),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Row(
+                children: [
+                  MyRadioListTile2<String>(
+                    value: 'kg',
+                    leading: 'kg',
+                    groupValue: _weight,
+                    onChanged: (value){
+                      setState(() {
+                        _weight = value!;
+                         userInput['${goalWeight.id}'] = {
+                            "question": goalWeight.qTxt,
+                            "question_id": goalWeight.id,
+                            "answer_text": '${goalWeightController.text} $_weight'
+                          };
+    
+                           userInput['${model.id}'] = {
+                            "question": model.qTxt,
+                            "question_id": model.id,
+                            "answer_text": '${currentWeightController.text} $_weight'
+                          };
+                      });
+                    } 
+                  ),
+                  MyRadioListTile2<String>(
+                    value: 'lbs',
+                    leading: 'lbs',
+                    groupValue: _weight,
+                    onChanged: (value) {
+                      setState(() {
+                        _weight = value!;
+                         userInput['${goalWeight.id}'] = {
+                            "question": goalWeight.qTxt,
+                            "question_id": goalWeight.id,
+                            "answer_text": '${goalWeightController.text} $_weight'
+                          };
+    
+                           userInput['${model.id}'] = {
+                            "question": model.qTxt,
+                            "question_id": model.id,
+                            "answer_text": '${currentWeightController.text} $_weight'
+                          };
+                      });
+                    }),
+                  
+                ],
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  ListView heightScreen(Datum model) {
-    var controller = TextEditingController();
-    var textFromValue = '';
-    return ListView(
-      shrinkWrap: true,
-      physics: ClampingScrollPhysics(),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-          child: Text(
-            "How tall are you?",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.bold,
-              fontSize: 30,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 30,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 5),
-            Text("Height",
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                )),
-            SizedBox(width: 15),
-            SizedBox(
-              width: 80,
-              height: 35,
-              child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: TextFormField(
-                  maxLength: 4,
-                  controller: controller,
-                  textAlign: TextAlign.center,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                      filled: true,
-                      //<-- SEE HERE
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide: BorderSide(width: 1)),
-                      hintText: '',
-                      labelText: "",
-                      counterText: ""),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+  Padding heightScreen(Datum model) {
+    var controllerFt = TextEditingController();
+    var controllerIn = TextEditingController();
+    // var textFromValue = '';
+    return Padding(
+      padding: const EdgeInsets.only(bottom:20.0),
+      child: Column(
+        // shrinkWrap: true,
+        // physics: ClampingScrollPhysics(),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+            child: Text(
+              model.qTxt,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
               ),
             ),
-            SizedBox(width: 20),
-            MyRadioListTile2<String>(
-              value: 'Fit',
-              leading: 'Fit',
-              groupValue: _height,
-              onChanged: (value) => setState(() => _height = value!),
-            ),
-            MyRadioListTile2<String>(
-              value: 'cm',
-              leading: 'cm',
-              groupValue: _height,
-              onChanged: (value) => setState(() => _height = value!),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 90,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 15),
-            Text("",
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                )),
-            SizedBox(width: 15),
-            StatefulBuilder(builder: (context, setState) {
-              controller.addListener(() {
-                if (_height == 'cm') {
-                  double inches = 0.3937 * double.parse(controller.text);
-                  double feet = inches / 12;
-                  double leftover = inches % 12;
-                  textFromValue = '${feet.toInt()}`${leftover.toInt()}';
-                  userInput['${model.id}'] = {
-                    "question": model.qTxt,
-                    "question_id": model.id,
-                    "answer_text": '${feet.toInt()}fit${leftover.toInt()}in',
-                  };
-                } else {
-                  double feet = 1 * double.parse(controller.text);
-                  textFromValue = feet.toStringAsFixed(2);
-                  userInput['${model.id}'] = {
-                    "question": model.qTxt,
-                    "question_id": model.id,
-                    "answer_text": '${textFromValue}fit0in',
-                  };
-                }
-                setState(() => false);
-              });
-              return SizedBox(
-                width: 120,
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 5),
+              Text("Height",
+                  style: TextStyle(
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w600,
+                    fontSize: 21,
+                  )),
+              SizedBox(width: 15),
+              SizedBox(
+                width: 80,
                 height: 35,
                 child: Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: TextFormField(
                     maxLength: 4,
-                    enabled: false,
-                    onChanged: (value) {
-
-                    },
-                    controller: TextEditingController(text: textFromValue),
+                    controller: controllerFt,
                     textAlign: TextAlign.center,
                     textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {},
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.zero,
                         filled: true,
@@ -598,20 +692,143 @@ class _QuestionSectionState extends State<QuestionSection> {
                         hintText: '',
                         labelText: "",
                         counterText: ""),
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                 ),
-              );
-            }),
-            SizedBox(width: 20),
-            Text('Fit',
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                )),
-          ],
-        ),
-      ],
+              ),
+              SizedBox(width: 20),
+              MyRadioListTile2<String>(
+                value: 'Ft',
+                leading: 'Ft',
+                groupValue: _height,
+                onChanged: (value) => setState(() => _height = value!),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 5),
+              Visibility(
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                visible: false,
+                child: Text("Height",
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    )),
+              ),
+              SizedBox(width: 15),
+              SizedBox(
+                width: 80,
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: TextFormField(
+                    maxLength: 4,
+                    controller: controllerIn,
+                    textAlign: TextAlign.center,
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      userInput['${model.id}'] = {
+                        "question": model.qTxt,
+                        "question_id": model.id,
+                        "answer_text":
+                            '${controllerFt.text} $_height $value $_heightIn'
+                      };
+                    },
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.zero,
+                        filled: true,
+                        //<-- SEE HERE
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(width: 1)),
+                        hintText: '',
+                        labelText: "",
+                        counterText: ""),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+              SizedBox(width: 20),
+              MyRadioListTile2<String>(
+                value: 'In',
+                leading: 'In',
+                groupValue: _heightIn,
+                onChanged: (value) => setState(() => _heightIn = value!),
+              ),
+              // StatefulBuilder(builder: (context, setState) {
+              //   controller.addListener(() {
+              //     if (_height == 'cm') {
+              //       double inches = 0.3937 * double.parse(controller.text);
+              //       double feet = inches / 12;
+              //       double leftover = inches % 12;
+              //       textFromValue = '${feet.toInt()}`${leftover.toInt()}';
+              //       userInput['${model.id}'] = {
+              //         "question": model.qTxt,
+              //         "question_id": model.id,
+              //         "answer_text": '${feet.toInt()}fit${leftover.toInt()}in',
+              //       };
+              //     } else {
+              //       double feet = 1 * double.parse(controller.text);
+              //       textFromValue = feet.toStringAsFixed(2);
+              //       userInput['${model.id}'] = {
+              //         "question": model.qTxt,
+              //         "question_id": model.id,
+              //         "answer_text": '${textFromValue}fit0in',
+              //       };
+              //     }
+              //     setState(() => false);
+              //   });
+              //   return SizedBox(
+              //     width: 120,
+              //     height: 35,
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(0.0),
+              //       child: TextFormField(
+              //         maxLength: 4,
+              //         enabled: false,
+              //         onChanged: (value) {
+    
+              //         },
+              //         controller: TextEditingController(text: textFromValue),
+              //         textAlign: TextAlign.center,
+              //         textInputAction: TextInputAction.next,
+              //         decoration: InputDecoration(
+              //             contentPadding: EdgeInsets.zero,
+              //             filled: true,
+              //             //<-- SEE HERE
+              //             fillColor: Colors.white,
+              //             border: OutlineInputBorder(
+              //                 borderRadius: BorderRadius.circular(5),
+              //                 borderSide: BorderSide(width: 1)),
+              //             hintText: '',
+              //             labelText: "",
+              //             counterText: ""),
+              //         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              //       ),
+              //     ),
+              //   );
+              // }),
+              // SizedBox(width: 20),
+              // Text('Fit',
+              //     style: TextStyle(
+              //       color: Colors.grey[800],
+              //       fontWeight: FontWeight.bold,
+              //     )),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -628,12 +845,12 @@ class _QuestionSectionState extends State<QuestionSection> {
             style: TextStyle(
               color: Colors.grey[800],
               fontWeight: FontWeight.bold,
-              fontSize: 30,
+              fontSize: 28,
             ),
           ),
         ),
         SizedBox(
-          height: 50,
+          height: 25,
         ),
         ListView.builder(
           shrinkWrap: true,

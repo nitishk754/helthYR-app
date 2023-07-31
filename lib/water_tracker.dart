@@ -5,6 +5,8 @@ import 'package:health_wellness/constants/colors.dart';
 import 'package:health_wellness/services/api_services.dart';
 import 'package:intl/intl.dart';
 
+import 'dashboard_screen.dart';
+
 class WaterTracker extends StatefulWidget {
   const WaterTracker({super.key});
 
@@ -81,11 +83,9 @@ class _WaterTrackerState extends State<WaterTracker>
       appBar: null,
       body: ListView(
         children: [ 
-          SizedBox(
-            height: 20,
-          ),
+          
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(5.0),
             child: Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
@@ -94,21 +94,21 @@ class _WaterTrackerState extends State<WaterTracker>
                   },
                   icon: Icon(
                   Icons.arrow_back_ios_new,
-                  size: 30,
+                  size: 20,
                   color: Color(blueColor),
                 ))),
           ),
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(35.0, 5.0, 10.0, 5.0),
+              padding: const EdgeInsets.fromLTRB(35.0, 0.0, 10.0,0.0),
               child: Text(
                 "Water Tracker",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.bold,
-                  fontSize: 30,
+                  fontSize: 28,
                 ),
               ),
             ),
@@ -116,14 +116,14 @@ class _WaterTrackerState extends State<WaterTracker>
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(35.0, 2.5, 10.0, 2.5),
+              padding: const EdgeInsets.fromLTRB(35.0, 1.5, 10.0, 2.5),
               child: Text(
                 getCurrentDate(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(lightGreyShadeColor),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
                 ),
               ),
             ),
@@ -131,7 +131,9 @@ class _WaterTrackerState extends State<WaterTracker>
           SizedBox(
             height: 10,
           ),
-          Card(child: Center(child: tabbar())),
+          SizedBox(
+            height: 45,
+            child: Card(child: Center(child: tabbar()))),
           SizedBox(
             height: 40,
           ),
@@ -157,8 +159,8 @@ class _WaterTrackerState extends State<WaterTracker>
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20.0),
                           ),
-                          width: 255,
-                          height: 230,
+                          width: 200,
+                          height: 180,
                           child: Center(
                             child: Stack(
                               children: [
@@ -178,7 +180,7 @@ class _WaterTrackerState extends State<WaterTracker>
                                           icon: Icon(
                                             Icons.indeterminate_check_box,
                                             color: Color(lightGreyShadeColor),
-                                            size: 40,
+                                            size: 30,
                                           )),
                                       SizedBox(
                                         width: 10,
@@ -191,23 +193,13 @@ class _WaterTrackerState extends State<WaterTracker>
                                                   const EdgeInsets.fromLTRB(
                                                       0.0, 45.0, 0.0, 45.0),
                                               child: SizedBox(
-                                                  width: 100,
-                                                  height: 140,
+                                                  width: 80,
+                                                  height: 120,
                                                   child: Image(
                                                       image: AssetImage(
-                                                          "assets/Images/glass.png"))),
+                                                          "assets/Images/waterDashboard.png"))),
                                             ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      0.0, 100, 0.0, 50),
-                                              child: SizedBox(
-                                                  width: 100,
-                                                  height: 88,
-                                                  child: Image(
-                                                      image: AssetImage(
-                                                          "assets/Images/water.png"))),
-                                            )
+                                        
                                           ],
                                         ),
                                       ),
@@ -217,14 +209,14 @@ class _WaterTrackerState extends State<WaterTracker>
                                       IconButton(
                                           onPressed: () {
                                             setState(() {
-                                              waterIntake += 1;
+                                              waterIntake = 1;
                                               _addWaterIntake();
                                             });
                                           },
                                           icon: Icon(
                                             Icons.add_box,
                                             color: Color(blueColor),
-                                            size: 40,
+                                            size: 30,
                                           )),
                                     ],
                                   ),
@@ -246,7 +238,7 @@ class _WaterTrackerState extends State<WaterTracker>
                         style: TextStyle(
                           color: Colors.grey[800],
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 15,
                         ),
                       ),
                     ),
@@ -315,7 +307,7 @@ class _WaterTrackerState extends State<WaterTracker>
           child: Tab(
             child: Text(
               "Today",
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500),
             ),
           ),
         ),
@@ -331,4 +323,6 @@ class _WaterTrackerState extends State<WaterTracker>
     // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
     return formatter.format(date);
   }
+  
+  
 }

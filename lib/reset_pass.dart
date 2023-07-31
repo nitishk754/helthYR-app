@@ -38,20 +38,20 @@ class _ResetPassState extends State<ResetPass> {
             Center(
                 child: Text(
               "Reset Password",
-              style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             )),
             Padding(
               padding: const EdgeInsets.only(top: 15.0),
               child: Center(
                   child: Text(
                 "Enter your new password below, confirm it,",
-                style: TextStyle(fontSize: 15, color: Color(0xFF959595)),
+                style: TextStyle(fontSize: 12, color: Color(0xFF959595),fontWeight: FontWeight.w400),
               )),
             ),
             Center(
                 child: Text(
               "then click the Reset Password button",
-              style: TextStyle(fontSize: 15, color: Color(0xFF959595)),
+              style: TextStyle(fontSize: 12, color: Color(0xFF959595), fontWeight: FontWeight.w400),
             )),
             Container(
               margin: EdgeInsets.fromLTRB(30.0, 50.0, 30.0, 0.0),
@@ -132,7 +132,8 @@ class _ResetPassState extends State<ResetPass> {
                         },
                         child: const Text(
                           '  Reset Password  ',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500),
+                          
                         ),
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(

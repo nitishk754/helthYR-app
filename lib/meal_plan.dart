@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:health_wellness/recipe_details.dart';
 import 'package:health_wellness/services/api_services.dart';
 import 'package:horizontal_calendar/horizontal_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'constants/colors.dart';
- 
+
 class MealPlan extends StatefulWidget {
   const MealPlan({super.key});
 
@@ -21,6 +23,7 @@ class _MealPlanState extends State<MealPlan>
   bool _spinner = false;
   Map mealPlanData = {};
   List allResult = [];
+  bool _isMealAdded = false;
 
   @override
   void initState() {
@@ -31,27 +34,23 @@ class _MealPlanState extends State<MealPlan>
   }
 
   _meals() async {
-    setState(() =>_spinner = true);
+    setState(() => _spinner = true);
     await ApiService().meals().then((value) {
       var res = value["data"];
       setState(() => _spinner = false);
-      
+
       if (!res.containsKey('errors')) {
-        if(res["status"] == "success"){
+        if (res["status"] == "success") {
           setState(() => mealPlanData = res["data"]);
         }
       }
-       mealPlanData.keys.forEach((key) {
-       
-        allResult.add({
-          "meal_duration": key,
-          "meal_data": mealPlanData[key]
-        });
+      mealPlanData.removeWhere((key, value) => value == null);
+      mealPlanData.keys.forEach((key) {
+        allResult.add({"meal_duration": key, "meal_data": mealPlanData[key]});
       });
-      
+
       final snackBar = SnackBar(content: Text(res["message"]));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
     });
   }
 
@@ -61,22 +60,19 @@ class _MealPlanState extends State<MealPlan>
     return Scaffold(
       body: ListView(
         children: [
-          SizedBox(
-            height: 20,
-          ),
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(5.0),
             child: Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 30,
-                  color: Color(blueColor),
-                ))),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 20,
+                      color: Color(blueColor),
+                    ))),
           ),
           Align(
             alignment: Alignment.topLeft,
@@ -88,7 +84,7 @@ class _MealPlanState extends State<MealPlan>
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.bold,
-                  fontSize: 30,
+                  fontSize: 28,
                 ),
               ),
             ),
@@ -102,8 +98,8 @@ class _MealPlanState extends State<MealPlan>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(lightGreyShadeColor),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
                 ),
               ),
             ),
@@ -120,8 +116,16 @@ class _MealPlanState extends State<MealPlan>
                 backgroundColor: Colors.white,
                 selectedColor: Colors.blue,
                 showMonth: false,
+                initialDate: DateTime(2023),
                 onDateSelected: (date) {
-                  print(date.toString());
+                  if (date.isAfter(DateTime.now())) {
+                    Fluttertoast.showToast(
+                        msg: 'You have selected a future date');
+
+                    return;
+                  } else {
+                    print(date.toString());
+                  }
                 },
               ),
             ),
@@ -129,22 +133,23 @@ class _MealPlanState extends State<MealPlan>
           SizedBox(
             height: 2,
           ),
-          Card(child: Center(child: tabbar())),
+          SizedBox(height: 45, child: Card(child: Center(child: tabbar()))),
           SizedBox(
             height: 25,
           ),
           Builder(builder: (_) {
             if (tabIndex == 0) {
-              return _spinner ? Center(child: CircularProgressIndicator()) : ListView(
-                shrinkWrap: true,
-                physics: ClampingScrollPhysics(),
-                children: [
-                  for(var i=0; i<allResult.length; i++)...[
-                     mealWidget(allResult[i]),
-                  ]
-                 
-                ],
-              );
+              return _spinner
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView(
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      children: [
+                        for (var i = 0; i < allResult.length; i++) ...[
+                          mealWidget(allResult[i]),
+                        ]
+                      ],
+                    );
             } else {
               return Container();
             }
@@ -156,138 +161,160 @@ class _MealPlanState extends State<MealPlan>
 
   ListView mealWidget(Map _data) {
     return ListView(
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
-                      child: Text("${capitalizeFirstLetter(_data['meal_duration'])}",
-                          style: TextStyle(
-                              fontSize: 25,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
-                      child: Text(
-                        "400 cal",
-                        style: TextStyle(
-                            fontSize: 15, color: Color(orangeShade)),
-                      ),
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics(),
-                        itemCount: _data["meal_data"].length,
-                        itemBuilder: (BuildContext context, int index) {
-                          Map mealData = _data["meal_data"][index];
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                20.0, 2.5, 20.0, 2.5),
-                            child: Card(
-                              child: Stack(children: [
-                                Container(
-                                  margin: EdgeInsets.fromLTRB(
-                                      12.0, 5.5, 12.0, 5.5),
-                                  height: 120,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(7),
-                                        child: SizedBox(
-                                          width: 65,
-                                          height: 65,
-                                          child: Image(
-                                              image: AssetImage(
-                                                  "assets/Images/breakfast.jpeg")),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              //width: MediaQuery.of(context).size.width,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    bottom: 3.0),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      width: 150,
-                                                      child: Text(
-                                                        "${mealData['name']}",
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.bold),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      width: 70,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.only(
-                                                                left: 8.0),
-                                                        child: Text("${mealData['total_nutrition_value']} Cal",
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: Color(
-                                                                    orangeShade),
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold)),
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(1.0),
-                                              child:
-                                                  Text("prep time: ${mealData['prep_time']} mins"),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(1.0),
-                                              child:
-                                                  Text("cook time: ${mealData['cook_time']} mins"),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+      shrinkWrap: true,
+      physics: ClampingScrollPhysics(),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
+          child: Text("${capitalizeFirstLetter(_data['meal_duration'])}",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600)),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
+          child: Text(
+            "400 cal",
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(orangeShade)),
+          ),
+        ),
+        ListView.builder(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            itemCount: _data["meal_data"].length,
+            itemBuilder: (BuildContext context, int index) {
+              Map? mealData = _data["meal_data"][index];
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RecipeDetails()));
+                  },
+                  child: Card(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(12.0, 5.5, 12.0, 5.5),
+                      height: 100,
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            flex: 1,
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(7),
+                                  child: SizedBox(
+                                    width: 65,
+                                    height: 65,
+                                    child: Image(
+                                        image: AssetImage(
+                                            "assets/Images/breakfast.jpeg")),
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 90,
+                                Flexible(
                                   child: Padding(
-                                    padding: const EdgeInsets.only(right:11.0),
-                                    child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Icon(Icons.add_circle,size: 30,color: Color(blueColor),)),
+                                    padding: const EdgeInsets.all(7.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          //width: MediaQuery.of(context).size.width,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 1.0),
+                                            child: Container(
+                                              // width: 150,
+                                              child: Text(
+                                                "${mealData?['name']}",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(1.0),
+                                          child: Text(
+                                            "prep time: ${mealData?['prep_time']} mins",
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(1.0),
+                                          child: Text(
+                                              "cook time: ${mealData?['cook_time']} mins",
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w500)),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 )
-                              ]),
+                              ],
                             ),
-                          );
-                        })
-                  ],
-                );
+                          ),
+                          Flexible(
+                              flex: 0,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 8.0, right: 8.0),
+                                      child: Text(
+                                          "${mealData?['total_nutrition_value']} Cal",
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              color: Color(orangeShade),
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+                                  ),
+                                  Align(
+                                      alignment: Alignment.centerRight,
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _isMealAdded
+                                                ? _isMealAdded = false
+                                                : _isMealAdded = true;
+                                          });
+                                        },
+                                        child: Icon(
+                                          _isMealAdded
+                                              ? Icons.check_circle
+                                              : Icons.add_circle,
+                                          size: 25,
+                                          color: _isMealAdded
+                                              ? Colors.green
+                                              : Color(blueColor),
+                                        ),
+                                      )),
+                                ],
+                              ))
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            })
+      ],
+    );
   }
 
   TabBar tabbar() {
@@ -311,7 +338,7 @@ class _MealPlanState extends State<MealPlan>
           child: Tab(
             child: Text(
               "Today",
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
         ),
@@ -330,4 +357,4 @@ class _MealPlanState extends State<MealPlan>
 }
 
 String capitalizeFirstLetter(String s) =>
-  (s.isNotEmpty ?? false) ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
+    (s.isNotEmpty ?? false) ? '${s[0].toUpperCase()}${s.substring(1)}' : s;

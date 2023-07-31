@@ -13,26 +13,25 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
-     
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       appBar: null,
       body: Padding(
         padding: const EdgeInsets.all(35.0),
         child: Stack(children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          ListView(
+            // mainAxisAlignment: MainAxisAlignment.center,
+            // crossAxisAlignment: CrossAxisAlignment.center,`
             children: [
               SizedBox(
-                  width: 350,
-                  height: 350,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height/1.8,
                   child: Image(image: AssetImage('assets/Images/welcome.png'))),
               Padding(
                 padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
                 child: Text(
                   "We're So Happy You're Here!",
-                  style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
               ),
               SizedBox(
@@ -46,7 +45,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 padding: const EdgeInsets.all(10.0),
                 child: Text(
                     "Join us on a journey to improved health and well being created by healthcare professionals.",
-                    style: TextStyle(fontSize: 20)),
+                    style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500)),
               ),
             ],
           ),

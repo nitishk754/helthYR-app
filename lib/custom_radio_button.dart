@@ -53,7 +53,7 @@ class MyRadioListTile<T> extends StatelessWidget {
               leading,
               style: TextStyle(
                 color: isSelected ? Colors.black : Colors.black,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),

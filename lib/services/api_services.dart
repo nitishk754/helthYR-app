@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:health_wellness/model/question_model.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,6 +47,7 @@ class ApiService {
     Response userData = await dio.post(baseUrl + userLogin, data: formData);
 
     // Prints the raw data returned by the server
+    print('User Info: ${formData.toString()}');
 
     print('User Info: ${userData.data}');
 
@@ -61,7 +63,7 @@ class ApiService {
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] = 'Bearer $authorization';
     var userData = await dio.post(baseUrl + userResetPassword, data: formData);
-
+ print('User Info1: ${userData.data}');
     return jsonDecode(userData.data.toString());
   }
 
@@ -71,58 +73,62 @@ class ApiService {
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] = 'Bearer $authorization';
     var userData = await dio.post(baseUrl + questions, data: formData);
+    debugPrint(jsonEncode(inputs.toString()));
 
     return jsonDecode(userData.data.toString());
   }
+
   Future<Map> addWaterIntake(String intakeAmount) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     dio.options.headers['X-Authorization'] = auth;
-    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
     // var formData = jsonEncode({"email": email, "password": pass});
-    var formData = jsonEncode({
-      "intake_amount": intakeAmount,
-      "intake_measurement": "ltr"
-    });
+    var formData = jsonEncode(
+        {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
+    debugPrint(formData.toString());
     Response userData = await dio.post(baseUrl + waterIntake, data: formData);
     return jsonDecode(userData.data.toString());
   }
 
   Future<Map> getSevenDaysWaterIntake(String intakeAmount) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     dio.options.headers['X-Authorization'] = auth;
-    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
     // var formData = jsonEncode({"email": email, "password": pass});
-    var formData = jsonEncode({
-      "intake_amount": intakeAmount,
-      "intake_measurement": "ltr"
-    });
+    var formData = jsonEncode(
+        {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
     Response userData = await dio.get(baseUrl + waterIntake, data: formData);
     return jsonDecode(userData.data.toString());
   }
 
-  Future<Map> loadActivity() async {
+  Future<Map> loadActivity(String dateVal) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     dio.options.headers['X-Authorization'] = auth;
-    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
-    Response userData = await dio.get("${baseUrl + activity}?range=today");
+    Response userData = await dio.get("${baseUrl + activity}?range=today&date=${dateVal}");
     print(userData);
     return jsonDecode(userData.data.toString());
   }
 
-  Future<Map> saveActivity(String activityType, String duration, String intensity) async {
+  Future<Map> saveActivity(
+      String activityType, String duration, String intensity) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     dio.options.headers['X-Authorization'] = auth;
-    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
     // var formData = jsonEncode({"email": email, "password": pass});
     var formData = jsonEncode({
       "date": getCurrentDate(),
       "activity_type": activityType,
-      "duration": duration == "" ? "0":duration,
+      "duration": duration == "" ? "0" : duration,
       "intensity": intensity
     });
     print(formData);
@@ -132,13 +138,49 @@ class ApiService {
 
   Future<Map> meals() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     dio.options.headers['X-Authorization'] = auth;
-    dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
     Response userData = await dio.get(baseUrl + mealPlan);
-    
+
+    print(jsonDecode(userData.data.toString()));
+    print(jsonDecode(userData.data.toString()));
+
     return jsonDecode(userData.data.toString());
+  }
+
+  Future<String> postLogout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response userData = await dio.post(baseUrl + logout);
+
+    // print(jsonDecode(userData.data.toString()));
+    // print(jsonDecode(userData.data.toString()));
+    print(userData.data.toString());
+
+    return userData.data.toString();
+  }
+
+  Future<Map> getDashboard() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response dashboardData = await dio.get(baseUrl + dashboard);
+
+    print("dashboard: ${jsonDecode(dashboardData.data.toString())}");
+    
+    // print(jsonDecode(userData.data.toString()));
+
+    return jsonDecode(dashboardData.data.toString());
   }
 }
 

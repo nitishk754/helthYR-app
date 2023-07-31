@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:health_wellness/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'services/api_services.dart';
+
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
@@ -31,8 +33,9 @@ class _ProfileViewState extends State<ProfileView> {
   logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
+    await ApiService().postLogout();
      // ignore: use_build_context_synchronously
-     Navigator.push(
+     Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) {
             return  Login();
@@ -54,7 +57,7 @@ class _ProfileViewState extends State<ProfileView> {
             alignment: Alignment.center,
             child: Text(
               "Settings",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
             )),
         SizedBox(height: 40),
         Padding(
@@ -62,8 +65,8 @@ class _ProfileViewState extends State<ProfileView> {
           child: Row(
             children: [
               SizedBox(
-                width: 90,
-                height: 90,
+                width: 85,
+                height: 85,
                 child: CircleAvatar(
                   backgroundImage: AssetImage("assets/Images/avatar.png"),
                 ),
@@ -78,9 +81,9 @@ class _ProfileViewState extends State<ProfileView> {
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.bold)),
                             SizedBox(height: 10,),
-                    Text("27 years, 6ft, 55kg",
+                    Text("${user['age']} Years, ${user['hight']}, ${user['weight']}",
                         style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.bold))
+                            fontSize: 15, fontWeight: FontWeight.w500))
                   ],
                 ),
               )
@@ -96,18 +99,18 @@ class _ProfileViewState extends State<ProfileView> {
           thickness: 2,
         ),
         SizedBox(
-          height: 130,
+          height: 115,
           child: ListView(
             shrinkWrap: true,
             physics: ClampingScrollPhysics(),
             children: [
               ListTile(
                 leading: Icon(Icons.phone),
-                title: Text('+45-243-3234')
+                title: Text('${user["mobile"]}',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500),)
               ),
               ListTile(
                 leading: Icon(Icons.email),
-                title: Text("${user["email"]}")
+                title: Text("${user["email"]}",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500))
               ),
               
             ],
@@ -124,19 +127,19 @@ class _ProfileViewState extends State<ProfileView> {
             children: [
               ListTile(
                 leading: Icon(Icons.phone),
-                title: Text('Sound')
+                title: Text('Sound',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500))
               ),
               ListTile(
                 leading: Icon(Icons.notifications),
-                title: Text('Notification')
+                title: Text('Notification',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500))
               ),
               ListTile(
                 leading: Icon(Icons.people),
-                title: Text('Invite Friend')
+                title: Text('Invite Friend',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500))
               ),
               ListTile(
                 leading: Icon(Icons.logout),
-                title: Text('Logout'),
+                title: Text('Logout',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500)),
                  onTap: logout,
               ),
               
