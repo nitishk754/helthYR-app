@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'main.dart';
 import 'services/api_services.dart';
-
+import 'dart:developer';
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -152,6 +152,7 @@ class _LoginState extends State<Login> {
                             var password = controllerPassword.text;
                             var result =
                                 await ApiService(). getUser(email, password);
+                                log("resultresult_${result}");
                             print("resultresult_${result}");
                             if (result.containsKey('errors')) {
                               Fluttertoast.showToast(
@@ -175,7 +176,7 @@ class _LoginState extends State<Login> {
                                 var token = result['data']['token'];
                                 debugPrint('user token ==> $token');
                                 debugPrint('user token ==> $userInput');
-                                return login_histories.isEmpty
+                                return (login_histories.length==1)
                                     ? ResetPass(result)
                                     : DashboardScreen(result);
                               }), ((route) {

@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
             //var token = result['data']['token'];
             //debugPrint('user token ==> $token');
             //debugPrint('user token ==> $userInput');
-            return login_histories.isEmpty
+            return (login_histories.length==1&&!prefs.getBool("_isLoggedIn")!)
                 ? ResetPass(result)
                 : DashboardScreen(result);
           }),

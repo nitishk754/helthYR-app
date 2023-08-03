@@ -131,8 +131,7 @@ class _ResetPassState extends State<ResetPass> {
                               context,
                               MaterialPageRoute(builder: (context) {
                                 return DashboardScreen(widget.userData);
-                              }),
-                            );
+                              }));
                           }
                         },
                         child: const Text(
