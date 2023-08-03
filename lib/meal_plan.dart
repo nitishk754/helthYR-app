@@ -191,12 +191,12 @@ class _MealPlanState extends State<MealPlan>
               return Padding(
                 padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
                 child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => RecipeDetails()));
-                  },
+                  // onTap: () {
+                  //   Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => RecipeDetails()));
+                  // },
                   child: Card(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(12.0, 5.5, 12.0, 5.5),
