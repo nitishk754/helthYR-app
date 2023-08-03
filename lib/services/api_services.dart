@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/model/question_model.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +25,7 @@ class ApiService {
     Response questionData = await dio.get(
       baseUrl + questions,
     );
-    questionData.data = jsonDecode(questionData.data as String);
+    // questionData.data = jsonDecode(questionData.data as String);
     print('Questions Info: ${questionData.headers}');
     print('Questions Info: ${jsonEncode(questionData.data)}');
     // Prints the raw data returned by the server
@@ -36,46 +37,69 @@ class ApiService {
     return questionModel;
   }
 
-  Future<Map> getUser(String email, String password) async {
+  Future getUser(String email, String password) async {
     // var formData = jsonEncode({"email": email, "password": pass});
+    dio.options.headers['Accept'] = "application/json";
     var formData = jsonEncode({
       "email": email, //"ernitish1993@gmail.com",
       "password": password, //"nitish123",
       "role": "user"
     });
+    Response? userData;
+    try {
+      userData = await dio.post(baseUrl + userLogin, data: formData);
+      return userData.data;
+    } on DioException catch (e) {
+      print(e.response!.statusCode);
+      Fluttertoast.showToast(
+          msg: "These credentials do not match our records.");
 
-    Response userData = await dio.post(baseUrl + userLogin, data: formData);
+      // print("error: ${e.response?.data}");
+      var abc = e.response!.data;
+
+      print("error: ${(abc)}");
+      return (abc);
+    }
 
     // Prints the raw data returned by the server
     print('User Info: ${formData.toString()}');
 
-    print('User Info: ${userData.data}');
+    print('User Info: ${userData?.data}');
 
     // Parsing the raw JSON data to the User class
     // Login user = Login.fromJson(userData.data);
-
-    return jsonDecode(userData.data.toString());
   }
 
-  Future<Map> resetPassword(String authorization, inputs) async {
+  Future resetPassword(String authorization, inputs) async {
     var formData = jsonEncode(inputs);
 
     dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
     dio.options.headers['Authorization'] = 'Bearer $authorization';
-    var userData = await dio.post(baseUrl + userResetPassword, data: formData);
- print('User Info1: ${userData.data}');
-    return jsonDecode(userData.data.toString());
+    Response? userData;
+    try {
+      userData = await dio.post(baseUrl + userResetPassword, data: formData);
+      return (userData.data);
+    } on DioException catch (e) {
+      print("errorRes: ${e.response!.statusCode}");
+      print("errorRes: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
+    // print('User Info1: ${(userData.data)}');
+    // return (userData.data);
   }
 
   Future<Map> saveQuestions(String authorization, inputs) async {
     var formData = jsonEncode(inputs);
+    print('User Info10: ${formData}');
 
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] = 'Bearer $authorization';
     var userData = await dio.post(baseUrl + questions, data: formData);
     debugPrint(jsonEncode(inputs.toString()));
 
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
   Future<Map> addWaterIntake(String intakeAmount) async {
@@ -89,7 +113,7 @@ class ApiService {
         {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
     debugPrint(formData.toString());
     Response userData = await dio.post(baseUrl + waterIntake, data: formData);
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
   Future<Map> getSevenDaysWaterIntake(String intakeAmount) async {
@@ -102,7 +126,7 @@ class ApiService {
     var formData = jsonEncode(
         {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
     Response userData = await dio.get(baseUrl + waterIntake, data: formData);
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
   Future<Map> loadActivity(String dateVal) async {
@@ -112,9 +136,10 @@ class ApiService {
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
-    Response userData = await dio.get("${baseUrl + activity}?range=today&date=${dateVal}");
+    Response userData =
+        await dio.get("${baseUrl + activity}?range=today&date=${dateVal}");
     print(userData);
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
   Future<Map> saveActivity(
@@ -133,7 +158,7 @@ class ApiService {
     });
     print(formData);
     Response userData = await dio.post(baseUrl + activity, data: formData);
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
   Future<Map> meals() async {
@@ -145,13 +170,13 @@ class ApiService {
     print(dio.options.headers['Authorization']);
     Response userData = await dio.get(baseUrl + mealPlan);
 
-    print(jsonDecode(userData.data.toString()));
-    print(jsonDecode(userData.data.toString()));
+    print(userData.data);
+    // print(jsonDecode(userData.data.toString()));
 
-    return jsonDecode(userData.data.toString());
+    return userData.data;
   }
 
-  Future<String> postLogout() async {
+  Future<Map> postLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
@@ -164,7 +189,7 @@ class ApiService {
     // print(jsonDecode(userData.data.toString()));
     print(userData.data.toString());
 
-    return userData.data.toString();
+    return userData.data;
   }
 
   Future<Map> getDashboard() async {
@@ -176,11 +201,11 @@ class ApiService {
     print(dio.options.headers['Authorization']);
     Response dashboardData = await dio.get(baseUrl + dashboard);
 
-    print("dashboard: ${jsonDecode(dashboardData.data.toString())}");
-    
+    print("dashboard: ${(dashboardData.data.toString())}");
+
     // print(jsonDecode(userData.data.toString()));
 
-    return jsonDecode(dashboardData.data.toString());
+    return dashboardData.data;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/dashboard_screen.dart';
 
 import 'services/api_services.dart';
@@ -119,7 +120,11 @@ class _ResetPassState extends State<ResetPass> {
                               "password_confirmation": controllerPassword.text,
                             });
                             if (result.containsKey('errors')) {
-                              setState(() => isLoading = false);
+                               Fluttertoast.showToast(
+                                  msg: result["errors"]["password"][0]);
+                              setState(() {
+                                isLoading = false;
+                              });
                               return;
                             }
                             Navigator.push(

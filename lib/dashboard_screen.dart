@@ -46,16 +46,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    
+
+    saveQues();
+
+    _dashboard();
+  }
+
+  Future<void> saveQues() async {
     var inputs = userInput.values.toList();
     var token = widget.userData['data']['token'];
 
+    
     debugPrint('saveQuestions token ==> $token');
     debugPrint('saveQuestions inputs ==> ${{'res': inputs}}');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(!prefs.getBool("_isLoggedIn")!){
     ApiService().saveQuestions(token, {'res': inputs}).then((outputs) {
       debugPrint('saveQuestions outputs ==> $outputs');
+      prefs.setBool("_isLoggedIn", true);
     });
-
-    _dashboard();
+    }
   }
 
   void refreshData() {
@@ -119,8 +130,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
-    await ApiService().postLogout();
+    // prefs.clear();
+    await ApiService().postLogout().then((value) {
+      var res = value["data"];
+
+    setState(() {
+      
+      if(res.containsKey("status")){
+        prefs.clear();
+        prefs.setBool("_isLoggedIn", false);
+      }
+
+    });
+
+    });
     // ignore: use_build_context_synchronously
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => Login()), (route) => false);
@@ -242,86 +265,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisSpacing: 7,
               crossAxisCount: 2,
               children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NutrientTracker()))
-                          .then(onGoBack);
-                    });
-                  },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.45,
-                    height: 170,
-                    child: Card(
-                      elevation: 2.5,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: Color(blueColor),
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
-                      ),
-                      color: Colors.white,
-                      child: Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                15.0, 15.0, 15.0, 0.0),
-                            child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Nutrient Tracker",
-                                  style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                          ),
-                          Center(
-                            child: AspectRatio(
-                              aspectRatio: 15 / 10,
-                              child: DChartPie(
-                                donutWidth: 10,
-                                data: [
-                                  {'domain': 'Flutter', 'measure': 28},
-                                  {'domain': 'React Native', 'measure': 27},
-                                  {'domain': 'Ionic', 'measure': 20},
-                                  {'domain': 'Cordova', 'measure': 15},
-                                ],
-                                fillColor: (pieData, index) {
-                                  switch (pieData['domain']) {
-                                    case 'Flutter':
-                                      return Colors.blue;
-                                    case 'React Native':
-                                      return Colors.blueAccent;
-                                    case 'Ionic':
-                                      return Colors.lightBlue;
-                                    default:
-                                      return Colors.orange;
-                                  }
-                                },
-                                pieLabel: (pieData, index) {
-                                  return "${pieData['domain']}:\n${pieData['measure']}%";
-                                },
-                                labelPosition: PieLabelPosition.outside,
-                                labelLinelength: 3.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                // nutrientTracker(context),
                 waterTracker(context),
                 activityTracker(context)
               ],
             ))
       ],
     );
+  }
+
+  InkWell nutrientTracker(BuildContext context) {
+    return InkWell(
+                onTap: () {
+                  setState(() {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NutrientTracker()))
+                        .then(onGoBack);
+                  });
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 170,
+                  child: Card(
+                    elevation: 2.5,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: Color(blueColor),
+                      ),
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    color: Colors.white,
+                    child: Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                              15.0, 15.0, 15.0, 0.0),
+                          child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                "Nutrient Tracker",
+                                style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                        ),
+                        Center(
+                          child: AspectRatio(
+                            aspectRatio: 15 / 10,
+                            child: DChartPie(
+                              donutWidth: 10,
+                              data: [
+                                {'domain': 'Flutter', 'measure': 28},
+                                {'domain': 'React Native', 'measure': 27},
+                                {'domain': 'Ionic', 'measure': 20},
+                                {'domain': 'Cordova', 'measure': 15},
+                              ],
+                              fillColor: (pieData, index) {
+                                switch (pieData['domain']) {
+                                  case 'Flutter':
+                                    return Colors.blue;
+                                  case 'React Native':
+                                    return Colors.blueAccent;
+                                  case 'Ionic':
+                                    return Colors.lightBlue;
+                                  default:
+                                    return Colors.orange;
+                                }
+                              },
+                              pieLabel: (pieData, index) {
+                                return "${pieData['domain']}:\n${pieData['measure']}%";
+                              },
+                              labelPosition: PieLabelPosition.outside,
+                              labelLinelength: 3.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
   }
 
   InkWell activityTracker(BuildContext context) {

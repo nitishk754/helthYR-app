@@ -151,7 +151,7 @@ class _LoginState extends State<Login> {
                             var email = controllerEmail.text;
                             var password = controllerPassword.text;
                             var result =
-                                await ApiService().getUser(email, password);
+                                await ApiService(). getUser(email, password);
                             print("resultresult_${result}");
                             if (result.containsKey('errors')) {
                               Fluttertoast.showToast(
@@ -165,6 +165,7 @@ class _LoginState extends State<Login> {
                               isLoading = false;
                             });
                             prefs.setString("_result", jsonEncode(result));
+                            prefs.setBool("_isLoggedIn", false);
                             prefs.setString("_token", result['data']['token']);
                             Navigator.pushAndRemoveUntil(
                               context,

@@ -1,5 +1,6 @@
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/constants/colors.dart';
@@ -111,13 +112,15 @@ class _QuestionSectionState extends State<QuestionSection> {
                                 ? (model.qTxt.contains("Weight") ||
                                         model.qTxt.contains("weight"))
                                     ? SingleChildScrollView(
-                                      physics: AlwaysScrollableScrollPhysics(),
-                                      child: weightScreen(model))
+                                        physics:
+                                            AlwaysScrollableScrollPhysics(),
+                                        child: weightScreen(model))
                                     : (model.qTxt.contains("Tall") ||
                                             model.qTxt.contains("tall"))
                                         ? SingleChildScrollView(
-                                          physics: AlwaysScrollableScrollPhysics(),
-                                          child: heightScreen(model))
+                                            physics:
+                                                AlwaysScrollableScrollPhysics(),
+                                            child: heightScreen(model))
                                         : Column(
                                             children: [
                                               Padding(
@@ -139,8 +142,16 @@ class _QuestionSectionState extends State<QuestionSection> {
                                                 value: _currentAge,
                                                 itemHeight: 60,
                                                 // itemWidth: 100,
-                                                textStyle: TextStyle(color: Colors.grey[400],fontSize: 30, fontWeight: FontWeight.bold),
-                                                selectedTextStyle: TextStyle(color: Color(orangeShade),fontSize: 44, fontWeight: FontWeight.bold),
+                                                textStyle: TextStyle(
+                                                    color: Colors.grey[400],
+                                                    fontSize: 30,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                                selectedTextStyle: TextStyle(
+                                                    color: Color(orangeShade),
+                                                    fontSize: 44,
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                                 itemCount: 5,
                                                 minValue: 12,
                                                 maxValue: 65,
@@ -193,8 +204,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                               },
                               child: const Text(
                                 '  Back  ',
-                                style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500),
-                                
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w500),
                               ),
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -332,7 +343,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                               },
                               child: const Text(
                                 '  Continue  ',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w500),
                               ),
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -388,7 +400,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                 child: SizedBox(
                   height: 24,
                   width: 24,
-                  child: Image(image: AssetImage("assets/Images/weightIcon.png")),
+                  child:
+                      Image(image: AssetImage("assets/Images/weightIcon.png")),
                 ),
               ),
               SizedBox(
@@ -414,7 +427,9 @@ class _QuestionSectionState extends State<QuestionSection> {
                   child: Padding(
                     padding: const EdgeInsets.all(0.0),
                     child: TextFormField(
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       controller: currentWeightController,
                       maxLength: 4,
                       textAlign: TextAlign.center,
@@ -439,7 +454,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                           hintText: '',
                           labelText: "",
                           counterText: ""),
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -458,17 +474,19 @@ class _QuestionSectionState extends State<QuestionSection> {
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
-                           userInput['${model.id}'] = {
-                              "question": model.qTxt,
-                              "question_id": model.id,
-                              "answer_text": '${currentWeightController.text} $_weight'
-                            };
-              
-                            userInput['${goalWeight.id}'] = {
-                              "question": goalWeight.qTxt,
-                              "question_id": goalWeight.id,
-                              "answer_text": '${goalWeightController.text} $_weight'
-                            };
+                          userInput['${model.id}'] = {
+                            "question": model.qTxt,
+                            "question_id": model.id,
+                            "answer_text":
+                                '${currentWeightController.text} $_weight'
+                          };
+
+                          userInput['${goalWeight.id}'] = {
+                            "question": goalWeight.qTxt,
+                            "question_id": goalWeight.id,
+                            "answer_text":
+                                '${goalWeightController.text} $_weight'
+                          };
                         });
                       },
                     ),
@@ -476,20 +494,22 @@ class _QuestionSectionState extends State<QuestionSection> {
                       value: 'lbs',
                       leading: 'lbs',
                       groupValue: _weight,
-                      onChanged: (value){
+                      onChanged: (value) {
                         setState(() {
                           _weight = value!;
-                           userInput['${model.id}'] = {
-                              "question": model.qTxt,
-                              "question_id": model.id,
-                              "answer_text": '${currentWeightController.text} $_weight'
-                            };
-              
-                            userInput['${goalWeight.id}'] = {
-                              "question": goalWeight.qTxt,
-                              "question_id": goalWeight.id,
-                              "answer_text": '${goalWeightController.text} $_weight'
-                            };
+                          userInput['${model.id}'] = {
+                            "question": model.qTxt,
+                            "question_id": model.id,
+                            "answer_text":
+                                '${currentWeightController.text} $_weight'
+                          };
+
+                          userInput['${goalWeight.id}'] = {
+                            "question": goalWeight.qTxt,
+                            "question_id": goalWeight.id,
+                            "answer_text":
+                                '${goalWeightController.text} $_weight'
+                          };
                         });
                       },
                     ),
@@ -550,7 +570,9 @@ class _QuestionSectionState extends State<QuestionSection> {
                       controller: goalWeightController,
                       maxLength: 4,
                       textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (value) {
                         setState(() {
                           userInput['${goalWeight.id}'] = {
@@ -572,7 +594,8 @@ class _QuestionSectionState extends State<QuestionSection> {
                           hintText: '',
                           labelText: "",
                           counterText: ""),
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -583,47 +606,49 @@ class _QuestionSectionState extends State<QuestionSection> {
               Row(
                 children: [
                   MyRadioListTile2<String>(
-                    value: 'kg',
-                    leading: 'kg',
-                    groupValue: _weight,
-                    onChanged: (value){
-                      setState(() {
-                        _weight = value!;
-                         userInput['${goalWeight.id}'] = {
+                      value: 'kg',
+                      leading: 'kg',
+                      groupValue: _weight,
+                      onChanged: (value) {
+                        setState(() {
+                          _weight = value!;
+                          userInput['${goalWeight.id}'] = {
                             "question": goalWeight.qTxt,
                             "question_id": goalWeight.id,
-                            "answer_text": '${goalWeightController.text} $_weight'
+                            "answer_text":
+                                '${goalWeightController.text} $_weight'
                           };
-    
-                           userInput['${model.id}'] = {
+
+                          userInput['${model.id}'] = {
                             "question": model.qTxt,
                             "question_id": model.id,
-                            "answer_text": '${currentWeightController.text} $_weight'
+                            "answer_text":
+                                '${currentWeightController.text} $_weight'
                           };
-                      });
-                    } 
-                  ),
+                        });
+                      }),
                   MyRadioListTile2<String>(
-                    value: 'lbs',
-                    leading: 'lbs',
-                    groupValue: _weight,
-                    onChanged: (value) {
-                      setState(() {
-                        _weight = value!;
-                         userInput['${goalWeight.id}'] = {
+                      value: 'lbs',
+                      leading: 'lbs',
+                      groupValue: _weight,
+                      onChanged: (value) {
+                        setState(() {
+                          _weight = value!;
+                          userInput['${goalWeight.id}'] = {
                             "question": goalWeight.qTxt,
                             "question_id": goalWeight.id,
-                            "answer_text": '${goalWeightController.text} $_weight'
+                            "answer_text":
+                                '${goalWeightController.text} $_weight'
                           };
-    
-                           userInput['${model.id}'] = {
+
+                          userInput['${model.id}'] = {
                             "question": model.qTxt,
                             "question_id": model.id,
-                            "answer_text": '${currentWeightController.text} $_weight'
+                            "answer_text":
+                                '${currentWeightController.text} $_weight'
                           };
-                      });
-                    }),
-                  
+                        });
+                      }),
                 ],
               )
             ],
@@ -638,7 +663,7 @@ class _QuestionSectionState extends State<QuestionSection> {
     var controllerIn = TextEditingController();
     // var textFromValue = '';
     return Padding(
-      padding: const EdgeInsets.only(bottom:20.0),
+      padding: const EdgeInsets.only(bottom: 20.0),
       child: Column(
         // shrinkWrap: true,
         // physics: ClampingScrollPhysics(),
@@ -675,11 +700,13 @@ class _QuestionSectionState extends State<QuestionSection> {
                 child: Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: TextFormField(
+                    keyboardType: const TextInputType.numberWithOptions(
+                        signed: true, decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     maxLength: 4,
                     controller: controllerFt,
                     textAlign: TextAlign.center,
                     textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.number,
                     onChanged: (value) {},
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.zero,
@@ -798,7 +825,7 @@ class _QuestionSectionState extends State<QuestionSection> {
               //         maxLength: 4,
               //         enabled: false,
               //         onChanged: (value) {
-    
+
               //         },
               //         controller: TextEditingController(text: textFromValue),
               //         textAlign: TextAlign.center,

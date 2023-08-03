@@ -1,10 +1,11 @@
 
 const String auth = 'OXVGZg3A0oe4ev5lJeuWBHFamUXBd5CGN7OsdJTo0S60IVAP0sV3s21P6GbO3sM8';
 
-const String baseUrl = 'http://helthyr.showmeproject.com/';
+const String baseUrl = 'http://helthyr.app.showmeproject.com/';
 const String questions = 'api/app/question';
 const String userLogin = 'api/login';
-const String userResetPassword = 'api/reset-password';
+const String userResetPassword = 'api/app/reset-password';
+// reset-password';
 const String waterIntake = 'api/app/water-intake';
 const String activity = 'api/app/activity';
 const String mealPlan = 'api/app/meal-plan';

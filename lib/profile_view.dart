@@ -32,8 +32,20 @@ class _ProfileViewState extends State<ProfileView> {
   }
   logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
-    await ApiService().postLogout();
+   
+    await ApiService().postLogout().then((value) {
+      var res = value["data"];
+
+    setState(() {
+      
+      if(res.containsKey("status")){
+        prefs.clear();
+        prefs.setBool("_isLoggedIn", false);
+      }
+
+    });
+
+    });
      // ignore: use_build_context_synchronously
      Navigator.pushReplacement(
           context,
