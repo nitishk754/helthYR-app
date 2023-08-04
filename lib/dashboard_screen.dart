@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:d_chart/d_chart.dart';
@@ -50,6 +51,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     saveQues();
 
     _dashboard();
+    // getUserProfile();
+  }
+
+  Future<void> getUserProfile() async {
+   
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var result = await ApiService().userProfile();
+   
+
+    prefs.setString("userResult", jsonEncode(result));
   }
 
   Future<void> saveQues() async {
@@ -59,12 +70,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     debugPrint('saveQuestions token ==> $token');
     debugPrint('saveQuestions inputs ==> ${{'res': inputs}}');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!prefs.getBool("_isLoggedIn")!) {
+    
       ApiService().saveQuestions(token, {'res': inputs}).then((outputs) {
         debugPrint('saveQuestions outputs ==> $outputs');
-        prefs.setBool("_isLoggedIn", true);
+        setState(() {
+          prefs.setBool("_isLoggedIn", true);
+          getUserProfile();
+        });
       });
-    }
+    
   }
 
   void refreshData() {
@@ -352,10 +366,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       },
       child: Container(
-        decoration:
-            BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(15)),
-            color: Colors.white,
-            ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+          color: Colors.white,
+        ),
         width: MediaQuery.of(context).size.width * 0.45,
         height: 170,
         child: Card(
@@ -480,11 +494,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       },
       child: Container(
-        decoration:
-            BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(15)),
-            color: Colors.white,
-            ),
-        
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+          color: Colors.white,
+        ),
         width: MediaQuery.of(context).size.width * 0.45,
         height: 170,
         child: Card(

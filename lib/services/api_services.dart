@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/urls.dart';
+import 'dart:developer';
 
 final dio = Dio();
 
@@ -90,16 +92,24 @@ class ApiService {
     // return (userData.data);
   }
 
-  Future<Map> saveQuestions(String authorization, inputs) async {
+  Future saveQuestions(String authorization, inputs) async {
     var formData = jsonEncode(inputs);
     print('User Info10: ${formData}');
 
     dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
     dio.options.headers['Authorization'] = 'Bearer $authorization';
-    var userData = await dio.post(baseUrl + questions, data: formData);
-    debugPrint(jsonEncode(inputs.toString()));
+    try {
+      var userData = await dio.post(baseUrl + questions, data: formData);
+      debugPrint(jsonEncode(inputs.toString()));
 
-    return userData.data;
+      return userData.data;
+    } on DioException catch (e) {
+      print("errorRes: ${e.response!.statusCode}");
+      print("errorRes: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
   }
 
   Future<Map> addWaterIntake(String intakeAmount) async {
@@ -207,7 +217,31 @@ class ApiService {
 
     return dashboardData.data;
   }
+
+  Future<Map> userProfile() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  dio.options.headers['X-Authorization'] = auth;
+  dio.options.headers['Accept'] = "application/json";
+  dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
+  //  var userData;
+
+  try {
+    Response userProfile = await dio.get(baseUrl + profile);
+    // log(dashboardData.data.toString());
+    print("userDataProfile: ${userProfile.data}");
+    return (userProfile.data);
+  } on DioException catch (e) {
+    print("errorResProfile: ${e.response!.statusCode}");
+    print("errorResProfile: ${e.response!.data}");
+    var returnError = e.response!.data;
+    return returnError;
+  }
+  // print('User Info1: ${(userData.data)}');
+  // return (userData.data);
 }
+}
+
+
 
 String getCurrentDate() {
   var date = DateTime.now();

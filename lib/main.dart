@@ -13,7 +13,7 @@ import 'package:health_wellness/water_tracker.dart';
 import 'package:health_wellness/welcome_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-
+import 'package:flutter/services.dart';
 
 var userInput = <String, dynamic>{};
 
@@ -21,7 +21,14 @@ void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   FlutterNativeSplash.remove();
-  runApp(const MyApp());
+
+  WidgetsFlutterBinding.ensureInitialized();
+  // Step 3
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((value) => runApp(MyApp()));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -31,21 +38,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'HELTHYR',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Poppins',
-      ),
-      home: const SplashScreen(),
-       builder: (context, child) {
-            return MediaQuery(
-              child: child!,
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 0.8),
-            );
-       }
-      //home: const MealPlan(),
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'HELTHYR',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          fontFamily: 'Poppins',
+        ),
+        home: const SplashScreen(),
+        builder: (context, child) {
+          return MediaQuery(
+            child: child!,
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 0.8),
+          );
+        }
+        //home: const MealPlan(),
+        );
   }
 }
 
@@ -63,46 +70,45 @@ class _SplashScreenState extends State<SplashScreen> {
     _auth();
     super.initState();
   }
-  
+
   _auth() async {
-    
-              
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     print("_token_${prefs.getString("_token")}");
-    if(prefs.getString("_token") == null){
+    if (prefs.getString("_token") == null) {
       // ignore: use_build_context_synchronously
       Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return const WelcomePage();
-          }),
-        );
-    }else{
+        context,
+        MaterialPageRoute(builder: (context) {
+          return const WelcomePage();
+        }),
+      );
+    } else {
       var _result = prefs.getString("_result");
       Map result = jsonDecode(_result!);
-     // print(result["data"]["user"]["name"]);
+      // print(result["data"]["user"]["name"]);
       // ignore: use_build_context_synchronously
       Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            var login_histories = result['data']['user']
-                ['login_histories'] as List;
-            //var token = result['data']['token'];
-            //debugPrint('user token ==> $token');
-            //debugPrint('user token ==> $userInput');
-            return (login_histories.length==1&&!prefs.getBool("_isLoggedIn")!)
-                ? ResetPass(result)
-                : DashboardScreen(result);
-          }),
-        );
+        context,
+        MaterialPageRoute(builder: (context) {
+          var login_histories =
+              result['data']['user']['login_histories'] as List;
+          //var token = result['data']['token'];
+          //debugPrint('user token ==> $token');
+          //debugPrint('user token ==> $userInput');
+          return (login_histories.length == 1 && !prefs.getBool("_isLoggedIn")!)
+              ? ResetPass(result)
+              : DashboardScreen(result);
+        }),
+      );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: Image.asset(
-      //   'assets/splash/splash.png',
-      // ),
-    );
+        // body: Image.asset(
+        //   'assets/splash/splash.png',
+        // ),
+        );
   }
 }
