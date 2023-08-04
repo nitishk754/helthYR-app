@@ -762,7 +762,9 @@ class _QuestionSectionState extends State<QuestionSection> {
                     controller: controllerIn,
                     textAlign: TextAlign.center,
                     textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.number,
+                     keyboardType: const TextInputType.numberWithOptions(
+                        signed: true, decimal: true),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
                       userInput['${model.id}'] = {
                         "question": model.qTxt,
