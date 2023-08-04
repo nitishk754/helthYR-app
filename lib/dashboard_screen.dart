@@ -531,9 +531,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               size: 25,
                             )),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(7.0),
-                        child: Flexible(
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.all(7.0),
                           child: SizedBox(
                             width: 45,
                             height: 65,
