@@ -11,6 +11,7 @@ const String activity = 'api/app/activity';
 const String mealPlan = 'api/app/meal-plan';
 const String logout = 'api/logout';
 const String dashboard = 'api/app/dashboard';
+const String profile = 'api/app/profile';
 // const String saveAnswer = 'api/save-answer';
 // const String saveResult = 'api/save-result';
 // const String verifyMail = 'api/verify-email';

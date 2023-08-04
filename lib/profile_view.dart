@@ -24,10 +24,10 @@ class _ProfileViewState extends State<ProfileView> {
   }
   _auth() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var _result = prefs.getString("_result");
+    var _result = prefs.getString("userResult");
     Map result = jsonDecode(_result!);
     setState(() {
-      user = result["data"]["user"];
+      user = result["data"]["data"];
     });
   }
   logout() async {
