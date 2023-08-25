@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horizontal_calendar/horizontal_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'constants/colors.dart';
 
@@ -22,10 +23,15 @@ class _NutrientTrackerState extends State<NutrientTracker>
   String dateVal = "";
   DateTime dateTime = DateTime.now();
   bool isCardSelected = false;
+  late List<NutrientData> _nutData;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    _nutData = getNutrientData();
+
     tabController = TabController(length: 2, vsync: this);
     getCurrentDate();
   }
@@ -192,36 +198,44 @@ class _NutrientTrackerState extends State<NutrientTracker>
                 child: Stack(
                   children: [
                     Center(
-                      child: AspectRatio(
-                        aspectRatio: 20 / 12,
-                        child: DChartPie(
-                          donutWidth: 22,
-                          data: [
-                            {'domain': 'Flutter', 'measure': 28},
-                            {'domain': 'React Native', 'measure': 27},
-                            {'domain': 'Ionic', 'measure': 20},
-                            {'domain': 'Cordova', 'measure': 15},
-                          ],
-                          fillColor: (pieData, index) {
-                            switch (pieData['domain']) {
-                              case 'Flutter':
-                                return Colors.blue;
-                              case 'React Native':
-                                return Colors.blueAccent;
-                              case 'Ionic':
-                                return Colors.lightBlue;
-                              default:
-                                return Colors.orange;
-                            }
-                          },
-                          pieLabel: (pieData, index) {
-                            return "${pieData['domain']}:\n${pieData['measure']}%";
-                          },
-                          labelPosition: PieLabelPosition.outside,
-                          labelLinelength: 4.5,
+                        child: SfCircularChart(
+                      series: <CircularSeries>[
+                        DoughnutSeries<NutrientData, String>(
+                          dataSource: _nutData,
+                          xValueMapper: (NutrientData data, _) => data.nutrient,
+                          yValueMapper: (NutrientData data, _) => data.value,
+                        )
+                      ],
+                    )
+                        // AspectRatio(
+                        //   aspectRatio: 20 / 12,
+                        //   child: DChartPie(
+                        //     donutWidth: 22,
+                        //     data: [
+                        //       {'domain': 'Carbs', 'measure': 28},
+                        //       {'domain': 'Fat', 'measure': 27},
+                        //       {'domain': 'Protein', 'measure': 20},
+                        //     ],
+                        //     fillColor: (pieData, index) {
+                        //       switch (pieData['domain']) {
+                        //         case 'Carbs':
+                        //           return Colors.blue;
+                        //         case 'Fat':
+                        //           return Colors.blueAccent;
+                        //         case 'Protein':
+                        //           return Colors.lightBlue;
+                        //         default:
+                        //           return Colors.orange;
+                        //       }
+                        //     },
+                        //     pieLabel: (pieData, index) {
+                        //       return "${pieData['domain']}:\n${pieData['measure']}%";
+                        //     },
+                        //     labelPosition: PieLabelPosition.outside,
+                        //     labelLinelength: 4.5,
+                        //   ),
+                        // ),
                         ),
-                      ),
-                    ),
                     Align(
                       alignment: Alignment.center,
                       child: Text(
@@ -260,7 +274,9 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                               itemCount: 4,
                                               itemBuilder: (context, index) {
                                                 return Padding(
-                                                  padding: const EdgeInsets.fromLTRB(20.0,0.0,20.0,10),
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          20.0, 0.0, 20.0, 10),
                                                   child: Row(
                                                     children: [
                                                       Expanded(
@@ -278,7 +294,8 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                           padding:
                                                               const EdgeInsets
                                                                   .all(8.0),
-                                                          child: Text('Breakfast',
+                                                          child: Text(
+                                                              'Breakfast',
                                                               style: TextStyle(
                                                                 color: Colors
                                                                     .black87,
@@ -296,7 +313,8 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                               color: Color(
                                                                   orangeShade),
                                                               fontWeight:
-                                                                  FontWeight.w600,
+                                                                  FontWeight
+                                                                      .w600,
                                                               fontSize: 18,
                                                             )),
                                                       ),
@@ -471,4 +489,20 @@ class _NutrientTrackerState extends State<NutrientTracker>
     print("date value: ${formatter2.format(date)}");
     return formatter.format(date);
   }
+
+  List<NutrientData> getNutrientData() {
+    final List<NutrientData> nutrientData = [
+      NutrientData('Carbs', 500),
+      NutrientData('Protien', 120),
+      NutrientData('Fats', 80),
+    ];
+    return nutrientData;
+  }
+}
+
+class NutrientData {
+  NutrientData(this.nutrient, this.value);
+
+  final String nutrient;
+  final double value;
 }

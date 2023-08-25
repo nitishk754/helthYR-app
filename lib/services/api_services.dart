@@ -209,39 +209,45 @@ class ApiService {
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
-    Response dashboardData = await dio.get(baseUrl + dashboard);
 
-    print("dashboard: ${(dashboardData.data.toString())}");
+    try {
+      Response dashboardData = await dio.get(baseUrl + dashboard);
+      print("dashboard: ${(dashboardData.data.toString())}");
+
+      return dashboardData.data;
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
 
     // print(jsonDecode(userData.data.toString()));
-
-    return dashboardData.data;
   }
 
   Future<Map> userProfile() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  dio.options.headers['X-Authorization'] = auth;
-  dio.options.headers['Accept'] = "application/json";
-  dio.options.headers['Authorization'] = 'Bearer ${prefs.getString("_token")}';
-  //  var userData;
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    //  var userData;
 
-  try {
-    Response userProfile = await dio.get(baseUrl + profile);
-    // log(dashboardData.data.toString());
-    print("userDataProfile: ${userProfile.data}");
-    return (userProfile.data);
-  } on DioException catch (e) {
-    print("errorResProfile: ${e.response!.statusCode}");
-    print("errorResProfile: ${e.response!.data}");
-    var returnError = e.response!.data;
-    return returnError;
+    try {
+      Response userProfile = await dio.get(baseUrl + profile);
+      // log(dashboardData.data.toString());
+      print("userDataProfile: ${userProfile.data}");
+      return (userProfile.data);
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
+    // print('User Info1: ${(userData.data)}');
+    // return (userData.data);
   }
-  // print('User Info1: ${(userData.data)}');
-  // return (userData.data);
 }
-}
-
-
 
 String getCurrentDate() {
   var date = DateTime.now();

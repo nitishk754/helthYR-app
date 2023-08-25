@@ -12,6 +12,7 @@ import 'package:health_wellness/main.dart';
 import 'package:health_wellness/meal_plan.dart';
 import 'package:health_wellness/nutrient_tracker.dart';
 import 'package:health_wellness/profile_view.dart';
+import 'package:health_wellness/recipes.dart';
 import 'package:health_wellness/services/api_services.dart';
 import 'package:health_wellness/water_tracker.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
 import 'constants/colors.dart';
+import 'education_content.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Map userData;
@@ -55,10 +57,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> getUserProfile() async {
-   
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var result = await ApiService().userProfile();
-   
 
     prefs.setString("userResult", jsonEncode(result));
   }
@@ -70,15 +70,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     debugPrint('saveQuestions token ==> $token');
     debugPrint('saveQuestions inputs ==> ${{'res': inputs}}');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    
-      ApiService().saveQuestions(token, {'res': inputs}).then((outputs) {
-        debugPrint('saveQuestions outputs ==> $outputs');
-        setState(() {
-          prefs.setBool("_isLoggedIn", true);
-          getUserProfile();
-        });
+
+    ApiService().saveQuestions(token, {'res': inputs}).then((outputs) {
+      debugPrint('saveQuestions outputs ==> $outputs');
+      setState(() {
+        prefs.setBool("_isLoggedIn", true);
+        getUserProfile();
       });
-    
+    });
   }
 
   void refreshData() {
@@ -116,6 +115,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               });
               return;
             }
+          }
+        } else {
+          if (resource["message"] == "Unauthenticated.") {
+            print("elseCond");
+            setState(() {
+              Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => Login()), (route) => false);
+            });
+            return;
           }
         }
       });
@@ -181,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               )
             : null,
         body: ListView(
-          physics: BouncingScrollPhysics(),
+          physics: AlwaysScrollableScrollPhysics(),
           children: [
             (_selectedIndex == 0)
                 ? (_spinner)
@@ -189,11 +197,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         padding: const EdgeInsets.all(50.0),
                         child: Center(child: CircularProgressIndicator()),
                       )
-                    : LiquidPullToRefresh(
-                        onRefresh: () async {
-                          _dashboard();
-                        },
-                        child: DashboardScreen(context))
+                    : 
+                    // LiquidPullToRefresh(
+                    //     onRefresh: () async {
+                    //       _dashboard();
+                    //     },
+                        // child:
+                         DashboardScreen(context)
+                        //  )
                 : (_selectedIndex == 1)
                     ? Text("")
                     : ProfileView()
@@ -225,7 +236,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ListView DashboardScreen(BuildContext context) {
     return ListView(
       shrinkWrap: true,
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       children: [
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -268,19 +279,195 @@ class _DashboardScreenState extends State<DashboardScreen> {
               physics:
                   NeverScrollableScrollPhysics(), // to disable GridView's scrolling
               shrinkWrap: true,
-              primary: false,
+              // primary: false,
               // padding: const EdgeInsets.all(20),
               crossAxisSpacing: 15,
               mainAxisSpacing: 7,
               crossAxisCount: 2,
               children: [
-                // nutrientTracker(context),
+                nutrientTracker(context),
+                activityTracker(context),
+                educationContent(context),
                 waterTracker(context),
-                activityTracker(context)
+                recipeWidget(context),
+                // recipeWidget(context),
+                // recipeWidget(context)
               ],
             ))
       ],
     );
+  }
+
+  InkWell recipeWidget(BuildContext context) {
+    return InkWell(
+              onTap: () {
+                setState(() {
+                  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RecipesWidget()))
+                      .then(onGoBack);
+                });
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.45,
+                height: 170,
+                child: Card(
+                  elevation: 2.5,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: Color(blueColor),
+                    ),
+                    borderRadius:
+                        const BorderRadius.all(Radius.circular(12)),
+                  ),
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                              15.0, 15.0, 15.0, 0.0),
+                          child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                "Recipes",
+                                style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold),
+                              )),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Image(
+                              height: 65,
+                              width: 65,
+                              image:
+                                  AssetImage("assets/Images/recipeBook.png"),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: AlignmentDirectional.bottomCenter,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "220",
+                                style: TextStyle(
+                                    color: Color(orangeShade),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                "recipes",
+                                style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+  }
+
+  InkWell educationContent(BuildContext context) {
+    return InkWell(
+                onTap: () {
+                  setState(() {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EducationContent()))
+                        .then(onGoBack);
+                  });
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 170,
+                  child: Card(
+                    elevation: 2.5,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: Color(blueColor),
+                      ),
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                                15.0, 15.0, 15.0, 0.0),
+                            child: Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  "Educational Content",
+                                  style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                          ),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Image(
+                                height: 65,
+                                width: 65,
+                                image:
+                                    AssetImage("assets/Images/eduWidget.png"),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "80%",
+                                  style: TextStyle(
+                                      color: Color(orangeShade),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                  "completed",
+                                  style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              );
   }
 
   InkWell nutrientTracker(BuildContext context) {

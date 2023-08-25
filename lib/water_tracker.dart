@@ -269,6 +269,7 @@ class _WaterTrackerState extends State<WaterTracker>
                               measureLabelPaddingToAxisLine: 16,
                               barColor: (barData, index, id) => Color(blueColor),
                               showBarValue: true,
+                              
                             ),
                           ),
                         ),
