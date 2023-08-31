@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:animated_weight_picker/animated_weight_picker.dart';
 import 'package:d_chart/d_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -17,8 +18,11 @@ import 'package:health_wellness/services/api_services.dart';
 import 'package:health_wellness/water_tracker.dart';
 import 'package:intl/intl.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'constants/colors.dart';
 import 'education_content.dart';
@@ -35,10 +39,19 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
   int waterIntake = 1;
+  // use in statefull widget or in stateless widget in stateless widget you need
+// a statemanagement service or you are unable to change value in setState
+  final double min = 0;
+  final double max = 10;
+  String selectedValue = '';
+  // int _currentIntValue = 65;
+  double _currentHorizontalIntValue = 65;
 
   List<String> mealList = ["Breakfast", "Lunch", "Snacks", "Dinner"];
   Map dashboardData = {};
   bool _spinner = false;
+  late List<NutrientData> _nutData;
+  // late TooltipBehavior _tooltip;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -48,7 +61,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
+    _nutData = getNutrientData();
+    // _tooltip = TooltipBehavior(enable: true);
     super.initState();
+    selectedValue = min.toString();
 
     saveQues();
 
@@ -89,6 +105,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {});
   }
 
+//   _launchURL() async {
+//    final Uri url = Uri.parse('https://flutter.dev');
+//    if (!await launchUrl(url)) {
+//         throw Exception('Could not launch $_url');
+//     }
+// }
+
   _dashboard() async {
     setState(() => _spinner = true);
     await ApiService().getDashboard().then((value) {
@@ -121,7 +144,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             print("elseCond");
             setState(() {
               Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => Login()), (route) => false);
+                  MaterialPageRoute(builder: (context) => Login()),
+                  (route) => false);
             });
             return;
           }
@@ -197,14 +221,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         padding: const EdgeInsets.all(50.0),
                         child: Center(child: CircularProgressIndicator()),
                       )
-                    : 
+                    :
                     // LiquidPullToRefresh(
                     //     onRefresh: () async {
                     //       _dashboard();
                     //     },
-                        // child:
-                         DashboardScreen(context)
-                        //  )
+                    // child:
+                    DashboardScreen(context)
+                //  )
                 : (_selectedIndex == 1)
                     ? Text("")
                     : ProfileView()
@@ -290,6 +314,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 educationContent(context),
                 waterTracker(context),
                 recipeWidget(context),
+                weightTracker(context),
+                discountSupplements(context)
                 // recipeWidget(context),
                 // recipeWidget(context)
               ],
@@ -298,176 +324,356 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  InkWell recipeWidget(BuildContext context) {
-    return InkWell(
-              onTap: () {
-                setState(() {
-                  Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RecipesWidget()))
-                      .then(onGoBack);
-                });
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.45,
-                height: 170,
-                child: Card(
-                  elevation: 2.5,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: Color(blueColor),
+  Container weightTracker(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.45,
+      height: 170,
+      child: Card(
+        elevation: 2.5,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color(blueColor),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        color: Colors.white,
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Weight Tracker",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                  child: Image(
+                height: 55,
+                width: 55,
+                image: AssetImage("assets/Images/scale.png"),
+              )),
+            ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: IconButton(
+                      icon: Icon(Icons.indeterminate_check_box_sharp,color: Color(blueColor),),
+                      onPressed: () => setState(() {
+                        final newValue = _currentHorizontalIntValue - 0.5;
+                        _currentHorizontalIntValue = newValue;
+                      }),
                     ),
-                    borderRadius:
-                        const BorderRadius.all(Radius.circular(12)),
                   ),
-                  color: Colors.white,
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(1)),
+                          border: Border.all(
+                            width: 0.5,
+                            color: Color(blueColor)
+                          ),
+                        ),
+                        child: Text('$_currentHorizontalIntValue',textAlign: TextAlign.center,)),
+                  ),
+                  Expanded(
+                    child: IconButton(
+                      icon: Icon(Icons.add_box,color: Color(blueColor)),
+                      onPressed: () => setState(() {
+                        final newValue = _currentHorizontalIntValue + 0.5;
+                        _currentHorizontalIntValue = newValue;
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Expanded(
+            //   child: Align(
+            //     alignment: AlignmentDirectional.bottomCenter,
+            //     child: Column(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       crossAxisAlignment: CrossAxisAlignment.center,
+            //       children: [
+            //         Text(
+            //           "2kgs to loose!",
+            //           style: TextStyle(
+            //               color: Color(orangeShade),
+            //               fontSize: 20,
+            //               fontWeight: FontWeight.w600),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // )
+          ],
+        ),
+      ),
+    );
+  }
+
+  InkWell discountSupplements(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        String url = "https://secure.cobionic.com/collections/all-supplements";
+        var urllaunchable = await canLaunch(url); //canLaunch is from url_launcher package
+                    if(urllaunchable){
+                        await launch(url); //launch is from url_launcher package to launch URL
+                    }else{
+                       print("URL can't be launched.");
+                    }
+        //check it
+
+        //        const url = 'https://flutter.dev';
+        // if (await canLaunchUrl(Uri.parse(url))) {
+        //   await launchUrl(Uri.parse(url));
+        // } else {
+        //   throw 'Could not launch $url';
+        // }
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Supplements",
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Image(
+                      height: 65,
+                      width: 65,
+                      image: AssetImage("assets/Images/vitamin.png"),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.bottomCenter,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              15.0, 15.0, 15.0, 0.0),
-                          child: Align(
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                "Recipes",
-                                style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                        ),
+                      Text(
+                        "50%",
+                        style: TextStyle(
+                            color: Color(orangeShade),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
                       ),
-                      Expanded(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Image(
-                              height: 65,
-                              width: 65,
-                              image:
-                                  AssetImage("assets/Images/recipeBook.png"),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Align(
-                          alignment: AlignmentDirectional.bottomCenter,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "220",
-                                style: TextStyle(
-                                    color: Color(orangeShade),
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              Text(
-                                "recipes",
-                                style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500),
-                              )
-                            ],
-                          ),
-                        ),
+                      Text(
+                        "Discount",
+                        style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
                       )
                     ],
                   ),
                 ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InkWell recipeWidget(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => RecipesWidget()))
+              .then(onGoBack);
+        });
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Recipes",
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
+                ),
               ),
-            );
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Image(
+                      height: 65,
+                      width: 65,
+                      image: AssetImage("assets/Images/recipeBook.png"),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "220",
+                        style: TextStyle(
+                            color: Color(orangeShade),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "recipes",
+                        style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   InkWell educationContent(BuildContext context) {
     return InkWell(
-                onTap: () {
-                  setState(() {
-                    Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => EducationContent()))
-                        .then(onGoBack);
-                  });
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.45,
-                  height: 170,
-                  child: Card(
-                    elevation: 2.5,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: Color(blueColor),
-                      ),
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(12)),
-                    ),
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                15.0, 15.0, 15.0, 0.0),
-                            child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Educational Content",
-                                  style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                )),
-                          ),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Image(
-                                height: 65,
-                                width: 65,
-                                image:
-                                    AssetImage("assets/Images/eduWidget.png"),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: AlignmentDirectional.bottomCenter,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "80%",
-                                  style: TextStyle(
-                                      color: Color(orangeShade),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  "completed",
-                                  style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
+      onTap: () {
+        setState(() {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => EducationContent()))
+              .then(onGoBack);
+        });
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Educational Content",
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Image(
+                      height: 65,
+                      width: 65,
+                      image: AssetImage("assets/Images/eduWidget.png"),
                     ),
                   ),
                 ),
-              );
+              ),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "80%",
+                        style: TextStyle(
+                            color: Color(orangeShade),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "completed",
+                        style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   InkWell nutrientTracker(BuildContext context) {
@@ -506,36 +712,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     )),
               ),
               Center(
-                child: AspectRatio(
-                  aspectRatio: 15 / 10,
-                  child: DChartPie(
-                    donutWidth: 10,
-                    data: [
-                      {'domain': 'Flutter', 'measure': 28},
-                      {'domain': 'React Native', 'measure': 27},
-                      {'domain': 'Ionic', 'measure': 20},
-                      {'domain': 'Cordova', 'measure': 15},
+                  child: InkWell(
+                onTap: () {
+                  setState(() {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NutrientTracker()))
+                        .then(onGoBack);
+                  });
+                },
+                child: Container(
+                  width: 170,
+                  height: 120,
+                  child: SfCircularChart(
+                    onChartTouchInteractionUp:
+                        (ChartTouchInteractionArgs args) {
+                      setState(() {
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => NutrientTracker()))
+                            .then(onGoBack);
+                      });
+                    },
+                    annotations: <CircularChartAnnotation>[
+                      CircularChartAnnotation(
+                          height: '100%',
+                          width: '100%',
+                          widget: PhysicalModel(
+                            shape: BoxShape.circle,
+                            elevation: 0,
+                            color: Colors.white,
+                            child: Container(),
+                          )),
+                      CircularChartAnnotation(
+                          widget: const Text('1402',
+                              style: TextStyle(
+                                color: Color(orangeShade),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              )))
                     ],
-                    fillColor: (pieData, index) {
-                      switch (pieData['domain']) {
-                        case 'Flutter':
-                          return Colors.blue;
-                        case 'React Native':
-                          return Colors.blueAccent;
-                        case 'Ionic':
-                          return Colors.lightBlue;
-                        default:
-                          return Colors.orange;
-                      }
-                    },
-                    pieLabel: (pieData, index) {
-                      return "${pieData['domain']}:\n${pieData['measure']}%";
-                    },
-                    labelPosition: PieLabelPosition.outside,
-                    labelLinelength: 3.5,
+                    series: <CircularSeries>[
+                      DoughnutSeries<NutrientData, String>(
+                          animationDuration: 1000.0,
+                          dataSource: _nutData,
+                          xValueMapper: (NutrientData data, _) => data.nutrient,
+                          yValueMapper: (NutrientData data, _) => data.value,
+                          dataLabelMapper: (NutrientData data, _) =>
+                              data.nutrient,
+                          dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              labelPosition: ChartDataLabelPosition.outside,
+                              connectorLineSettings:
+                                  ConnectorLineSettings(width: 1.0),
+                              textStyle: TextStyle(
+                                  fontSize: 6, fontWeight: FontWeight.w500)))
+                    ],
                   ),
                 ),
-              ),
+              )),
             ],
           ),
         ),
@@ -875,4 +1112,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
     return formatter.format(date);
   }
+
+  List<NutrientData> getNutrientData() {
+    final List<NutrientData> nutrientData = [
+      NutrientData('Carbs', 500),
+      NutrientData('Protien', 120),
+      NutrientData('Fats', 80),
+    ];
+    return nutrientData;
+  }
+}
+
+class NutrientData {
+  NutrientData(this.nutrient, this.value);
+
+  final String nutrient;
+  final double value;
 }

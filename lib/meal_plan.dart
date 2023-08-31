@@ -23,8 +23,9 @@ class _MealPlanState extends State<MealPlan>
   bool _spinner = false;
   Map mealPlanData = {};
   List allResult = [];
-  bool _isMealAdded = false;
+  // bool _isMealAdded = false;
   bool _customTileExpanded = false;
+  List<bool> isMealAdded = [];
 
   @override
   void initState() {
@@ -55,11 +56,16 @@ class _MealPlanState extends State<MealPlan>
     });
   }
 
+  saveMeals(String recipe_id, String meal_type) async {
+    await ApiService().saveMeals(recipe_id, meal_type);
+  }
+
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting('en');
     return Scaffold(
       body: ListView(
+        // physics: NeverScrollableScrollPhysics(),
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
@@ -144,7 +150,7 @@ class _MealPlanState extends State<MealPlan>
                   ? Center(child: CircularProgressIndicator())
                   : ListView(
                       shrinkWrap: true,
-                      physics: ClampingScrollPhysics(),
+                      physics: ScrollPhysics(),
                       children: [
                         for (var i = 0; i < allResult.length; i++) ...[
                           mealWidget(allResult[i]),
@@ -186,7 +192,7 @@ class _MealPlanState extends State<MealPlan>
               ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: 3,
+                  itemCount: 2,
                   itemBuilder: (BuildContext context, int index) {
                     return ListView(
                       shrinkWrap: true,
@@ -267,7 +273,7 @@ class _MealPlanState extends State<MealPlan>
                                                         child: Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                      .only(
+                                                                  .only(
                                                                   bottom: 1.0),
                                                           child: Container(
                                                             // width: 150,
@@ -353,6 +359,7 @@ class _MealPlanState extends State<MealPlan>
             physics: ClampingScrollPhysics(),
             itemCount: _data["meal_data"].length,
             itemBuilder: (BuildContext context, int index) {
+              isMealAdded.add(false);
               Map? mealData = _data["meal_data"][index];
               return Padding(
                 padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
@@ -454,18 +461,19 @@ class _MealPlanState extends State<MealPlan>
                                       alignment: Alignment.centerRight,
                                       child: InkWell(
                                         onTap: () {
+                                          saveMeals("${mealData?['id']}","${mealData?['meal_type']}");
                                           setState(() {
-                                            _isMealAdded
-                                                ? _isMealAdded = false
-                                                : _isMealAdded = true;
+                                            isMealAdded[index]
+                                                ? isMealAdded[index] = false
+                                                : isMealAdded[index] = true;
                                           });
                                         },
                                         child: Icon(
-                                          _isMealAdded
+                                          isMealAdded[index]
                                               ? Icons.check_circle
                                               : Icons.add_circle,
                                           size: 25,
-                                          color: _isMealAdded
+                                          color: isMealAdded[index]
                                               ? Colors.green
                                               : Color(blueColor),
                                         ),

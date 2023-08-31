@@ -186,6 +186,27 @@ class ApiService {
     return userData.data;
   }
 
+  Future<Map> saveMeals(String recipe_id, String meal_type) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    var formData = jsonEncode({
+      "recipe_id": recipe_id, //"ernitish1993@gmail.com",
+      "meal_type": meal_type, //"nitish123",
+      // "role": "user"
+    });
+    print(dio.options.headers['Authorization']);
+    print(formData);
+    Response saveMealData = await dio.post(baseUrl + mealPlan, data: formData);
+
+    print(saveMealData.data);
+    // print(jsonDecode(userData.data.toString()));
+
+    return saveMealData.data;
+  }
+
   Future<Map> postLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -246,6 +267,26 @@ class ApiService {
     }
     // print('User Info1: ${(userData.data)}');
     // return (userData.data);
+  }
+
+  Future<Map> getNutrientData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+
+    try {
+      Response userNutrientData = await dio.get(baseUrl + nutrientData);
+      // log(dashboardData.data.toString());
+      print("userDataProfile: ${userNutrientData.data}");
+      return (userNutrientData.data);
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
   }
 }
 
