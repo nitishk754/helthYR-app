@@ -24,11 +24,16 @@ void main() {
 
   WidgetsFlutterBinding.ensureInitialized();
   // Step 3
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((value) => runApp(MyApp()));
-  runApp(MyApp());
+  ]).then((value) => runApp(
+    
+    MyApp()));
+  runApp(
+    
+    MyApp());
 }
 
 class MyApp extends StatelessWidget {

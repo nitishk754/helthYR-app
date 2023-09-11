@@ -1,3 +1,5 @@
+import 'package:chart_sparkline/chart_sparkline.dart';
+import 'package:d_chart/d_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -34,7 +36,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabController = TabController(length: 1, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
     getCurrentDate();
     _loadActivity();
   }
@@ -205,52 +207,125 @@ class _ActivityWidgetState extends State<ActivityWidget>
           ),
           Builder(builder: (_) {
             if (tabIndex == 0) {
+              return dailyCaloryBurn();
+            } else {
               return ListView(
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
                 children: [
-                  Center(
-                      child: Text(
-                    "Calories Burn",
-                    style: TextStyle(
-                        fontSize: 25,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold),
-                  )),
-                  SizedBox(
-                    height: 17,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: Text(
+                      "Calories Burn",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                   Center(
-                    child: SizedBox(
-                      height: 125,
-                      width: 135,
-                      child: Card(
-                          elevation: 2.5,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: Color(blueColor),
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
+                      child: SizedBox(
+                        height: 290,
+                        width: MediaQuery.of(context).size.width,
+                        child: Card(
+                            elevation: 2.5,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Color(blueColor),
+                              ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(12)),
                             ),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(12)),
-                          ),
-                          color: Colors.white,
-                          child: Center(
-                            child: _spinner
-                                ? CircularProgressIndicator()
-                                : Text(
-                                    "${caloriesBurned}",
-                                    style: TextStyle(
-                                        fontSize: 38,
-                                        color: Color(orangeShade),
-                                        fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 250,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: DChartLine(
+                                      data: [
+                                        {
+                                          'id': 'Line',
+                                          'data': [
+                                            {'domain': 0, 'measure': 200},
+                                            {'domain': 1, 'measure': 100},
+                                            {'domain': 2, 'measure': 400},
+                                            {'domain': 3, 'measure': 600},
+                                            {'domain': 4, 'measure': 250},
+                                            {'domain': 5, 'measure': 120},
+                                            {'domain': 6, 'measure': 300},
+                                          ],
+                                        },
+                                      ],
+                                      includePoints: true,
+                                      includeArea: true,
+                                      lineColor: (lineData, index, id) =>
+                                          Color(blueColor),
+                                    ),
                                   ),
-                          )),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      "Mon",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Tue",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Wed",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Thu",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Fri",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sat",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sun",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    )
+                                  ],
+                                )
+                              ],
+                            )),
+                      ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(15.0),
+                    padding: const EdgeInsets.only(left: 20.0),
                     child: Text(
-                      "Today's Activity",
+                      "Week's Activity",
                       style: TextStyle(
                           fontSize: 18,
                           color: Colors.black87,
@@ -258,145 +333,193 @@ class _ActivityWidgetState extends State<ActivityWidget>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+                    padding: const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
                     child: SizedBox(
-                      height: 70,
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
                       child: Card(
+                        elevation: 2.5,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Color(blueColor),
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                        ),
+                        color: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Stack(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.nordic_walking_outlined,
-                                    size: 25,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "Walking",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0,bottom: 10.0),
+                                child: Stack(
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.nordic_walking_outlined,
+                                          size: 36,
+                                          color: Color(blueColor),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Text(
+                                            "Walking",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Align(
+                                      
+                                      alignment: AlignmentDirectional.center,
+                                      child: Column(
+                                        children: [
+                                     Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Intensity  ",
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            "High",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(orangeShade)),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                padding: const EdgeInsets.only(bottom: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Duration  ",
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                      Text(
+                                        "20:00  ",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(orangeShade)),
+                                      ),
+                                      Text(
                                         "min",
                                         style: TextStyle(
                                             fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(orangeShade)),
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
                                       ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                                        ],
+                                      ),
+                                    )
+                                  
+                                  ],
+                                ),
+                              ),
+                              
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 0.0, 20.0, 0.0),
+                                child: Sparkline(
+                                  data: [
+                                    15.0,
+                                    25.0,
+                                    10.0,
+                                    30.0,
+                                    12.0,
+                                    25.0,
+                                    35.0,
+                                   
+                                  ],
+                                  pointsMode: PointsMode.all,
+                                  pointSize: 8.0,
+                                  pointColor: Color(blueColor),
+                                  enableGridLines: true,
+                                  fillMode: FillMode.below,
+                                  fillGradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.blue.shade100,Colors.white10],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      "Mon",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SizedBox(
-                                        width: 60,
-                                        height: 35,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(0.0),
-                                          child: TextFormField(
-                                            controller: walkingMintueController,
-                                            maxLength: 4,
-                                            textAlign: TextAlign.center,
-                                            textInputAction:
-                                                TextInputAction.next,
-                                            decoration: InputDecoration(
-                                                contentPadding: EdgeInsets.zero,
-                                                filled: true, //<-- SEE HERE
-                                                fillColor: Colors.white,
-                                                border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
-                                                    borderSide:
-                                                        BorderSide(width: 0.1)),
-                                                hintText: '',
-                                                labelText: "",
-                                                counterText: ""),
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      "Tue",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                    Container(
-                                      height: 35.0, // Set the desired height
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey),
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: Container(
-                                          padding: EdgeInsets.only(left: 5),
-                                          child: DropdownButton(
-                                            value: _walkingIntensity,
-                                            // padding: EdgeInsets.only(left: 5),
-                                            // DropdownButton properties...
-                                            underline:
-                                                Container(), // Hide the underline
-                                            items: [
-                                              DropdownMenuItem(
-                                                value: "",
-                                                child: Text(
-                                                  'Intensity',
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ), // Displayed when selectedValue is null
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'high',
-                                                child: Text('High',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'medium',
-                                                child: Text('Medium',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'low',
-                                                child: Text('Low',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                            ],
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _walkingIntensity =
-                                                    value.toString();
-                                              });
-                                              _updateActivity(
-                                                  "walking",
-                                                  walkingMintueController.text,
-                                                  _walkingIntensity);
-                                            },
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      "Wed",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Thu",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Fri",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sat",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sun",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     )
                                   ],
                                 ),
@@ -408,143 +531,398 @@ class _ActivityWidgetState extends State<ActivityWidget>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+                    padding: const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
                     child: SizedBox(
-                      height: 70,
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
                       child: Card(
+                        elevation: 2.5,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Color(blueColor),
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                        ),
+                        color: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Stack(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.run_circle_outlined,
-                                    size: 25,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "Running",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0,bottom: 10.0),
+                                child: Stack(
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.run_circle_outlined,
+                                          size: 36,
+                                          color: Color(blueColor),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Text(
+                                            "Running",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Align(
+                                      
+                                      alignment: AlignmentDirectional.center,
+                                      child: Column(
+                                        children: [
+                                     Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Intensity  ",
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            "High",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(orangeShade)),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                padding: const EdgeInsets.only(bottom: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Duration  ",
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                      Text(
+                                        "20:00  ",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(orangeShade)),
+                                      ),
+                                      Text(
                                         "min",
                                         style: TextStyle(
                                             fontSize: 10,
-                                            fontWeight: FontWeight.w600,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                                        ],
+                                      ),
+                                    )
+                                  
+                                  ],
+                                ),
+                              ),
+                              
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 0.0, 20.0, 0.0),
+                                child: Sparkline(
+                                  data: [
+                                    15.0,
+                                    25.0,
+                                    10.0,
+                                    30.0,
+                                    12.0,
+                                    25.0,
+                                    35.0,
+                                   
+                                  ],
+                                  pointsMode: PointsMode.all,
+                                  pointSize: 8.0,
+                                  pointColor: Color(blueColor),
+                                  enableGridLines: true,
+                                  fillMode: FillMode.below,
+                                  fillGradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.blue.shade100,Colors.white10],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      "Mon",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Tue",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Wed",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Thu",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Fri",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sat",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sun",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
+                    child: SizedBox(
+                      height: 250,
+                      width: MediaQuery.of(context).size.width,
+                      child: Card(
+                        elevation: 2.5,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Color(blueColor),
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                        ),
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0,bottom: 10.0),
+                                child: Stack(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.pedal_bike,
+                                          size: 36,
+                                          color: Color(blueColor),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Text(
+                                            "Cycling",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Align(
+                                      
+                                      alignment: AlignmentDirectional.center,
+                                      child: Column(
+                                        children: [
+                                     Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Average Speed  ",
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            "14.6  ",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(orangeShade)),
+                                          ),
+                                          Text(
+                                        "mil/h",
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                        ],
+                                      ),
+                                      Padding(
+                                padding: const EdgeInsets.only(bottom: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Milage  ",
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                      Text(
+                                        "34.5  ",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
                                             color: Color(orangeShade)),
                                       ),
+                                      Text(
+                                        "mil",
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                                        ],
+                                      ),
+                                    )
+                                  
+                                  ],
+                                ),
+                              ),
+                              
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 0.0, 20.0, 0.0),
+                                child: Sparkline(
+                                  data: [
+                                    15.0,
+                                    25.0,
+                                    10.0,
+                                    30.0,
+                                    12.0,
+                                    25.0,
+                                    35.0,
+                                   
+                                  ],
+                                  pointsMode: PointsMode.all,
+                                  pointSize: 8.0,
+                                  pointColor: Color(blueColor),
+                                  enableGridLines: true,
+                                  fillMode: FillMode.below,
+                                  fillGradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Colors.blue.shade100,Colors.white10],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(
+                                      "Mon",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SizedBox(
-                                        width: 60,
-                                        height: 35,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(0.0),
-                                          child: TextFormField(
-                                            controller: runningMintueController,
-                                            maxLength: 4,
-                                            textAlign: TextAlign.center,
-                                            textInputAction:
-                                                TextInputAction.next,
-                                            decoration: InputDecoration(
-                                                contentPadding: EdgeInsets.zero,
-                                                filled: true, //<-- SEE HERE
-                                                fillColor: Colors.white,
-                                                border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5),
-                                                    borderSide:
-                                                        BorderSide(width: 0.1)),
-                                                hintText: '',
-                                                labelText: "",
-                                                counterText: ""),
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      "Tue",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     ),
-                                    Container(
-                                      height: 35.0, // Set the desired height
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey),
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: Container(
-                                          padding: EdgeInsets.only(left: 5),
-                                          child: DropdownButton(
-                                            // padding: EdgeInsets.only(left: 5),
-                                            value: _runningIntensity,
-                                            // DropdownButton properties...
-                                            underline:
-                                                Container(), // Hide the underline
-                                            items: [
-                                              DropdownMenuItem(
-                                                value: "",
-                                                child: Text('Intensity',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight
-                                                            .w500)), // Displayed when selectedValue is null
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'high',
-                                                child: Text('High',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'medium',
-                                                child: Text('Medium',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                              DropdownMenuItem(
-                                                value: 'low',
-                                                child: Text('Low',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              ),
-                                            ],
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _runningIntensity =
-                                                    value.toString();
-                                              });
-                                              _updateActivity(
-                                                  "running",
-                                                  runningMintueController.text,
-                                                  _runningIntensity);
-                                            },
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      "Wed",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Thu",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Fri",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sat",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      "Sun",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
                                     )
                                   ],
                                 ),
@@ -555,14 +933,483 @@ class _ActivityWidgetState extends State<ActivityWidget>
                       ),
                     ),
                   )
+  
+  
                 ],
               );
-            } else {
-              return Container();
             }
           })
         ],
       ),
+    );
+  }
+
+  ListView dailyCaloryBurn() {
+    return ListView(
+      shrinkWrap: true,
+      physics: ClampingScrollPhysics(),
+      children: [
+        Center(
+            child: Text(
+          "Calories Burn",
+          style: TextStyle(
+              fontSize: 25, color: Colors.black87, fontWeight: FontWeight.bold),
+        )),
+        SizedBox(
+          height: 17,
+        ),
+        Center(
+          child: SizedBox(
+            height: 125,
+            width: 135,
+            child: Card(
+                elevation: 2.5,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: Color(blueColor),
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+                color: Colors.white,
+                child: Center(
+                  child: _spinner
+                      ? CircularProgressIndicator()
+                      : Text(
+                          "${caloriesBurned}",
+                          style: TextStyle(
+                              fontSize: 38,
+                              color: Color(orangeShade),
+                              fontWeight: FontWeight.bold),
+                        ),
+                )),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Text(
+            "Today's Activity",
+            style: TextStyle(
+                fontSize: 18,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+          child: SizedBox(
+            height: 70,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Stack(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.nordic_walking_outlined,
+                          size: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Walking",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "min",
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(orangeShade)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 60,
+                              height: 35,
+                              child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: TextFormField(
+                                  controller: walkingMintueController,
+                                  maxLength: 4,
+                                  textAlign: TextAlign.center,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.zero,
+                                      filled: true, //<-- SEE HERE
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          borderSide: BorderSide(width: 0.1)),
+                                      hintText: '',
+                                      labelText: "",
+                                      counterText: ""),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 35.0, // Set the desired height
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: Container(
+                                padding: EdgeInsets.only(left: 5),
+                                child: DropdownButton(
+                                  value: _walkingIntensity,
+                                  // padding: EdgeInsets.only(left: 5),
+                                  // DropdownButton properties...
+                                  underline: Container(), // Hide the underline
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: "",
+                                      child: Text(
+                                        'Intensity',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500),
+                                      ), // Displayed when selectedValue is null
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'high',
+                                      child: Text('High',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'medium',
+                                      child: Text('Medium',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'low',
+                                      child: Text('Low',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _walkingIntensity = value.toString();
+                                    });
+                                    _updateActivity(
+                                        "walking",
+                                        walkingMintueController.text,
+                                        _walkingIntensity);
+                                  },
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+          child: SizedBox(
+            height: 70,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Stack(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.run_circle_outlined,
+                          size: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Running",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "min",
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(orangeShade)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 60,
+                              height: 35,
+                              child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: TextFormField(
+                                  controller: runningMintueController,
+                                  maxLength: 4,
+                                  textAlign: TextAlign.center,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.zero,
+                                      filled: true, //<-- SEE HERE
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          borderSide: BorderSide(width: 0.1)),
+                                      hintText: '',
+                                      labelText: "",
+                                      counterText: ""),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 35.0, // Set the desired height
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: Container(
+                                padding: EdgeInsets.only(left: 5),
+                                child: DropdownButton(
+                                  // padding: EdgeInsets.only(left: 5),
+                                  value: _runningIntensity,
+                                  // DropdownButton properties...
+                                  underline: Container(), // Hide the underline
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: "",
+                                      child: Text('Intensity',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight
+                                                  .w500)), // Displayed when selectedValue is null
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'high',
+                                      child: Text('High',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'medium',
+                                      child: Text('Medium',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'low',
+                                      child: Text('Low',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _runningIntensity = value.toString();
+                                    });
+                                    _updateActivity(
+                                        "running",
+                                        runningMintueController.text,
+                                        _runningIntensity);
+                                  },
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 0.0),
+          child: SizedBox(
+            height: 70,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Stack(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.pedal_bike,
+                          size: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Cycling",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "mi",
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(orangeShade)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 60,
+                              height: 35,
+                              child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: TextFormField(
+                                  controller: runningMintueController,
+                                  maxLength: 4,
+                                  textAlign: TextAlign.center,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.zero,
+                                      filled: true, //<-- SEE HERE
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          borderSide: BorderSide(width: 0.1)),
+                                      hintText: '',
+                                      labelText: "",
+                                      counterText: ""),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 35.0, // Set the desired height
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: Container(
+                                padding: EdgeInsets.only(left: 5),
+                                child: DropdownButton(
+                                  // padding: EdgeInsets.only(left: 5),
+                                  value: _runningIntensity,
+                                  // DropdownButton properties...
+                                  underline: Container(), // Hide the underline
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: "",
+                                      child: Text('Intensity',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight
+                                                  .w500)), // Displayed when selectedValue is null
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'high',
+                                      child: Text('High',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'medium',
+                                      child: Text('Medium',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'low',
+                                      child: Text('Low',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500)),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _runningIntensity = value.toString();
+                                    });
+                                    _updateActivity(
+                                        "running",
+                                        runningMintueController.text,
+                                        _runningIntensity);
+                                  },
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 
@@ -587,6 +1434,14 @@ class _ActivityWidgetState extends State<ActivityWidget>
           child: Tab(
             child: Text(
               "Today",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+        Container(
+          child: Tab(
+            child: Text(
+              "Week",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),

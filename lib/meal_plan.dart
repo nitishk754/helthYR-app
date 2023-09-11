@@ -23,13 +23,15 @@ class _MealPlanState extends State<MealPlan>
   bool _spinner = false;
   Map mealPlanData = {};
   List allResult = [];
-  bool _isMealAdded = false;
+  // bool _isMealAdded = false;
+  bool _customTileExpanded = false;
+  List<bool> isMealAdded = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabController = TabController(length: 1, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
     _meals();
   }
 
@@ -54,11 +56,16 @@ class _MealPlanState extends State<MealPlan>
     });
   }
 
+  saveMeals(String recipe_id, String meal_type) async {
+    await ApiService().saveMeals(recipe_id, meal_type);
+  }
+
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting('en');
     return Scaffold(
       body: ListView(
+        // physics: NeverScrollableScrollPhysics(),
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
@@ -143,7 +150,7 @@ class _MealPlanState extends State<MealPlan>
                   ? Center(child: CircularProgressIndicator())
                   : ListView(
                       shrinkWrap: true,
-                      physics: ClampingScrollPhysics(),
+                      physics: ScrollPhysics(),
                       children: [
                         for (var i = 0; i < allResult.length; i++) ...[
                           mealWidget(allResult[i]),
@@ -151,12 +158,177 @@ class _MealPlanState extends State<MealPlan>
                       ],
                     );
             } else {
-              return Container();
+              return weeklyMealPlan();
             }
           })
         ],
       ),
     );
+  }
+
+  ListView weeklyMealPlan() {
+    return ListView.builder(
+        shrinkWrap: true,
+        physics: ClampingScrollPhysics(),
+        itemCount: 7,
+        itemBuilder: (BuildContext context, int index) {
+          return ExpansionTile(
+            title: Text("Sunday 24, April",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            subtitle: Text("350 cal",
+                style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w600)),
+            trailing: Icon(
+              _customTileExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+            ),
+            onExpansionChanged: (bool expanded) {
+              setState(() {
+                _customTileExpanded = expanded;
+              });
+            },
+            children: [
+              ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: 2,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListView(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
+                          child: Text("Breakfast",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
+                          child: Text(
+                            "400 cal",
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Color(orangeShade)),
+                          ),
+                        ),
+                        ListView.builder(
+                            shrinkWrap: true,
+                            physics: ClampingScrollPhysics(),
+                            itemCount: 2,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    10.0, 2.5, 10.0, 2.5),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                RecipeDetails()));
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.fromLTRB(
+                                        12.0, 5.5, 12.0, 5.5),
+                                    height: 65,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          flex: 1,
+                                          child: Row(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                child: SizedBox(
+                                                  width: 55,
+                                                  height: 55,
+                                                  child: Image(
+                                                      image: AssetImage(
+                                                          "assets/Images/breakfast.jpeg")),
+                                                ),
+                                              ),
+                                              Flexible(
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(7.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Container(
+                                                        //width: MediaQuery.of(context).size.width,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  bottom: 1.0),
+                                                          child: Container(
+                                                            // width: 150,
+                                                            child: Text(
+                                                              "Smoked Cheese",
+                                                              style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        Flexible(
+                                            flex: 0,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 8.0,
+                                                            right: 8.0),
+                                                    child: Text("400 Cal",
+                                                        style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Color(
+                                                                orangeShade),
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600)),
+                                                  ),
+                                                ),
+                                              ],
+                                            ))
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            })
+                      ],
+                    );
+                  })
+            ],
+          );
+        });
   }
 
   ListView mealWidget(Map _data) {
@@ -187,16 +359,17 @@ class _MealPlanState extends State<MealPlan>
             physics: ClampingScrollPhysics(),
             itemCount: _data["meal_data"].length,
             itemBuilder: (BuildContext context, int index) {
+              isMealAdded.add(false);
               Map? mealData = _data["meal_data"][index];
               return Padding(
                 padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
                 child: InkWell(
-                  // onTap: () {
-                  //   Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //           builder: (context) => RecipeDetails()));
-                  // },
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RecipeDetails()));
+                  },
                   child: Card(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(12.0, 5.5, 12.0, 5.5),
@@ -288,18 +461,19 @@ class _MealPlanState extends State<MealPlan>
                                       alignment: Alignment.centerRight,
                                       child: InkWell(
                                         onTap: () {
+                                          saveMeals("${mealData?['id']}","${mealData?['meal_type']}");
                                           setState(() {
-                                            _isMealAdded
-                                                ? _isMealAdded = false
-                                                : _isMealAdded = true;
+                                            isMealAdded[index]
+                                                ? isMealAdded[index] = false
+                                                : isMealAdded[index] = true;
                                           });
                                         },
                                         child: Icon(
-                                          _isMealAdded
+                                          isMealAdded[index]
                                               ? Icons.check_circle
                                               : Icons.add_circle,
                                           size: 25,
-                                          color: _isMealAdded
+                                          color: isMealAdded[index]
                                               ? Colors.green
                                               : Color(blueColor),
                                         ),
@@ -338,6 +512,14 @@ class _MealPlanState extends State<MealPlan>
           child: Tab(
             child: Text(
               "Today",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+        Container(
+          child: Tab(
+            child: Text(
+              "Weekly",
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
