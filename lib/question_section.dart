@@ -471,6 +471,10 @@ class _QuestionSectionState extends State<QuestionSection> {
                       value: 'kg',
                       leading: 'kg',
                       groupValue: _weight,
+                      customHeight: 30,
+                      fontSize: 15,
+                       customWidth: 40,
+                      weight: FontWeight.w500,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -493,7 +497,11 @@ class _QuestionSectionState extends State<QuestionSection> {
                     MyRadioListTile2<String>(
                       value: 'lbs',
                       leading: 'lbs',
+                      customHeight: 30,
                       groupValue: _weight,
+                      fontSize: 15,
+                      weight: FontWeight.w500,
+                       customWidth: 40,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -609,6 +617,10 @@ class _QuestionSectionState extends State<QuestionSection> {
                       value: 'kg',
                       leading: 'kg',
                       groupValue: _weight,
+                      customHeight: 30,
+                      fontSize: 15,
+                       customWidth: 40,
+                      weight: FontWeight.w500,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -631,6 +643,10 @@ class _QuestionSectionState extends State<QuestionSection> {
                       value: 'lbs',
                       leading: 'lbs',
                       groupValue: _weight,
+                      customHeight: 30,
+                      fontSize: 15,
+                      weight: FontWeight.w500,
+                       customWidth: 40,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -728,6 +744,10 @@ class _QuestionSectionState extends State<QuestionSection> {
                 value: 'Ft',
                 leading: 'Ft',
                 groupValue: _height,
+                customHeight: 30,
+                fontSize: 15,
+                 customWidth: 40,
+                weight: FontWeight.w500,
                 onChanged: (value) => setState(() => _height = value!),
               ),
             ],
@@ -762,7 +782,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                     controller: controllerIn,
                     textAlign: TextAlign.center,
                     textInputAction: TextInputAction.next,
-                     keyboardType: const TextInputType.numberWithOptions(
+                    keyboardType: const TextInputType.numberWithOptions(
                         signed: true, decimal: true),
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
@@ -793,6 +813,10 @@ class _QuestionSectionState extends State<QuestionSection> {
                 value: 'In',
                 leading: 'In',
                 groupValue: _heightIn,
+                fontSize: 15,
+                customHeight: 30,
+                customWidth: 40,
+                weight: FontWeight.w500,
                 onChanged: (value) => setState(() => _heightIn = value!),
               ),
               // StatefulBuilder(builder: (context, setState) {

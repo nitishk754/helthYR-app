@@ -30,26 +30,45 @@ class _NutrientTrackerState extends State<NutrientTracker>
   bool _customTileExpanded = false;
   bool _spinner = false;
   Map nutrientData = {};
+  List<BarNutrientData> barData = [];
+  // late List<_ChartData> data;
+  // late TooltipBehavior _tooltip;
 
   @override
   void initState() {
     // TODO: implement initState
-    _nutData = getNutrientData();
+    // _nutData = getNutrientData();
     _tooltip = TooltipBehavior(enable: true);
     super.initState();
 
     tabController = TabController(length: 2, vsync: this);
     getCurrentDate();
-    getNutrientTracker();
+    getNutrientTracker('today');
   }
 
-  Future<void> getNutrientTracker() async {
+  Future<void> getNutrientTracker(String range) async {
     setState(() => _spinner = true);
-    await ApiService().getNutrientData().then((value) {
+    await ApiService().getNutrientData(range).then((value) {
       var res = value["data"];
       setState(() => _spinner = false);
       if (res["status"] == "success") {
-        setState(() => nutrientData = res["data"]);
+        setState(() {
+          nutrientData = res["data"];
+          if (nutrientData['graph_data'].containsKey('bar_chart')) {
+            print("condTrue");
+            for (int i = 0;
+                i < nutrientData['graph_data']['bar_chart'].length;
+                i++) {
+              barData.add(BarNutrientData(
+                  nutrientData['graph_data']['bar_chart'][i]['meal_day'],
+                  double.parse((nutrientData['graph_data']['bar_chart'][i]
+                          ["total_calories"])
+                      .toStringAsFixed(2))));
+            }
+          } else {
+            print("condFalse");
+          }
+        });
       }
     });
   }
@@ -180,9 +199,270 @@ class _NutrientTrackerState extends State<NutrientTracker>
             if (tabIndex == 0) {
               return _spinner
                   ? Center(child: CircularProgressIndicator())
-                  : caloriesCount();
+                  : (nutrientData["graph_data"]["toal_calories"] == 0)
+                      ? Center(
+                          child: Container(
+                            child: Text(
+                              "No Meal Added To The Nutritient Tracker",
+                              style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : caloriesCount();
             } else if (tabIndex == 1) {
-              return caloriesCount();
+              return _spinner
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView(
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      children: [
+                        Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                                child: Card(
+                              elevation: 2.5,
+                              shape: RoundedRectangleBorder(
+                                  //<-- SEE HERE
+                                  side: BorderSide(
+                                    color: Color(blueColor),
+                                  ),
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                width: 310,
+                                height: 250,
+                                child: SfCartesianChart(
+                                    primaryXAxis: CategoryAxis(),
+                                    // primaryYAxis: NumericAxis(
+                                    //     minimum: 0, maximum: 40, interval: 10),
+                                    series: <ChartSeries<BarNutrientData,
+                                        String>>[
+                                      ColumnSeries<BarNutrientData, String>(
+                                          dataSource: barData,
+                                          xValueMapper:
+                                              (BarNutrientData barData, _) =>
+                                                  barData.weekDay,
+                                          yValueMapper:
+                                              (BarNutrientData barData, _) =>
+                                                  barData.value,
+                                          name: 'Gold',
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              topRight: Radius.circular(5)),
+                                          color: Color(blueColor))
+                                    ]),
+                              ),
+                            ))),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Text(
+                              "Food Log",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                            visible: (nutrientData.containsKey("food_log"))
+                                ? false
+                                : true,
+                            child: Center(
+                                child: Text(
+                              "No Meal Added To The Tracker",
+                              style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ))),
+                        Visibility(
+                          visible: (nutrientData.containsKey("food_log"))
+                              ? true
+                              : false,
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: ClampingScrollPhysics(),
+                              itemCount: (nutrientData.containsKey("food_log"))
+                                  ? nutrientData["food_log"].length
+                                  : 0,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        20.0, 5.0, 20.0, 5.0),
+                                    child: Card(
+                                      child: ExpansionTile(
+                                        title: Text(
+                                            "${nutrientData["food_log"][index]["meal_type"]}",
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w600)),
+                                        subtitle: Text(
+                                            "${(nutrientData["food_log"][index]["total_calories"]).toStringAsFixed(2)}",
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.orange,
+                                                fontWeight: FontWeight.w600)),
+                                        trailing: Icon(
+                                          _customTileExpanded
+                                              ? Icons.arrow_drop_up
+                                              : Icons.arrow_drop_down,
+                                        ),
+                                        onExpansionChanged: (bool expanded) {
+                                          setState(() {
+                                            _customTileExpanded = expanded;
+                                          });
+                                        },
+                                        children: [
+                                          ListView.builder(
+                                              shrinkWrap: true,
+                                              physics:
+                                                  NeverScrollableScrollPhysics(),
+                                              itemCount:
+                                                  nutrientData["food_log"]
+                                                              [index]["item"]
+                                                          ["items"]
+                                                      .length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index1) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          10.0, 2.5, 10.0, 2.5),
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        print(
+                                                            "recipeId: ${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["id"]}");
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    RecipeDetails(
+                                                                        "${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["id"]}")));
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      margin:
+                                                          EdgeInsets.fromLTRB(
+                                                              12.0,
+                                                              5.5,
+                                                              12.0,
+                                                              5.5),
+                                                      height: 70,
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      child: Row(
+                                                        children: [
+                                                          Flexible(
+                                                            flex: 1,
+                                                            child: Row(
+                                                              children: [
+                                                                ClipRRect(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              7),
+                                                                  child:
+                                                                      SizedBox(
+                                                                    width: 55,
+                                                                    height: 55,
+                                                                    child: Image(
+                                                                        image: AssetImage(
+                                                                            "assets/Images/breakfast.jpeg")),
+                                                                  ),
+                                                                ),
+                                                                Flexible(
+                                                                  child:
+                                                                      Padding(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            7.0),
+                                                                    child:
+                                                                        Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Container(
+                                                                          //width: MediaQuery.of(context).size.width,
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.only(bottom: 1.0),
+                                                                            child:
+                                                                                Container(
+                                                                              // width: 150,
+                                                                              child: Text(
+                                                                                "${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["name"]}",
+                                                                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          Flexible(
+                                                              flex: 0,
+                                                              child: Row(
+                                                                children: [
+                                                                  Container(
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              8.0,
+                                                                          right:
+                                                                              8.0),
+                                                                      child: Text(
+                                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).toStringAsFixed(2)} Cals",
+                                                                          style: TextStyle(
+                                                                              fontSize: 11,
+                                                                              color: Color(orangeShade),
+                                                                              fontWeight: FontWeight.w600)),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ))
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              })
+                                        ],
+                                      ),
+                                    ));
+                              }),
+                        )
+                      ],
+                    );
             } else {
               return Container();
             }
@@ -232,7 +512,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             )),
                         CircularChartAnnotation(
                             widget: Text(
-                                "${nutrientData["graph_data"]["toal_calories"]}",
+                                "${nutrientData["graph_data"]["toal_calories"].toStringAsFixed(2)}",
                                 style: TextStyle(
                                   color: Color(orangeShade),
                                   fontWeight: FontWeight.bold,
@@ -246,22 +526,29 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             explodeGesture: ActivationMode.singleTap,
                             dataSource: [
                               NutrientData(
-                                nutrientData['graph_data']['dounts'][0]["key"],
-                                nutrientData['graph_data']['dounts'][0]
-                                    ["value"],
-                              ),
+                                  nutrientData['graph_data']['dounts'][0]
+                                      ["key"],
+                                  double.parse((nutrientData['graph_data']
+                                          ['dounts'][0]["value"])
+                                      .toStringAsFixed(2)),
+                                  Color(donutBlueShadeDark)),
                               NutrientData(
-                                nutrientData['graph_data']['dounts'][1]["key"],
-                                nutrientData['graph_data']['dounts'][1]
-                                    ["value"],
-                              ),
+                                  nutrientData['graph_data']['dounts'][1]
+                                      ["key"],
+                                  double.parse((nutrientData['graph_data']
+                                          ['dounts'][1]["value"])
+                                      .toStringAsFixed(2)),
+                                  Color(donutBlueShadeMed)),
                               NutrientData(
-                                nutrientData['graph_data']['dounts'][2]["key"],
-                                (nutrientData['graph_data']['dounts'][2]
-                                        ["value"])
-                                    .toDouble(),
-                              ),
+                                  nutrientData['graph_data']['dounts'][2]
+                                      ["key"],
+                                  double.parse((nutrientData['graph_data']
+                                          ['dounts'][2]["value"])
+                                      .toStringAsFixed(2)),
+                                  Color(donutBlueShadeLite)),
                             ],
+                            pointColorMapper: (NutrientData data, _) =>
+                                data.color,
                             xValueMapper: (NutrientData data, _) =>
                                 data.nutrient,
                             yValueMapper: (NutrientData data, _) => data.value,
@@ -318,213 +605,224 @@ class _NutrientTrackerState extends State<NutrientTracker>
             ),
           ),
         ),
-        ListView.builder(
-            shrinkWrap: true,
-            physics: ClampingScrollPhysics(),
-            itemCount: nutrientData["food_log"].length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                  child: Card(
-                    child: ExpansionTile(
-                      title: Text(
-                          "${nutrientData["food_log"][index]["meal_type"]}",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600)),
-                      subtitle: Text(
-                          "${nutrientData["food_log"][index]["total_calories"]}",
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.w600)),
-                      trailing: Icon(
-                        _customTileExpanded
-                            ? Icons.arrow_drop_up
-                            : Icons.arrow_drop_down,
-                      ),
-                      onExpansionChanged: (bool expanded) {
-                        setState(() {
-                          _customTileExpanded = expanded;
-                        });
-                      },
-                      children: [
-                        ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: nutrientData["food_log"][index]["item"]
-                                    ["items"]
-                                .length,
-                            itemBuilder: (BuildContext context, int index1) {
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    10.0, 2.5, 10.0, 2.5),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                RecipeDetails()));
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.fromLTRB(
-                                        12.0, 5.5, 12.0, 5.5),
-                                    height: 65,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Row(
-                                      children: [
-                                        Flexible(
-                                          flex: 1,
-                                          child: Row(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(7),
-                                                child: SizedBox(
-                                                  width: 55,
-                                                  height: 55,
-                                                  child: Image(
-                                                      image: AssetImage(
-                                                          "assets/Images/breakfast.jpeg")),
+        Visibility(
+          visible: (nutrientData.containsKey("food_log")) ? true : false,
+          child: ListView.builder(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              itemCount: (nutrientData.containsKey("food_log"))
+                  ? nutrientData["food_log"].length
+                  : 0,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                    padding: const EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
+                    child: Card(
+                      child: ExpansionTile(
+                        title: Text(
+                            "${nutrientData["food_log"][index]["meal_type"]}",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600)),
+                        subtitle: Text(
+                            "${(nutrientData["food_log"][index]["total_calories"]).toStringAsFixed(2)}",
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w600)),
+                        trailing: Icon(
+                          _customTileExpanded
+                              ? Icons.arrow_drop_up
+                              : Icons.arrow_drop_down,
+                        ),
+                        onExpansionChanged: (bool expanded) {
+                          setState(() {
+                            _customTileExpanded = expanded;
+                          });
+                        },
+                        children: [
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: nutrientData["food_log"][index]["item"]
+                                      ["items"]
+                                  .length,
+                              itemBuilder: (BuildContext context, int index1) {
+                                return Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      10.0, 2.5, 10.0, 2.5),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        print(
+                                            "recipeId: ${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["id"]}");
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => RecipeDetails(
+                                                    "${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["id"]}")));
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.fromLTRB(
+                                          12.0, 5.5, 12.0, 5.5),
+                                      height: 70,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Row(
+                                        children: [
+                                          Flexible(
+                                            flex: 1,
+                                            child: Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                  child: SizedBox(
+                                                    width: 55,
+                                                    height: 55,
+                                                    child: Image(
+                                                        image: AssetImage(
+                                                            "assets/Images/breakfast.jpeg")),
+                                                  ),
                                                 ),
-                                              ),
-                                              Flexible(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(7.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Container(
-                                                        //width: MediaQuery.of(context).size.width,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  bottom: 1.0),
-                                                          child: Container(
-                                                            // width: 150,
-                                                            child: Text(
-                                                              "${nutrientData["food_log"][index]["item"]
-                                    ["items"][index1]["recipe_details"]["name"]}",
-                                                              style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500),
+                                                Flexible(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            7.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          //width: MediaQuery.of(context).size.width,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    bottom:
+                                                                        1.0),
+                                                            child: Container(
+                                                              // width: 150,
+                                                              child: Text(
+                                                                "${nutrientData["food_log"][index]["item"]["items"][index1]["recipe_details"]["name"]}",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Flexible(
-                                            flex: 0,
-                                            child: Row(
-                                              children: [
-                                                Container(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0,
-                                                            right: 8.0),
-                                                    child: Text("${nutrientData["food_log"][index]["item"]
-                                    ["items"][index1]["calories"]} Cals",
-                                                        style: TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(
-                                                                orangeShade),
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600)),
-                                                  ),
-                                                ),
+                                                )
                                               ],
-                                            ))
-                                      ],
+                                            ),
+                                          ),
+                                          Flexible(
+                                              flex: 0,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0,
+                                                              right: 8.0),
+                                                      child: Text(
+                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).toStringAsFixed(2)} Cals",
+                                                          style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(
+                                                                  orangeShade),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600)),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ))
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            })
-                      ],
-                    ),
-                  )
-                  // InkWell(
-                  //   onTap: () {
-                  //     setState(() {
-                  //       if (!isCardSelected) {
-                  //         isCardSelected = true;
-                  //       } else {
-                  //         isCardSelected = false;
-                  //       }
-                  //     });
-                  //   },
-                  //   child: Container(
-                  //     width: MediaQuery.of(context).size.width,
-                  //     height: 60,
-                  //     child: Card(
-                  //       shape: isCardSelected
-                  //           ? new RoundedRectangleBorder(
-                  //               side: new BorderSide(
-                  //                   color: Colors.blue, width: 2.0),
-                  //               borderRadius: BorderRadius.circular(5.0))
-                  //           : new RoundedRectangleBorder(
-                  //               side: new BorderSide(
-                  //                   color: Colors.white, width: 2.0),
-                  //               borderRadius: BorderRadius.circular(5.0)),
-                  //       child: Padding(
-                  //         padding: const EdgeInsets.all(8.0),
-                  //         child: Row(
-                  //           children: [
-                  //             Expanded(
-                  //               flex: 0,
-                  //               child: SizedBox(
-                  //                   width: 34,
-                  //                   height: 34,
-                  //                   child: Image(
-                  //                       image: AssetImage(
-                  //                           "assets/Images/breakfast.png"))),
-                  //             ),
-                  //             Expanded(
-                  //               flex: 1,
-                  //               child: Padding(
-                  //                 padding: const EdgeInsets.all(8.0),
-                  //                 child: Text('Breakfast',
-                  //                     style: TextStyle(
-                  //                       color: Colors.black87,
-                  //                       fontWeight: FontWeight.w600,
-                  //                       fontSize: 18,
-                  //                     )),
-                  //               ),
-                  //             ),
-                  //             Expanded(
-                  //               flex: 0,
-                  //               child: Text('110 Cals',
-                  //                   style: TextStyle(
-                  //                     color: Color(orangeShade),
-                  //                     fontWeight: FontWeight.w600,
-                  //                     fontSize: 14,
-                  //                   )),
-                  //             ),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  );
-            })
+                                );
+                              })
+                        ],
+                      ),
+                    )
+                    // InkWell(
+                    //   onTap: () {
+                    //     setState(() {
+                    //       if (!isCardSelected) {
+                    //         isCardSelected = true;
+                    //       } else {
+                    //         isCardSelected = false;
+                    //       }
+                    //     });
+                    //   },
+                    //   child: Container(
+                    //     width: MediaQuery.of(context).size.width,
+                    //     height: 60,
+                    //     child: Card(
+                    //       shape: isCardSelected
+                    //           ? new RoundedRectangleBorder(
+                    //               side: new BorderSide(
+                    //                   color: Colors.blue, width: 2.0),
+                    //               borderRadius: BorderRadius.circular(5.0))
+                    //           : new RoundedRectangleBorder(
+                    //               side: new BorderSide(
+                    //                   color: Colors.white, width: 2.0),
+                    //               borderRadius: BorderRadius.circular(5.0)),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.all(8.0),
+                    //         child: Row(
+                    //           children: [
+                    //             Expanded(
+                    //               flex: 0,
+                    //               child: SizedBox(
+                    //                   width: 34,
+                    //                   height: 34,
+                    //                   child: Image(
+                    //                       image: AssetImage(
+                    //                           "assets/Images/breakfast.png"))),
+                    //             ),
+                    //             Expanded(
+                    //               flex: 1,
+                    //               child: Padding(
+                    //                 padding: const EdgeInsets.all(8.0),
+                    //                 child: Text('Breakfast',
+                    //                     style: TextStyle(
+                    //                       color: Colors.black87,
+                    //                       fontWeight: FontWeight.w600,
+                    //                       fontSize: 18,
+                    //                     )),
+                    //               ),
+                    //             ),
+                    //             Expanded(
+                    //               flex: 0,
+                    //               child: Text('110 Cals',
+                    //                   style: TextStyle(
+                    //                     color: Color(orangeShade),
+                    //                     fontWeight: FontWeight.w600,
+                    //                     fontSize: 14,
+                    //                   )),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    );
+              }),
+        )
       ],
     );
   }
@@ -568,7 +866,8 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                   flex: 1,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Text('${nutrientData['graph_data']['dounts'][index]['key']}',
+                                    child: Text(
+                                        '${nutrientData['graph_data']['dounts'][index]['key']}',
                                         style: TextStyle(
                                           color: Colors.black87,
                                           fontWeight: FontWeight.w600,
@@ -578,7 +877,8 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                 ),
                                 Expanded(
                                   flex: 0,
-                                  child: Text('${nutrientData['graph_data']['dounts'][index]['value']} Cals',
+                                  child: Text(
+                                      '${(nutrientData['graph_data']['dounts'][index]['value']).toStringAsFixed(2)} Cals',
                                       style: TextStyle(
                                         color: Color(orangeShade),
                                         fontWeight: FontWeight.w600,
@@ -602,6 +902,11 @@ class _NutrientTrackerState extends State<NutrientTracker>
         // print(value.toString());
         setState(() {
           tabIndex = value;
+          if (tabIndex == 0) {
+            getNutrientTracker('today');
+          } else {
+            getNutrientTracker('week');
+          }
           print(tabIndex);
         });
       },
@@ -611,6 +916,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
       controller: tabController,
       indicatorColor: Color(blueColor),
       isScrollable: true,
+
       tabs: [
         Container(
           child: Tab(
@@ -644,19 +950,27 @@ class _NutrientTrackerState extends State<NutrientTracker>
     return formatter.format(date);
   }
 
-  List<NutrientData> getNutrientData() {
-    final List<NutrientData> nutrientData = [
-      NutrientData('Carbs', 500),
-      NutrientData('Protien', 120),
-      NutrientData('Fats', 80),
-    ];
-    return nutrientData;
-  }
+  // List<NutrientData> getNutrientData() {
+  //   final List<NutrientData> nutrientData = [
+  //     NutrientData('Carbs', 500),
+  //     NutrientData('Protien', 120),
+  //     NutrientData('Fats', 80),
+  //   ];
+  //   return nutrientData;
+  // }
 }
 
 class NutrientData {
-  NutrientData(this.nutrient, this.value);
+  NutrientData(this.nutrient, this.value, this.color);
 
   final String nutrient;
+  final double value;
+  final Color color;
+}
+
+class BarNutrientData {
+  BarNutrientData(this.weekDay, this.value);
+
+  final String weekDay;
   final double value;
 }

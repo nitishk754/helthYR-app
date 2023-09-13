@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:health_wellness/audio_content.dart';
+import 'package:health_wellness/reading_content.dart';
 import 'package:health_wellness/video_content.dart';
 import 'package:horizontal_calendar/horizontal_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -15,6 +16,7 @@ class EducationContent extends StatefulWidget {
 
 class _EducationContentState extends State<EducationContent> {
   bool checkboxValue = false;
+  
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting('en');
@@ -140,47 +142,10 @@ class _EducationContentState extends State<EducationContent> {
                   ],
                 ),
               ),
+              
               Padding(
                 padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                child: Text(
-                  "Affirmation Videos",
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87),
-                ),
-              ),
-              InkWell(
-                onTap: () {
-                   Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => VideoContent()));
-                },
-                child: Stack(
-                  children: [
-                    Image(
-                      height: 200,
-                      width: MediaQuery.of(context).size.width,
-                      image: AssetImage("assets/Images/videos.png"),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 70.0),
-                      child: Center(
-                        child: Center(
-                            child: Icon(
-                          Icons.play_circle_outline,
-                          size: 60,
-                          color: Colors.red,
-                        )),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                child: Text(
+                child: Text( 
                   "Audio",
                   style: TextStyle(
                       fontSize: 15,
@@ -223,17 +188,25 @@ class _EducationContentState extends State<EducationContent> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
                 child: Text(
-                  "Written Content",
+                  "Reading Content",
                   style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87),
                 ),
               ),
-              Image(
-                height: 200,
-                width: MediaQuery.of(context).size.width,
-                image: AssetImage("assets/Images/written_content.png"),
+              InkWell(
+                onTap: () {
+                   Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ReadingContent()));
+                },
+                child: Image(
+                  height: 200,
+                  width: MediaQuery.of(context).size.width,
+                  image: AssetImage("assets/Images/written_content.png"),
+                ),
               ),
             ],
           )
