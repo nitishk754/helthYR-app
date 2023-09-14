@@ -171,14 +171,14 @@ class ApiService {
     return userData.data;
   }
 
-  Future<Map> meals() async {
+  Future<Map> meals(String range) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
-    Response userData = await dio.get(baseUrl + mealPlan);
+    Response userData = await dio.get(baseUrl + mealPlan + "?range=" + range);
 
     print(userData.data);
     // print(jsonDecode(userData.data.toString()));
@@ -186,20 +186,73 @@ class ApiService {
     return userData.data;
   }
 
-  Future<Map> saveMeals(String recipe_id, String meal_type) async {
+  Future<Map> getWeeklyMeals() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response weeklyMealPlanData = await dio.get(baseUrl + weeklyMealPlan);
+
+    print(weeklyMealPlanData.data);
+    // print(jsonDecode(userData.data.toString()));
+
+    return weeklyMealPlanData.data;
+  }
+
+Future<Map> getEducationalContent(String contentType, String contentCategory) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    print(dio.options.headers['Authorization']);
+    Response educationalContentData = await dio.get(baseUrl + educationalContent + contentType + '&category=' + contentCategory);
+
+    print("eduData: ${educationalContentData.data}");
+    // print(jsonDecode(userData.data.toString()));
+
+    return educationalContentData.data;
+  }
+
+
+  Future<Map> saveMeals(String mealId,String recipeId, String mealType) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     var formData = jsonEncode({
-      "recipe_id": recipe_id, //"ernitish1993@gmail.com",
-      "meal_type": meal_type, //"nitish123",
+      "recipe_id": recipeId, //"ernitish1993@gmail.com",
+      "meal_type": mealType, //"nitish123",
+      "plan_id" : mealId,
       // "role": "user"
     });
     print(dio.options.headers['Authorization']);
     print(formData);
     Response saveMealData = await dio.post(baseUrl + mealPlan, data: formData);
+
+    print(saveMealData.data);
+    // print(jsonDecode(userData.data.toString()));
+
+    return saveMealData.data;
+  }
+
+    Future<Map> addWeightDash(String userWeight, String weightUnit) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    var formData = jsonEncode({
+      "user_weight": userWeight, //"ernitish1993@gmail.com",
+      "unit": weightUnit, //"nitish123",
+      // "role": "user"
+    });
+    print(dio.options.headers['Authorization']);
+    print(formData);
+    Response saveMealData = await dio.post(baseUrl + addWeight, data: formData);
 
     print(saveMealData.data);
     // print(jsonDecode(userData.data.toString()));
@@ -269,7 +322,8 @@ class ApiService {
     // return (userData.data);
   }
 
-  Future<Map> getNutrientData() async {
+
+Future<Map> getRecipeDetails(String id) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Accept'] = "application/json";
@@ -277,9 +331,47 @@ class ApiService {
         'Bearer ${prefs.getString("_token")}';
 
     try {
-      Response userNutrientData = await dio.get(baseUrl + nutrientData);
+      Response getRecipeDetails = await dio.get(baseUrl + recipeDetails + id);
       // log(dashboardData.data.toString());
-      print("userDataProfile: ${userNutrientData.data}");
+      print("userRecipeDetails: ${getRecipeDetails.data}");
+      return (getRecipeDetails.data);
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
+  }
+
+  Future<Map> getRecipeSearch(String searchKey) async {
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
+
+    try {
+      Response getRecipeSearch = await dio.get(baseUrl + recipeSearch + searchKey);
+      // log(dashboardData.data.toString());
+      print("userRecipeSearch: ${getRecipeSearch.data}");
+      return (getRecipeSearch.data);
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
+  }
+
+  
+  Future<Map> getNutrientData(String range) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+
+    try {
+      Response userNutrientData = await dio.get(baseUrl + nutrientData + range);
+      // log(dashboardData.data.toString());
+      print("getNutData: ${userNutrientData.data}");
       return (userNutrientData.data);
     } on DioException catch (e) {
       print("errorResProfile: ${e.response!.statusCode}");
@@ -288,7 +380,30 @@ class ApiService {
       return returnError;
     }
   }
+
+   Future<Map> getWeeklyActivityData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Accept'] = "application/json";
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+
+    try {
+      Response userWeeklyActivity = await dio.get(baseUrl + weeklyActivity);
+      // log(dashboardData.data.toString());
+      print("weekActivity: ${userWeeklyActivity.data}");
+      return (userWeeklyActivity.data);
+    } on DioException catch (e) {
+      print("errorResProfile: ${e.response!.statusCode}");
+      print("errorResProfile: ${e.response!.data}");
+      var returnError = e.response!.data;
+      return returnError;
+    }
+  }
 }
+
+
+
 
 String getCurrentDate() {
   var date = DateTime.now();

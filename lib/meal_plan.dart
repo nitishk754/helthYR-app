@@ -22,42 +22,97 @@ class _MealPlanState extends State<MealPlan>
   late TabController tabController;
   bool _spinner = false;
   Map mealPlanData = {};
+  Map weeklyMealPlanData = {};
   List allResult = [];
   // bool _isMealAdded = false;
   bool _customTileExpanded = false;
   List<bool> isMealAdded = [];
-
+  List weekPlan = [];
+  List<double> caloryVal = [];
+  double sumCalVal = 0.0;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     tabController = TabController(length: 2, vsync: this);
-    _meals();
+    _meals('today');
   }
 
-  _meals() async {
+  _meals(String range) async {
     setState(() => _spinner = true);
-    await ApiService().meals().then((value) {
-      var res = value["data"];
-      setState(() => _spinner = false);
-
-      if (!res.containsKey('errors')) {
-        if (res["status"] == "success") {
-          setState(() => mealPlanData = res["data"]);
+    await ApiService().meals(range).then((value) {
+      setState(() {
+        mealPlanData = {};
+        allResult = [];
+        var res = value["data"];
+        _spinner = false;
+        if (!res.containsKey('errors')) {
+          if (res["status"] == "success") {
+            setState(() => mealPlanData = res["data"]);
+          }
         }
-      }
-      mealPlanData.removeWhere((key, value) => value == null);
-      mealPlanData.keys.forEach((key) {
-        allResult.add({"meal_duration": key, "meal_data": mealPlanData[key]});
-      });
+        mealPlanData.removeWhere((key, value) => value == null);
+        mealPlanData.keys.forEach((key) {
+          if (mealPlanData[key].length > 0) {
+            allResult
+                .add({"meal_duration": key, "meal_data": mealPlanData[key]});
+          }
+        });
 
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        final snackBar = SnackBar(content: Text(res["message"]));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      });
     });
   }
 
-  saveMeals(String recipe_id, String meal_type) async {
-    await ApiService().saveMeals(recipe_id, meal_type);
+  getWeeklyMealPlanData() async {
+    setState(() => _spinner = true);
+    await ApiService().getWeeklyMeals().then((value) {
+      setState(() {
+        var res = value["data"];
+        _spinner = false;
+        if (!res.containsKey('errors')) {
+          if (res["status"] == "success") {
+            setState(() => weeklyMealPlanData = value["data"]);
+          }
+        }
+        // weeklyMealPlanData.removeWhere((key, value) => value == null);
+        // weeklyMealPlanData.keys.forEach((key) {
+        //   allResult.add({"meal_duration": key, "meal_data": mealPlanData[key]});
+        // });
+        for (int i = 0; i < weeklyMealPlanData['data'].length; i++) {
+          sumCalVal = 0.0;
+          for (int j = 0;
+              j < weeklyMealPlanData['data'][i]['mealData'].length;
+              j++) {
+            if (weeklyMealPlanData['data'][i]['mealData'][j]['data'].length >
+                0) {
+                  sumCalVal = sumCalVal + double.parse(weeklyMealPlanData['data'][i]['mealData']
+                  [j]['data'][0]['total_calories']);
+              // caloryVal.add(double.parse(weeklyMealPlanData['data'][i]['mealData']
+              //     [j]['data'][0]['recepie']['recipe_nutritions']['calories']));
+            }
+          }
+          caloryVal.add(sumCalVal);
+        }
+        // double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][0]['recepie']['recipe_nutritions']['calories']).toStringAsFixed(2)
+
+        final snackBar = SnackBar(content: Text(res["message"]));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      });
+    });
+  }
+
+  saveMeals(String mealId, String recipeId, String mealType) async {
+    await ApiService().saveMeals(mealId, recipeId, mealType).then((value) {
+      var res = value["data"];
+      // setState(() => _spinner = false);
+      if (!res.containsKey('errors')) {
+        if (res["status"] == "success") {
+          _meals('today');
+        }
+      }
+    });
   }
 
   @override
@@ -158,7 +213,9 @@ class _MealPlanState extends State<MealPlan>
                       ],
                     );
             } else {
-              return weeklyMealPlan();
+              return _spinner
+                  ? Center(child: CircularProgressIndicator())
+                  : weeklyMealPlan();
             }
           })
         ],
@@ -167,15 +224,18 @@ class _MealPlanState extends State<MealPlan>
   }
 
   ListView weeklyMealPlan() {
+    int counter = 0;
+    bool isVisible = true;
     return ListView.builder(
         shrinkWrap: true,
         physics: ClampingScrollPhysics(),
-        itemCount: 7,
+        itemCount: weeklyMealPlanData['data'].length,
         itemBuilder: (BuildContext context, int index) {
           return ExpansionTile(
-            title: Text("Sunday 24, April",
+            title: Text(
+                "${weeklyMealPlanData['data'][index]['weekDay']} ( ${weeklyMealPlanData['data'][index]['date']} )",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            subtitle: Text("350 cal",
+            subtitle: Text("${caloryVal[index].roundToDouble().round()} cal",
                 style: TextStyle(
                     fontSize: 13,
                     color: Colors.orange,
@@ -192,138 +252,159 @@ class _MealPlanState extends State<MealPlan>
               ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
-                  itemCount: 2,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListView(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
-                          child: Text("Breakfast",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
-                          child: Text(
-                            "400 cal",
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: Color(orangeShade)),
+                  itemCount:
+                      weeklyMealPlanData['data'][index]['mealData'].length,
+                  itemBuilder: (BuildContext context, int index1) {
+                    return Visibility(
+                      visible: (weeklyMealPlanData['data'][index]['mealData']
+                                      [index1]['data']
+                                  .length >
+                              0)
+                          ? true
+                          : false,
+                      child: ListView(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
+                            child: Text(
+                                "${weeklyMealPlanData['data'][index]['mealData'][index1]['meal_type']}",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600)),
                           ),
-                        ),
-                        ListView.builder(
-                            shrinkWrap: true,
-                            physics: ClampingScrollPhysics(),
-                            itemCount: 2,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    10.0, 2.5, 10.0, 2.5),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                RecipeDetails()));
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.fromLTRB(
-                                        12.0, 5.5, 12.0, 5.5),
-                                    height: 65,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Row(
-                                      children: [
-                                        Flexible(
-                                          flex: 1,
-                                          child: Row(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(7),
-                                                child: SizedBox(
-                                                  width: 55,
-                                                  height: 55,
-                                                  child: Image(
-                                                      image: AssetImage(
-                                                          "assets/Images/breakfast.jpeg")),
+                          Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
+                            child: Text(
+                              (weeklyMealPlanData['data'][index]['mealData']
+                                              [index1]['data']
+                                          .length >
+                                      0)
+                                  ? "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][0]['total_calories']).roundToDouble().round()} Cal"
+                                  : "0 Cal",
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(orangeShade)),
+                            ),
+                          ),
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: ClampingScrollPhysics(),
+                              itemCount: weeklyMealPlanData['data'][index]
+                                      ['mealData'][index1]['data']
+                                  .length,
+                              itemBuilder: (BuildContext context, int index2) {
+                                return Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      10.0, 2.5, 10.0, 2.5),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => RecipeDetails(
+                                                  "${weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['recipe_id']}")));
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.fromLTRB(
+                                          12.0, 5.5, 12.0, 5.5),
+                                      height: 65,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Row(
+                                        children: [
+                                          Flexible(
+                                            flex: 1,
+                                            child: Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                  child: SizedBox(
+                                                    width: 55,
+                                                    height: 55,
+                                                    child: Image(
+                                                        image: AssetImage(
+                                                            "assets/Images/breakfast.jpeg")),
+                                                  ),
                                                 ),
-                                              ),
-                                              Flexible(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(7.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Container(
-                                                        //width: MediaQuery.of(context).size.width,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  bottom: 1.0),
-                                                          child: Container(
-                                                            // width: 150,
-                                                            child: Text(
-                                                              "Smoked Cheese",
-                                                              style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500),
+                                                Flexible(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            7.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          //width: MediaQuery.of(context).size.width,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    bottom:
+                                                                        1.0),
+                                                            child: Container(
+                                                              // width: 150,
+                                                              child: Text(
+                                                                "${weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['recepie']['name']}",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        14,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Flexible(
-                                            flex: 0,
-                                            child: Row(
-                                              children: [
-                                                Container(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 8.0,
-                                                            right: 8.0),
-                                                    child: Text("400 Cal",
-                                                        style: TextStyle(
-                                                            fontSize: 11,
-                                                            color: Color(
-                                                                orangeShade),
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600)),
-                                                  ),
-                                                ),
+                                                )
                                               ],
-                                            ))
-                                      ],
+                                            ),
+                                          ),
+                                          Flexible(
+                                              flex: 0,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0,
+                                                              right: 8.0),
+                                                      child: Text(
+                                                          "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['total_calories']).roundToDouble().round()} Cal",
+                                                          style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Color(
+                                                                  orangeShade),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600)),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ))
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            })
-                      ],
+                                );
+                              })
+                        ],
+                      ),
                     );
                   })
             ],
@@ -347,7 +428,7 @@ class _MealPlanState extends State<MealPlan>
         Padding(
           padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
           child: Text(
-            "400 cal",
+            "${double.parse(_data["meal_data"][0]['total_calories']).roundToDouble().round()} Cals",
             style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
@@ -365,10 +446,13 @@ class _MealPlanState extends State<MealPlan>
                 padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
                 child: InkWell(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => RecipeDetails()));
+                    setState(() {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  RecipeDetails("${mealData?['recipe_id']}")));
+                    });
                   },
                   child: Card(
                     child: Container(
@@ -408,7 +492,7 @@ class _MealPlanState extends State<MealPlan>
                                             child: Container(
                                               // width: 150,
                                               child: Text(
-                                                "${mealData?['name']}",
+                                                "${mealData?['recepie']['name']}",
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight:
@@ -420,7 +504,7 @@ class _MealPlanState extends State<MealPlan>
                                         Padding(
                                           padding: const EdgeInsets.all(1.0),
                                           child: Text(
-                                            "prep time: ${mealData?['prep_time']} mins",
+                                            "prep time: ${mealData?['recepie']['prep_time']} mins",
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w500),
@@ -429,7 +513,7 @@ class _MealPlanState extends State<MealPlan>
                                         Padding(
                                           padding: const EdgeInsets.all(1.0),
                                           child: Text(
-                                              "cook time: ${mealData?['cook_time']} mins",
+                                              "cook time: ${mealData?['recepie']['cook_time']} mins",
                                               style: TextStyle(
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.w500)),
@@ -450,7 +534,9 @@ class _MealPlanState extends State<MealPlan>
                                       padding: const EdgeInsets.only(
                                           left: 8.0, right: 8.0),
                                       child: Text(
-                                          "${mealData?['total_nutrition_value']} Cal",
+                                          "${double.parse(mealData?['total_calories']).roundToDouble().round()} Cals"
+                                          // "${mealData?['recipe_nutritions']['calories']} Cal"
+                                          ,
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: Color(orangeShade),
@@ -461,19 +547,28 @@ class _MealPlanState extends State<MealPlan>
                                       alignment: Alignment.centerRight,
                                       child: InkWell(
                                         onTap: () {
-                                          saveMeals("${mealData?['id']}","${mealData?['meal_type']}");
-                                          setState(() {
-                                            isMealAdded[index]
-                                                ? isMealAdded[index] = false
-                                                : isMealAdded[index] = true;
-                                          });
+                                          if ((mealData?['is_taken'] == 1)) {
+                                            Fluttertoast.showToast(
+                                                msg: "Meal Already Added");
+                                          } else {
+                                            saveMeals(
+                                                "${mealData?['id']}",
+                                                "${mealData?['recipe_id']}",
+                                                "${mealData?['meal_type']}");
+                                          }
+
+                                          // setState(() {
+                                          //   isMealAdded[index]
+                                          //       ? isMealAdded[index] = false
+                                          //       : isMealAdded[index] = true;
+                                          // });
                                         },
                                         child: Icon(
-                                          isMealAdded[index]
+                                          (mealData?['is_taken'] == 1)
                                               ? Icons.check_circle
                                               : Icons.add_circle,
                                           size: 25,
-                                          color: isMealAdded[index]
+                                          color: (mealData?['is_taken'] == 1)
                                               ? Colors.green
                                               : Color(blueColor),
                                         ),
@@ -498,6 +593,11 @@ class _MealPlanState extends State<MealPlan>
         // print(value.toString());
         setState(() {
           tabIndex = value;
+          if (tabIndex == 0) {
+            _meals('today');
+          } else {
+            getWeeklyMealPlanData();
+          }
           print(tabIndex);
         });
       },

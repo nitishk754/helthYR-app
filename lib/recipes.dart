@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:health_wellness/recipe_details.dart';
+import 'package:health_wellness/services/api_services.dart';
 
 import 'constants/colors.dart';
 
@@ -20,13 +22,14 @@ class _RecipesWidgetState extends State<RecipesWidget> {
   final duplicateItems = List<String>.generate(10000, (i) => "Item $i");
   var items = <String>[];
   bool _visibility = false;
- 
+  bool _spinner = false;
+  Map recipeSearchResult = {};
+  bool selected = false;
 
   @override
   void initState() {
     items = duplicateItems;
     super.initState();
-   
   }
 
   void filterSearchResults(String query) {
@@ -34,6 +37,18 @@ class _RecipesWidgetState extends State<RecipesWidget> {
       items = duplicateItems
           .where((item) => item.toLowerCase().contains(query.toLowerCase()))
           .toList();
+    });
+  }
+
+  Future<void> getRecipes(String query) async {
+    setState(() => _spinner = true);
+    await ApiService().getRecipeSearch(query).then((value) {
+      var res = value["data"];
+      setState(() => _spinner = false);
+      if (res["status"] == "success") {
+        // log(value["data"]);
+        setState(() => recipeSearchResult = value["data"]);
+      }
     });
   }
 
@@ -48,6 +63,7 @@ class _RecipesWidgetState extends State<RecipesWidget> {
         body: SafeArea(
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.center,
+        // crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
           Padding(
@@ -81,48 +97,59 @@ class _RecipesWidgetState extends State<RecipesWidget> {
             ),
           ),
           Padding(
+            
             padding: const EdgeInsets.all(8.0),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  //<-- SEE HERE
-
-                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
-              child: TextField(
-                onChanged: (value) {
-                  filterSearchResults(value);
-                  setState(() {
-                    _visibility = true;
-                  });
-                  if (value.isEmpty) {
-                    setState(() {
-                      _visibility = false;
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    });
-                  }
-                },
-                controller: editingController,
-                decoration: InputDecoration(
-                    labelText: "Search by ingredients or recipes",
-                    hintText: "Search by ingredients or recipes",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+            child: Container(
+              margin: EdgeInsets.only(top: 100),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    //<-- SEE HERE
+                        
+                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                child: TextField(
+                  onChanged: (value) {
+                    // filterSearchResults(value);
+                    if (value.length > 2) {
+                      getRecipes(value);
+                      setState(() {
+                        _visibility = true;
+                      });
+                    }
+                        
+                    if (value.isEmpty) {
+                      setState(() {
+                        _visibility = false;
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      });
+                    }
+                  },
+                  controller: editingController,
+                  decoration: InputDecoration(
+                      labelText: "Search by ingredients or recipes",
+                      hintText: "Search by ingredients or recipes",
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                ),
               ),
             ),
           ),
           _visibility
               ? Visibility(
-                  child: searchList(),
+                  child: _spinner
+                      ? Center(child: CircularProgressIndicator())
+                      : searchList(),
                   visible: _visibility,
                 )
               : Visibility(
+                // visible: (_visibility),
                   child: Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(
+                    padding: const EdgeInsets.only(top: 20,
                         left: 20.0, right: 20.0, bottom: 50.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      // crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           "Search By Typing Ingredients or Recipes",
@@ -144,33 +171,48 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                                 DefaultTextStyle(
                                   textAlign: TextAlign.left,
                                   style: const TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold
-                                    
-                                  ),
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold),
                                   child: AnimatedTextKit(
-                                    pause: Duration(milliseconds: 1),
+                                      pause: Duration(milliseconds: 1),
                                       // isRepeatingAnimation: true,
                                       repeatForever: true,
                                       animatedTexts: [
-                                        RotateAnimatedText("Try Typing ' Fish '",textStyle: TextStyle(color: Color(orangeShade))),
                                         RotateAnimatedText(
-                                            "Try Typing ' Grilled Chicken '",textStyle: TextStyle(color: Color(orangeShade))),
+                                            "Try Typing ' Fish '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
                                         RotateAnimatedText(
-                                            "Try Typing ' Avacado '",textStyle: TextStyle(color: Color(orangeShade))),
-                                        RotateAnimatedText("Try Typing ' Salad '",textStyle: TextStyle(color: Color(orangeShade))),
-                                        RotateAnimatedText("Try Typing ' Soup '",textStyle: TextStyle(color: Color(orangeShade))),
+                                            "Try Typing ' Grilled Chicken '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
                                         RotateAnimatedText(
-                                            "Try Typing ' Coconut '",textStyle: TextStyle(color: Color(orangeShade))),
+                                            "Try Typing ' Avacado '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
                                         RotateAnimatedText(
-                                            "Try Typing ' Chickpea Curry '",textStyle: TextStyle(color: Color(orangeShade)))
+                                            "Try Typing ' Salad '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
+                                        RotateAnimatedText(
+                                            "Try Typing ' Soup '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
+                                        RotateAnimatedText(
+                                            "Try Typing ' Coconut '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade))),
+                                        RotateAnimatedText(
+                                            "Try Typing ' Chickpea Curry '",
+                                            textStyle: TextStyle(
+                                                color: Color(orangeShade)))
                                       ]),
                                 ),
                               ],
                             ),
                           ),
 
-                          //  
+                          //
                         )
                       ],
                     ),
@@ -187,14 +229,16 @@ class _RecipesWidgetState extends State<RecipesWidget> {
       child: ListView.builder(
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
-          itemCount: items.length,
+          itemCount: recipeSearchResult["data"].length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
               padding: const EdgeInsets.fromLTRB(10.0, 2.5, 10.0, 2.5),
               child: InkWell(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => RecipeDetails()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => RecipeDetails("${recipeSearchResult["data"][index]["id"]}")));
                 },
                 child: Card(
                   child: Container(
@@ -233,7 +277,7 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                                           child: Container(
                                             // width: 150,
                                             child: Text(
-                                              '${items[index]}',
+                                              '${recipeSearchResult["data"][index]["name"]}',
                                               style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w500),
@@ -244,7 +288,7 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                                       Padding(
                                         padding: const EdgeInsets.all(1.0),
                                         child: Text(
-                                          "prep time: 120 mins",
+                                          "prep time: ${recipeSearchResult["data"][index]["prep_time"]} mins",
                                           style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w500),
@@ -252,7 +296,8 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(1.0),
-                                        child: Text("cook time: 120 mins",
+                                        child: Text(
+                                            "cook time: ${recipeSearchResult["data"][index]["cook_time"]} mins",
                                             style: TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w500)),
@@ -270,7 +315,9 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                     left: 8.0, right: 8.0),
-                                child: Text("120 Cal",
+                                child: Text((recipeSearchResult["data"][index]['recipe_nutritions']==null)?
+                                  "0 Cal":
+                                  "${double.parse(recipeSearchResult["data"][index]['recipe_nutritions']['calories']).roundToDouble().round().toString()} Cal",
                                     style: TextStyle(
                                         fontSize: 11,
                                         color: Color(orangeShade),

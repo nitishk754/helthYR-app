@@ -5,9 +5,12 @@ import 'dart:io';
 import 'package:animated_weight_picker/animated_weight_picker.dart';
 import 'package:d_chart/d_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/activity_screen.dart';
+import 'package:health_wellness/animatedPos.dart';
+import 'package:health_wellness/custom_radio_button_2.dart';
 import 'package:health_wellness/login.dart';
 import 'package:health_wellness/main.dart';
 import 'package:health_wellness/meal_plan.dart';
@@ -21,7 +24,9 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
+import 'package:slide_switcher/slide_switcher.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'constants/colors.dart';
@@ -46,11 +51,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String selectedValue = '';
   // int _currentIntValue = 65;
   double _currentHorizontalIntValue = 65;
+  final weightController = TextEditingController();
 
   List<String> mealList = ["Breakfast", "Lunch", "Snacks", "Dinner"];
   Map dashboardData = {};
   bool _spinner = false;
   late List<NutrientData> _nutData;
+  String _weight = 'lbs';
+  
   // late TooltipBehavior _tooltip;
 
   void _onItemTapped(int index) {
@@ -61,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
-    _nutData = getNutrientData();
+    // _nutData = getNutrientData();
     // _tooltip = TooltipBehavior(enable: true);
     super.initState();
     selectedValue = min.toString();
@@ -69,6 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     saveQues();
 
     _dashboard();
+
     // getUserProfile();
   }
 
@@ -125,6 +134,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 print("ifCond");
                 dashboardData = resource["data"];
                 debugPrint("dashboard data ${dashboardData}");
+                _weight =
+                    "${dashboardData["current_weight"]["weight_measurement"]}";
+                _currentHorizontalIntValue = double.parse(
+                    (dashboardData["current_weight"]["user_weight"]));
+                weightController.text = _currentHorizontalIntValue.toString();
+
                 setState(() => _spinner = false);
               });
             } else {
@@ -158,6 +173,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => _spinner = true);
 
     await ApiService().addWaterIntake(waterIntake.toString()).then((value) {
+      var res = value["data"];
+      if (res["status"] == "success") {
+        _dashboard();
+      } else {
+        setState(() {
+          _spinner = false;
+        });
+      }
+
+      final snackBar = SnackBar(content: Text(res["message"]));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });
+  }
+
+  _adduserWeight(String userWeight, String weightUnit) async {
+    setState(() => _spinner = true);
+
+    await ApiService().addWeightDash(userWeight, weightUnit).then((value) {
       var res = value["data"];
       if (res["status"] == "success") {
         _dashboard();
@@ -319,7 +352,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 // recipeWidget(context),
                 // recipeWidget(context)
               ],
-            ))
+            )),
       ],
     );
   }
@@ -354,51 +387,276 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             Expanded(
-              child: Center(
-                  child: Image(
-                height: 55,
-                width: 55,
-                image: AssetImage("assets/Images/scale.png"),
-              )),
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.indeterminate_check_box_sharp,color: Color(blueColor),),
-                      onPressed: () => setState(() {
-                        final newValue = _currentHorizontalIntValue - 0.5;
-                        _currentHorizontalIntValue = newValue;
-                      }),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(1)),
-                          border: Border.all(
-                            width: 0.5,
-                            color: Color(blueColor)
-                          ),
-                        ),
-                        child: Text('$_currentHorizontalIntValue',textAlign: TextAlign.center,)),
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.add_box,color: Color(blueColor)),
-                      onPressed: () => setState(() {
-                        final newValue = _currentHorizontalIntValue + 0.5;
-                        _currentHorizontalIntValue = newValue;
-                      }),
-                    ),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Center(
+                    child: Image(
+                  height: 55,
+                  width: 55,
+                  image: AssetImage("assets/Images/scale.png"),
+                )),
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.indeterminate_check_box_sharp,
+                      color: Color(blueColor),
+                    ),
+                    onPressed: () => setState(() {
+                      final newValue = _currentHorizontalIntValue - 0.5;
+                      _currentHorizontalIntValue = newValue;
+                      _adduserWeight(
+                          _currentHorizontalIntValue.toString(), _weight);
+                    }),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            // <-- SEE HERE
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20.0),
+                            ),
+                          ),
+                          builder: (BuildContext context) {
+                            return StatefulBuilder(
+                              builder: (BuildContext context, StateSetter mystate) {
+                                return SingleChildScrollView(
+                                  padding: EdgeInsets.only(
+                                      bottom:
+                                          MediaQuery.of(context).viewInsets.bottom),
+                                  child: Container(
+                                      height: 210,
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text("Enter Your Weight",
+                                                  style: TextStyle(
+                                                    color: Colors.grey[800],
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 20,
+                                                  )),
+                                            ),
+                                            SizedBox(
+                                              width: 90,
+                                              height: 40,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(0.0),
+                                                child: TextFormField(
+                                                  keyboardType: const TextInputType
+                                                      .numberWithOptions(
+                                                      signed: true, decimal: true),
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter
+                                                        .digitsOnly
+                                                  ],
+                                                  controller: weightController,
+                                                  maxLength: 4,
+                                                  onChanged: (value) {
+                                                    if(value.length>1){
+                                                      mystate(() {
+                                                      _currentHorizontalIntValue = double.parse(weightController.text);
+                                                    });
+                                                    }
+                                                  },
+                                                  textAlign: TextAlign.center,
+                                                  textInputAction:
+                                                      TextInputAction.next,
+                                                  decoration: InputDecoration(
+                                                      contentPadding:
+                                                          EdgeInsets.zero,
+                                                      filled: true,
+                                                      //<-- SEE HERE
+                                                      fillColor: Colors.white,
+                                                      border: OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  5),
+                                                          borderSide:
+                                                              BorderSide(width: 1)),
+                                                      hintText: '',
+                                                      labelText: "",
+                                                      counterText: ""),
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 10.0,
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  MyRadioListTile2<String>(
+                                                      value: 'kg',
+                                                      leading: 'kg',
+                                                      groupValue: _weight,
+                                                      fontSize: 10,
+                                                      customHeight: 22,
+                                                      customWidth: 35,
+                                                      weight: FontWeight.w500,
+                                                      onChanged: (value) {
+                                                        mystate(() {
+                                                          _weight = value!;
+
+                                                          _currentHorizontalIntValue =
+                                                              double.parse(
+                                                                  (_currentHorizontalIntValue *
+                                                                          0.453)
+                                                                      .toStringAsFixed(
+                                                                          1));
+                                                          weightController.text =
+                                                              _currentHorizontalIntValue
+                                                                  .toString();
+
+                                                          // _adduserWeight(
+                                                          //     _currentHorizontalIntValue
+                                                          //         .toString(),
+                                                          //     _weight);
+                                                        });
+                                                      }),
+                                                  MyRadioListTile2<String>(
+                                                      value: 'lbs',
+                                                      leading: 'lbs',
+                                                      groupValue: _weight,
+                                                      fontSize: 10,
+                                                      customHeight: 22,
+                                                      customWidth: 35,
+                                                      weight: FontWeight.w400,
+                                                      onChanged: (value) {
+                                                        mystate(() {
+                                                          _weight = value!;
+                                                          _currentHorizontalIntValue =
+                                                              double.parse(
+                                                                  (_currentHorizontalIntValue /
+                                                                          0.453)
+                                                                      .toStringAsFixed(
+                                                                          1));
+                                                          weightController.text =
+                                                              _currentHorizontalIntValue
+                                                                  .toString();
+                                                          // _adduserWeight(
+                                                          //     _currentHorizontalIntValue
+                                                          //         .toString(),
+                                                          //     _weight);
+                                                        });
+                                                      }),
+                                                ],
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: ElevatedButton(
+                                                  child: const Text('Submit'),
+                                                  onPressed: () {
+                                                    _adduserWeight(
+                                                        weightController.text,
+                                                        _weight);
+                                                    Navigator.pop(context);
+                                                  }),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+                                );
+                              }
+                            );
+                          });
+                    },
+                    child: Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(1)),
+                          border:
+                              Border.all(width: 0.5, color: Color(blueColor)),
+                        ),
+                        child: Text(
+                          '$_currentHorizontalIntValue',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        )),
+                  ),
+                ),
+                Expanded(
+                  child: IconButton(
+                    icon: Icon(Icons.add_box, color: Color(blueColor)),
+                    onPressed: () => setState(() {
+                      final newValue = _currentHorizontalIntValue + 0.5;
+                      _currentHorizontalIntValue = newValue;
+                      _adduserWeight(
+                          _currentHorizontalIntValue.toString(), _weight);
+                    }),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  MyRadioListTile2<String>(
+                      value: 'kg',
+                      leading: 'kg',
+                      groupValue: _weight,
+                      fontSize: 10,
+                      customHeight: 22,
+                      customWidth: 35,
+                      weight: FontWeight.w500,
+                      onChanged: (value) {
+                        setState(() {
+                          _weight = value!;
+
+                          _currentHorizontalIntValue = double.parse(
+                              (_currentHorizontalIntValue * 0.453)
+                                  .toStringAsFixed(1));
+
+                          _adduserWeight(
+                              _currentHorizontalIntValue.toString(), _weight);
+                        });
+                      }),
+                  MyRadioListTile2<String>(
+                      value: 'lbs',
+                      leading: 'lbs',
+                      groupValue: _weight,
+                      fontSize: 10,
+                      customHeight: 22,
+                      customWidth: 35,
+                      weight: FontWeight.w400,
+                      onChanged: (value) {
+                        setState(() {
+                          _weight = value!;
+                          _currentHorizontalIntValue = double.parse(
+                              (_currentHorizontalIntValue / 0.453)
+                                  .toStringAsFixed(1));
+                          _adduserWeight(
+                              _currentHorizontalIntValue.toString(), _weight);
+                        });
+                      }),
+                ],
+              ),
+            )
             // Expanded(
             //   child: Align(
             //     alignment: AlignmentDirectional.bottomCenter,
@@ -427,12 +685,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return InkWell(
       onTap: () async {
         String url = "https://secure.cobionic.com/collections/all-supplements";
-        var urllaunchable = await canLaunch(url); //canLaunch is from url_launcher package
-                    if(urllaunchable){
-                        await launch(url); //launch is from url_launcher package to launch URL
-                    }else{
-                       print("URL can't be launched.");
-                    }
+        var urllaunchable =
+            await canLaunch(url); //canLaunch is from url_launcher package
+        if (urllaunchable) {
+          await launch(url); //launch is from url_launcher package to launch URL
+        } else {
+          print("URL can't be launched.");
+        }
         //check it
 
         //        const url = 'https://flutter.dev';
@@ -571,7 +830,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "220",
+                        "${dashboardData["total_recipes"]}",
                         style: TextStyle(
                             color: Color(orangeShade),
                             fontSize: 20,
@@ -722,60 +981,93 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         .then(onGoBack);
                   });
                 },
-                child: Container(
-                  width: 170,
-                  height: 120,
-                  child: SfCircularChart(
-                    onChartTouchInteractionUp:
-                        (ChartTouchInteractionArgs args) {
-                      setState(() {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => NutrientTracker()))
-                            .then(onGoBack);
-                      });
-                    },
-                    annotations: <CircularChartAnnotation>[
-                      CircularChartAnnotation(
-                          height: '100%',
-                          width: '100%',
-                          widget: PhysicalModel(
-                            shape: BoxShape.circle,
-                            elevation: 0,
-                            color: Colors.white,
-                            child: Container(),
-                          )),
-                      CircularChartAnnotation(
-                          widget: const Text('1402',
-                              style: TextStyle(
-                                color: Color(orangeShade),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              )))
-                    ],
-                    series: <CircularSeries>[
-                      DoughnutSeries<NutrientData, String>(
-                          animationDuration: 1000.0,
-                          dataSource: _nutData,
-                          xValueMapper: (NutrientData data, _) => data.nutrient,
-                          yValueMapper: (NutrientData data, _) => data.value,
-                          dataLabelMapper: (NutrientData data, _) =>
-                              data.nutrient,
-                          dataLabelSettings: DataLabelSettings(
-                              isVisible: true,
-                              labelPosition: ChartDataLabelPosition.outside,
-                              connectorLineSettings:
-                                  ConnectorLineSettings(width: 1.0),
-                              textStyle: TextStyle(
-                                  fontSize: 6, fontWeight: FontWeight.w500)))
-                    ],
-                  ),
-                ),
+                child: (dashboardData['nutrient_data']["total_calories"] == 0)
+                    ? Center(
+                        child: Text(
+                          "No Meal Added To The Nutritient Tracker",
+                          style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : donutData(context),
               )),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Container donutData(BuildContext context) {
+    return Container(
+      width: 170,
+      height: 120,
+      child: SfCircularChart(
+        onChartTouchInteractionUp: (ChartTouchInteractionArgs args) {
+          setState(() {
+            Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => NutrientTracker()))
+                .then(onGoBack);
+          });
+        },
+        annotations: <CircularChartAnnotation>[
+          CircularChartAnnotation(
+              height: '50%',
+              width: '50%',
+              widget: PhysicalModel(
+                shape: BoxShape.circle,
+                elevation: 0,
+                color: Colors.white,
+                child: Container(),
+              )),
+          CircularChartAnnotation(
+              widget: Text(
+                  "${(dashboardData['nutrient_data']["total_calories"]).roundToDouble().round()}",
+                  style: TextStyle(
+                    color: Color(orangeShade),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  )))
+        ],
+        series: <CircularSeries>[
+          DoughnutSeries<NutrientData, String>(
+              animationDuration: 1000.0,
+              dataSource: [
+                NutrientData(
+                    dashboardData['nutrient_data']['inner_data'][0]["key"],
+                    (dashboardData['nutrient_data']['inner_data'][0]["value"])
+                        .toDouble(),
+                    Color(donutBlueShadeDark)),
+                NutrientData(
+                    dashboardData['nutrient_data']['inner_data'][1]["key"],
+                    (dashboardData['nutrient_data']['inner_data'][1]["value"])
+                        .toDouble(),
+                    Color(donutBlueShadeMed)),
+                NutrientData(
+                    dashboardData['nutrient_data']['inner_data'][2]["key"],
+                    (dashboardData['nutrient_data']['inner_data'][2]["value"])
+                        .toDouble(),
+                    Color(donutBlueShadeLite)),
+              ],
+              // pointColorMapper: (NutrientData data) => data.color,
+              pointColorMapper: (NutrientData data, _) => data.color,
+              xValueMapper: (NutrientData data, _) => data.nutrient,
+              yValueMapper: (NutrientData data, _) => data.value,
+              dataLabelMapper: (NutrientData data, _) => data.nutrient,
+              radius: "40",
+              dataLabelSettings: DataLabelSettings(
+                  alignment: ChartAlignment.near,
+                  angle: 0,
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  connectorLineSettings:
+                      ConnectorLineSettings(width: 1.0, length: "5"),
+                  textStyle:
+                      TextStyle(fontSize: 9, fontWeight: FontWeight.w600)))
+        ],
       ),
     );
   }
@@ -1112,20 +1404,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
     return formatter.format(date);
   }
-
-  List<NutrientData> getNutrientData() {
-    final List<NutrientData> nutrientData = [
-      NutrientData('Carbs', 500),
-      NutrientData('Protien', 120),
-      NutrientData('Fats', 80),
-    ];
-    return nutrientData;
-  }
 }
 
 class NutrientData {
-  NutrientData(this.nutrient, this.value);
+  NutrientData(this.nutrient, this.value, this.color);
 
   final String nutrient;
   final double value;
+  final Color color;
 }

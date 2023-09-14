@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:health_wellness/constants/colors.dart';
+import 'package:health_wellness/services/api_services.dart';
 
 class AudioContent extends StatefulWidget {
   const AudioContent({super.key});
@@ -11,13 +12,44 @@ class AudioContent extends StatefulWidget {
 
 class _AudioContentState extends State<AudioContent> {
   final player = AudioPlayer();
-  
-  bool isPlayed = false;
+
+  List<bool> isPlayed = [];
+  bool _spinner = false;
+  Map educationalContentData = {};
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getEducationalContent("affirmation content");
+  }
+
+  Future<void> getEducationalContent(String contentCategory) async {
+    setState(() => _spinner = true);
+    await ApiService()
+        .getEducationalContent('audio', contentCategory)
+        .then((value) {
+      var res = value["data"];
+      setState(() => _spinner = false);
+      if (res["status"] == "success") {
+        setState(() {
+          educationalContentData = value["data"];
+          // isPlayed=educationalContentData['data'].length;
+          for(int i =0;i<educationalContentData['data'].length;i++){
+            isPlayed.add(false) ;
+          }
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    player.onPlayerComplete.listen((event) {
-      setState(()=>isPlayed=false);
-    },);
+    // player.onPlayerComplete.listen(
+    //   (event) {
+    //     setState(() => isPlayed = false);
+    //   },
+    // );
     return Scaffold(
       body: ListView(
         children: [
@@ -55,53 +87,63 @@ class _AudioContentState extends State<AudioContent> {
           SizedBox(
             height: 10,
           ),
-          ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 15,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(5.0, 1.5, 5.0, 1.5),
-                  child: Container(
-                    height: 70,
-                    width: MediaQuery.of(context).size.width,
-                    child: Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(5)),
-                      ),
-                      color: Colors.white,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(
-                            children: [
-                              Flexible(
-                                flex: 1,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      child: Card(
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Color(blueColor),
-                                          ),
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(12)),
+          _spinner
+                  ? Center(child: CircularProgressIndicator())
+                  : audioContent(),
+        ],
+      ),
+    );
+  }
+
+  ListView audioContent() {
+    return ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: educationalContentData['data'].length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(5.0, 1.5, 5.0, 1.5),
+                child: Container(
+                  height: 80,
+                  width: MediaQuery.of(context).size.width,
+                  child: Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(5)),
+                    ),
+                    color: Colors.white,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    child: Card(
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                          color: Color(blueColor),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
-                                          child: Image(
-                                            height: 50,
-                                            width: 50,
-                                            image: AssetImage(
-                                                "assets/Images/listen.png"),
-                                          ),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Image(
+                                          height: 50,
+                                          width: 50,
+                                          image: AssetImage(
+                                              "assets/Images/listen.png"),
                                         ),
                                       ),
                                     ),
-                                    Column(
+                                  ),
+                                  Flexible(
+                                    child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
@@ -111,64 +153,62 @@ class _AudioContentState extends State<AudioContent> {
                                           padding: const EdgeInsets.fromLTRB(
                                               20.0, 0.0, 20.0, 0.0),
                                           child: Text(
-                                            "Audio Name",
+                                            "${educationalContentData['data'][index]['title']}",
                                             style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w500,
                                                 color: Colors.black87),
                                           ),
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              20.0, 0.0, 20.0, 0.0),
-                                          child: Text(
-                                            "Duration",
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.black87),
-                                          ),
-                                        ),
+                                        // Padding(
+                                        //   padding: const EdgeInsets.fromLTRB(
+                                        //       20.0, 0.0, 20.0, 0.0),
+                                        //   child: Text(
+                                        //     "Duration",
+                                        //     style: TextStyle(
+                                        //         fontSize: 15,
+                                        //         fontWeight: FontWeight.w400,
+                                        //         color: Colors.black87),
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              Flexible(
-                                flex: 0,
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                        onPressed: () async {
-                                          if (isPlayed) {
-                                            await player.stop();
-                                            setState(() {
-                                              isPlayed = false;
-                                            });
-                                          } else {
-                                            await player.play(AssetSource(
-                                                'sounds/sampleAudio.wav'));
-                                            setState(() {
-                                              isPlayed = true;
-                                            });
-                                          }
-                                        },
-                                        icon: isPlayed
-                                            ? Icon(Icons.pause_circle)
-                                            : Icon(Icons.play_circle_outline))
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
+                            ),
+                            Flexible(
+                              flex: 0,
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                      onPressed: () async {
+                                        if (isPlayed[index]) {
+                                          await player.stop();
+                                          setState(() {
+                                            isPlayed[index] = false;
+                                          });
+                                        } else {
+                                          await player.play(UrlSource(
+                                              '${educationalContentData['data'][index]['url']}'));
+                                          setState(() {
+                                            isPlayed[index] = true;
+                                          });
+                                        }
+                                      },
+                                      icon: isPlayed[index]
+                                          ? Icon(Icons.pause_circle)
+                                          : Icon(Icons.play_circle_outline))
+                                ],
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     ),
                   ),
-                );
-              })
-        ],
-      ),
-    );
+                ),
+              );
+            });
   }
 }
