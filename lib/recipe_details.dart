@@ -226,14 +226,14 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("Carbs",
+                        Text("Net Carbs",
                             style: TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.bold)),
                         SizedBox(
                           height: 20,
                         ),
                         Text(
-                            "${double.parse((recipeDetails["recipe_nutritions"]["net_carbs"])).toStringAsFixed(2)}",
+                            "${double.parse((recipeDetails["recipe_nutritions"]["net_carbs"])).roundToDouble().round()}",
                             style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -268,7 +268,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           height: 20,
                         ),
                         Text(
-                            "${double.parse((recipeDetails["recipe_nutritions"]["proteins"])).toStringAsFixed(2)}",
+                            "${double.parse((recipeDetails["recipe_nutritions"]["proteins"])).roundToDouble().round()}",
                             style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -301,7 +301,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         height: 20,
                       ),
                       Text(
-                          "${double.parse((recipeDetails["recipe_nutritions"]["fats"])).toStringAsFixed(2)}",
+                          "${double.parse((recipeDetails["recipe_nutritions"]["fats"])).roundToDouble().round()}",
                           style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -391,7 +391,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
             flex: 0,
             child: Text(
                 (recipeDetails["recipe_nutritions"]!=null)
-                    ? "${double.parse((recipeDetails["recipe_nutritions"]["calories"])).toStringAsFixed(2)} cal"
+                    ? "${double.parse((recipeDetails["recipe_nutritions"]["calories"])).roundToDouble().round()} cal"
                     : "0 Cal",
                 style: TextStyle(
                     fontSize: 11,

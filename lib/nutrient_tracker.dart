@@ -63,7 +63,9 @@ class _NutrientTrackerState extends State<NutrientTracker>
                   nutrientData['graph_data']['bar_chart'][i]['meal_day'],
                   double.parse((nutrientData['graph_data']['bar_chart'][i]
                           ["total_calories"])
-                      .toStringAsFixed(2))));
+                      .roundToDouble()
+                      .round()
+                      .toString())));
             }
           } else {
             print("condFalse");
@@ -253,7 +255,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                           yValueMapper:
                                               (BarNutrientData barData, _) =>
                                                   barData.value,
-                                          name: 'Gold',
+                                          // name: 'Gold',
                                           borderRadius: BorderRadius.only(
                                               topLeft: Radius.circular(5),
                                               topRight: Radius.circular(5)),
@@ -311,7 +313,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.w600)),
                                         subtitle: Text(
-                                            "${(nutrientData["food_log"][index]["total_calories"]).toStringAsFixed(2)}",
+                                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()}",
                                             style: TextStyle(
                                                 fontSize: 13,
                                                 color: Colors.orange,
@@ -441,7 +443,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                                           right:
                                                                               8.0),
                                                                       child: Text(
-                                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).toStringAsFixed(2)} Cals",
+                                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).roundToDouble().round()} Cals",
                                                                           style: TextStyle(
                                                                               fontSize: 11,
                                                                               color: Color(orangeShade),
@@ -493,7 +495,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-                width: 310,
+                width: 320,
                 height: 250,
                 child: Stack(
                   children: [
@@ -502,8 +504,8 @@ class _NutrientTrackerState extends State<NutrientTracker>
                       tooltipBehavior: _tooltip,
                       annotations: <CircularChartAnnotation>[
                         CircularChartAnnotation(
-                            height: '100%',
-                            width: '100%',
+                            height: '90%',
+                            width: '90%',
                             widget: PhysicalModel(
                               shape: BoxShape.circle,
                               elevation: 0,
@@ -512,7 +514,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             )),
                         CircularChartAnnotation(
                             widget: Text(
-                                "${nutrientData["graph_data"]["toal_calories"].toStringAsFixed(2)}",
+                                "${nutrientData["graph_data"]["toal_calories"].roundToDouble().round()}",
                                 style: TextStyle(
                                   color: Color(orangeShade),
                                   fontWeight: FontWeight.bold,
@@ -521,6 +523,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                       ],
                       series: <CircularSeries>[
                         DoughnutSeries<NutrientData, String>(
+                          radius: "85",
                             animationDuration: 1000.0,
                             explode: true,
                             explodeGesture: ActivationMode.singleTap,
@@ -530,21 +533,27 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                       ["key"],
                                   double.parse((nutrientData['graph_data']
                                           ['dounts'][0]["value"])
-                                      .toStringAsFixed(2)),
+                                      .roundToDouble()
+                                      .round()
+                                      .toString()),
                                   Color(donutBlueShadeDark)),
                               NutrientData(
                                   nutrientData['graph_data']['dounts'][1]
                                       ["key"],
                                   double.parse((nutrientData['graph_data']
                                           ['dounts'][1]["value"])
-                                      .toStringAsFixed(2)),
+                                      .roundToDouble()
+                                      .round()
+                                      .toString()),
                                   Color(donutBlueShadeMed)),
                               NutrientData(
                                   nutrientData['graph_data']['dounts'][2]
                                       ["key"],
                                   double.parse((nutrientData['graph_data']
                                           ['dounts'][2]["value"])
-                                      .toStringAsFixed(2)),
+                                      .roundToDouble()
+                                      .round()
+                                      .toString()),
                                   Color(donutBlueShadeLite)),
                             ],
                             pointColorMapper: (NutrientData data, _) =>
@@ -558,7 +567,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                 isVisible: true,
                                 labelPosition: ChartDataLabelPosition.outside,
                                 connectorLineSettings:
-                                    ConnectorLineSettings(width: 3.0),
+                                    ConnectorLineSettings(width: 3.0,length: "8%"),
                                 textStyle: TextStyle(
                                     fontSize: 12, fontWeight: FontWeight.w500)))
                       ],
@@ -623,7 +632,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600)),
                         subtitle: Text(
-                            "${(nutrientData["food_log"][index]["total_calories"]).toStringAsFixed(2)}",
+                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()}",
                             style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.orange,
@@ -736,7 +745,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                               left: 8.0,
                                                               right: 8.0),
                                                       child: Text(
-                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).toStringAsFixed(2)} Cals",
+                                                          "${double.parse((nutrientData["food_log"][index]["item"]["items"][index1]["calories"])).roundToDouble().round()} Cals",
                                                           style: TextStyle(
                                                               fontSize: 11,
                                                               color: Color(
@@ -831,67 +840,63 @@ class _NutrientTrackerState extends State<NutrientTracker>
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: EdgeInsets.all(10),
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: <Widget>[
-                  Container(
-                      width: double.infinity,
-                      height: 300,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white),
-                      padding: EdgeInsets.fromLTRB(20, 50, 20, 20),
-                      child: ListView.builder(
-                        itemCount: nutrientData['graph_data']['dounts'].length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 10),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 0,
-                                  child: SizedBox(
-                                      width: 38,
-                                      height: 38,
-                                      child: Image(
-                                          image: AssetImage(
-                                              "assets/Images/breakfast.png"))),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                        '${nutrientData['graph_data']['dounts'][index]['key']}',
-                                        style: TextStyle(
-                                          color: Colors.black87,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 21,
-                                        )),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: Text(
-                                      '${(nutrientData['graph_data']['dounts'][index]['value']).toStringAsFixed(2)} Cals',
-                                      style: TextStyle(
-                                        color: Color(orangeShade),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18,
-                                      )),
-                                ),
-                              ],
+          return AlertDialog(
+            title: Center(child: Text("Macros",style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),)),
+             shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                     ),
+              // backgroundColor: Colors.transparent,
+              // insetPadding: EdgeInsets.all(10),
+              content: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 200,
+                 
+                  // padding: EdgeInsets.fromLTRB(20, 50, 20, 20),
+                  child: ListView.builder(
+                    itemCount: nutrientData['graph_data']['dounts'].length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 0,
+                              child: SizedBox(
+                                  width: 38,
+                                  height: 38,
+                                  child: Image(
+                                      image: AssetImage(
+                                          "assets/Images/breakfast.png"))),
                             ),
-                          );
-                        },
-                      ))
-                ],
-              ));
+                            Expanded(
+                              flex: 1,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                    '${nutrientData['graph_data']['dounts'][index]['key']}',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 21,
+                                    )),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 0,
+                              child: Text(
+                                  '${(nutrientData['graph_data']['dounts'][index]['value']).roundToDouble().round()} Cals',
+                                  style: TextStyle(
+                                    color: Color(orangeShade),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18,
+                                  )),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )));
         });
   }
 

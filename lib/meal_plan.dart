@@ -235,7 +235,7 @@ class _MealPlanState extends State<MealPlan>
             title: Text(
                 "${weeklyMealPlanData['data'][index]['weekDay']} ( ${weeklyMealPlanData['data'][index]['date']} )",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            subtitle: Text("${caloryVal[index].toStringAsFixed(2)} cal",
+            subtitle: Text("${caloryVal[index].roundToDouble().round()} cal",
                 style: TextStyle(
                     fontSize: 13,
                     color: Colors.orange,
@@ -284,7 +284,7 @@ class _MealPlanState extends State<MealPlan>
                                               [index1]['data']
                                           .length >
                                       0)
-                                  ? "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][0]['total_calories']).toStringAsFixed(2)} Cal"
+                                  ? "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][0]['total_calories']).roundToDouble().round()} Cal"
                                   : "0 Cal",
                               style: TextStyle(
                                   fontSize: 11,
@@ -385,7 +385,7 @@ class _MealPlanState extends State<MealPlan>
                                                               left: 8.0,
                                                               right: 8.0),
                                                       child: Text(
-                                                          "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['total_calories']).toStringAsFixed(2)} Cal",
+                                                          "${double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['total_calories']).roundToDouble().round()} Cal",
                                                           style: TextStyle(
                                                               fontSize: 11,
                                                               color: Color(
@@ -428,7 +428,7 @@ class _MealPlanState extends State<MealPlan>
         Padding(
           padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 2.5),
           child: Text(
-            "${double.parse(_data["meal_data"][0]['total_calories']).toStringAsFixed(2)} Cals",
+            "${double.parse(_data["meal_data"][0]['total_calories']).roundToDouble().round()} Cals",
             style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
@@ -534,7 +534,7 @@ class _MealPlanState extends State<MealPlan>
                                       padding: const EdgeInsets.only(
                                           left: 8.0, right: 8.0),
                                       child: Text(
-                                          "${double.parse(mealData?['total_calories']).toStringAsFixed(2)} Cals"
+                                          "${double.parse(mealData?['total_calories']).roundToDouble().round()} Cals"
                                           // "${mealData?['recipe_nutritions']['calories']} Cal"
                                           ,
                                           style: TextStyle(

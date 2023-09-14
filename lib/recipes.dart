@@ -317,7 +317,7 @@ class _RecipesWidgetState extends State<RecipesWidget> {
                                     left: 8.0, right: 8.0),
                                 child: Text((recipeSearchResult["data"][index]['recipe_nutritions']==null)?
                                   "0 Cal":
-                                  "${recipeSearchResult["data"][index]['recipe_nutritions']['calories']}",
+                                  "${double.parse(recipeSearchResult["data"][index]['recipe_nutritions']['calories']).roundToDouble().round().toString()} Cal",
                                     style: TextStyle(
                                         fontSize: 11,
                                         color: Color(orangeShade),
