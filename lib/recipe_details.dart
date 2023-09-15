@@ -70,16 +70,47 @@ class _RecipeDetailsState extends State<RecipeDetails> {
         ),
         recipeName(),
         servingCookPrep(),
-        (recipeDetails["recipe_nutritions"] != null)?
-        caloriesExtract():Container(
-          width: 0,
-          height: 0,
-        ),
+        (recipeDetails["recipe_nutritions"] != null)
+            ? caloriesExtract()
+            : Container(
+                width: 0,
+                height: 0,
+              ),
         Visibility(
             visible: (recipeDetails["recepie_ingredients"].length > 0)
                 ? true
                 : false,
             child: ingredientsList()),
+        Visibility(
+          visible: (recipeDetails.containsKey("ingredients") ||
+                  recipeDetails["ingredients"] != null)
+              ? true
+              : false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20.0,0.0,20.0,0.0),
+            child: Card(
+              child: ListView(
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text("Ingredient Preparation",
+                        style:
+                            TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 7.0),
+                    child: Html(
+                      data: "${recipeDetails["ingredients"]}",
+                    ),
+                  ),
+                  // Text("${recipeDetails["directions"]}"),
+                ],
+              ),
+            ),
+          ),
+        ),
         instructions()
       ],
     );
@@ -390,7 +421,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
           Expanded(
             flex: 0,
             child: Text(
-                (recipeDetails["recipe_nutritions"]!=null)
+                (recipeDetails["recipe_nutritions"] != null)
                     ? "${double.parse((recipeDetails["recipe_nutritions"]["calories"])).roundToDouble().round()} cal"
                     : "0 Cal",
                 style: TextStyle(
