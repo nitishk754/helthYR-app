@@ -260,9 +260,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
             } else {
               return _spinner
                   ? SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator())
+                      width: 30, height: 40, child: Center(child: CircularProgressIndicator()))
                   : weeklyActivityList(context);
             }
           })
@@ -409,7 +407,11 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                           color: Colors.grey),
                                     ),
                                     Text(
-                                      "${weeklyActivityData['activities'][0]['total_calories']}",
+                                      (weeklyActivityData['activities'][0]
+                                                  ['total_calories'] ==
+                                              null)
+                                          ? "0 Cal"
+                                          : "${weeklyActivityData['activities'][0]['total_calories']} Cal",
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -434,7 +436,11 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                               color: Colors.grey),
                                         ),
                                         Text(
-                                          "${weeklyActivityData['activities'][0]['total_duration']}",
+                                          (weeklyActivityData['activities'][0]
+                                                      ['total_duration'] ==
+                                                  null)
+                                              ? "0 "
+                                              : "${weeklyActivityData['activities'][0]['total_duration']} ",
                                           style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -466,10 +472,12 @@ class _ActivityWidgetState extends State<ActivityWidget>
                               series: <ChartSeries<LineChartData, String>>[
                                 AreaSeries<LineChartData, String>(
                                   dataSource: walkingData,
-                                  xValueMapper: (LineChartData walkingData, _) =>
-                                      walkingData.weekDay,
-                                  yValueMapper: (LineChartData walkingData, _) =>
-                                      walkingData.value,
+                                  xValueMapper:
+                                      (LineChartData walkingData, _) =>
+                                          walkingData.weekDay,
+                                  yValueMapper:
+                                      (LineChartData walkingData, _) =>
+                                          walkingData.value,
                                   name: 'Gold',
                                   markerSettings: MarkerSettings(
                                       isVisible: true,
@@ -553,7 +561,11 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                           color: Colors.grey),
                                     ),
                                     Text(
-                                      "${weeklyActivityData['activities'][1]['total_calories']} Cal",
+                                      (weeklyActivityData['activities'][1]
+                                                  ['total_calories'] ==
+                                              null)
+                                          ? "0 Cal"
+                                          : "${weeklyActivityData['activities'][1]['total_calories']} Cal",
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -578,7 +590,11 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                               color: Colors.grey),
                                         ),
                                         Text(
-                                          "${weeklyActivityData['activities'][1]['total_duration']} ",
+                                          (weeklyActivityData['activities'][1]
+                                                      ['total_duration'] ==
+                                                  null)
+                                              ? "0 "
+                                              : "${weeklyActivityData['activities'][1]['total_duration']} ",
                                           style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -601,7 +617,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
                         ],
                       ),
                     ),
-                   SizedBox(
+                    SizedBox(
                       height: 155,
                       child: Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -610,10 +626,12 @@ class _ActivityWidgetState extends State<ActivityWidget>
                               series: <ChartSeries<LineChartData, String>>[
                                 AreaSeries<LineChartData, String>(
                                   dataSource: runningData,
-                                  xValueMapper: (LineChartData runningData, _) =>
-                                      runningData.weekDay,
-                                  yValueMapper: (LineChartData runningData, _) =>
-                                      runningData.value,
+                                  xValueMapper:
+                                      (LineChartData runningData, _) =>
+                                          runningData.weekDay,
+                                  yValueMapper:
+                                      (LineChartData runningData, _) =>
+                                          runningData.value,
                                   name: 'Gold',
                                   markerSettings: MarkerSettings(
                                       isVisible: true,
@@ -633,7 +651,6 @@ class _ActivityWidgetState extends State<ActivityWidget>
                                 )
                               ])),
                     ),
-                    
                   ],
                 ),
               ),
@@ -647,191 +664,189 @@ class _ActivityWidgetState extends State<ActivityWidget>
 
   Padding cyclingData(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
-        child: SizedBox(
-          height: 250,
-          width: MediaQuery.of(context).size.width,
-          child: Card(
-            elevation: 2.5,
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: Color(blueColor),
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+      padding: const EdgeInsets.fromLTRB(35.0, 15.0, 35.0, 15.0),
+      child: SizedBox(
+        height: 250,
+        width: MediaQuery.of(context).size.width,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
             ),
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    child: Stack(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: Stack(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.pedal_bike,
+                            size: 36,
+                            color: Color(blueColor),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "Cycling",
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.center,
+                        child: Column(
                           children: [
-                            Icon(
-                              Icons.pedal_bike,
-                              size: 36,
-                              color: Color(blueColor),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Average Speed  ",
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey),
+                                ),
+                                Text(
+                                  "14.6  ",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(orangeShade)),
+                                ),
+                                Text(
+                                  "mil/h",
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey),
+                                ),
+                              ],
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Text(
-                                "Cycling",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600),
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Milage  ",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey),
+                                    ),
+                                    Text(
+                                      "34.5  ",
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(orangeShade)),
+                                    ),
+                                    Text(
+                                      "mil",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        Align(
-                          alignment: AlignmentDirectional.center,
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Average Speed  ",
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey),
-                                  ),
-                                  Text(
-                                    "14.6  ",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(orangeShade)),
-                                  ),
-                                  Text(
-                                    "mil/h",
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "Milage  ",
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey),
-                                      ),
-                                      Text(
-                                        "34.5  ",
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(orangeShade)),
-                                      ),
-                                      Text(
-                                        "mil",
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
+                  child: Sparkline(
+                    data: [
+                      15.0,
+                      25.0,
+                      10.0,
+                      30.0,
+                      12.0,
+                      25.0,
+                      35.0,
+                    ],
+                    pointsMode: PointsMode.all,
+                    pointSize: 8.0,
+                    pointColor: Color(blueColor),
+                    enableGridLines: true,
+                    fillMode: FillMode.below,
+                    fillGradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.blue.shade100, Colors.white10],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-                    child: Sparkline(
-                      data: [
-                        15.0,
-                        25.0,
-                        10.0,
-                        30.0,
-                        12.0,
-                        25.0,
-                        35.0,
-                      ],
-                      pointsMode: PointsMode.all,
-                      pointSize: 8.0,
-                      pointColor: Color(blueColor),
-                      enableGridLines: true,
-                      fillMode: FillMode.below,
-                      fillGradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.blue.shade100, Colors.white10],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        "Mon",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
                       ),
-                    ),
+                      Text(
+                        "Tue",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        "Wed",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        "Thu",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        "Fri",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        "Sat",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        "Sun",
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      )
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Text(
-                          "Mon",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Tue",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Wed",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Thu",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Fri",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Sat",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          "Sun",
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   ListView dailyCaloryBurn() {

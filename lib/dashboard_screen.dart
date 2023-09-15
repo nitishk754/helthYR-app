@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _spinner = false;
   late List<NutrientData> _nutData;
   String _weight = 'lbs';
-  
+  bool isDialogVisible = false;
   // late TooltipBehavior _tooltip;
 
   void _onItemTapped(int index) {
@@ -235,7 +235,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => exit(0),
+      onWillPop: () async {
+        _dashboard();
+        exit(0);
+      },
       child: Scaffold(
         appBar: (_selectedIndex == 0)
             ? AppBar(
@@ -426,161 +429,196 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               top: Radius.circular(20.0),
                             ),
                           ),
+                          // isDismissible: false,
                           builder: (BuildContext context) {
-                            return StatefulBuilder(
-                              builder: (BuildContext context, StateSetter mystate) {
-                                return SingleChildScrollView(
-                                  padding: EdgeInsets.only(
-                                      bottom:
-                                          MediaQuery.of(context).viewInsets.bottom),
-                                  child: Container(
-                                      height: 210,
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text("Enter Your Weight",
-                                                  style: TextStyle(
-                                                    color: Colors.grey[800],
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 20,
-                                                  )),
-                                            ),
-                                            SizedBox(
-                                              width: 90,
-                                              height: 40,
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(0.0),
-                                                child: TextFormField(
-                                                  keyboardType: const TextInputType
-                                                      .numberWithOptions(
-                                                      signed: true, decimal: true),
-                                                  inputFormatters: [
-                                                    FilteringTextInputFormatter
-                                                        .digitsOnly
-                                                  ],
-                                                  controller: weightController,
-                                                  maxLength: 4,
-                                                  onChanged: (value) {
-                                                    if(value.length>1){
-                                                      mystate(() {
-                                                      _currentHorizontalIntValue = double.parse(weightController.text);
-                                                    });
-                                                    }
-                                                  },
-                                                  textAlign: TextAlign.center,
-                                                  textInputAction:
-                                                      TextInputAction.next,
-                                                  decoration: InputDecoration(
-                                                      contentPadding:
-                                                          EdgeInsets.zero,
-                                                      filled: true,
-                                                      //<-- SEE HERE
-                                                      fillColor: Colors.white,
-                                                      border: OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  5),
-                                                          borderSide:
-                                                              BorderSide(width: 1)),
-                                                      hintText: '',
-                                                      labelText: "",
-                                                      counterText: ""),
-                                                  style: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w500),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 10.0,
-                                              ),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  MyRadioListTile2<String>(
-                                                      value: 'kg',
-                                                      leading: 'kg',
-                                                      groupValue: _weight,
-                                                      fontSize: 10,
-                                                      customHeight: 22,
-                                                      customWidth: 35,
-                                                      weight: FontWeight.w500,
-                                                      onChanged: (value) {
-                                                        mystate(() {
-                                                          _weight = value!;
-
-                                                          _currentHorizontalIntValue =
-                                                              double.parse(
-                                                                  (_currentHorizontalIntValue *
-                                                                          0.453)
-                                                                      .toStringAsFixed(
-                                                                          1));
-                                                          weightController.text =
-                                                              _currentHorizontalIntValue
-                                                                  .toString();
-
-                                                          // _adduserWeight(
-                                                          //     _currentHorizontalIntValue
-                                                          //         .toString(),
-                                                          //     _weight);
-                                                        });
-                                                      }),
-                                                  MyRadioListTile2<String>(
-                                                      value: 'lbs',
-                                                      leading: 'lbs',
-                                                      groupValue: _weight,
-                                                      fontSize: 10,
-                                                      customHeight: 22,
-                                                      customWidth: 35,
-                                                      weight: FontWeight.w400,
-                                                      onChanged: (value) {
-                                                        mystate(() {
-                                                          _weight = value!;
-                                                          _currentHorizontalIntValue =
-                                                              double.parse(
-                                                                  (_currentHorizontalIntValue /
-                                                                          0.453)
-                                                                      .toStringAsFixed(
-                                                                          1));
-                                                          weightController.text =
-                                                              _currentHorizontalIntValue
-                                                                  .toString();
-                                                          // _adduserWeight(
-                                                          //     _currentHorizontalIntValue
-                                                          //         .toString(),
-                                                          //     _weight);
-                                                        });
-                                                      }),
+                            return StatefulBuilder(builder:
+                                (BuildContext context, StateSetter mystate) {
+                              return SingleChildScrollView(
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom),
+                                child: Container(
+                                    height: 210,
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text("Enter Your Weight",
+                                                style: TextStyle(
+                                                  color: Colors.grey[800],
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 20,
+                                                )),
+                                          ),
+                                          SizedBox(
+                                            width: 90,
+                                            height: 40,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(0.0),
+                                              child: TextFormField(
+                                                keyboardType:
+                                                    const TextInputType
+                                                        .numberWithOptions(
+                                                        signed: true,
+                                                        decimal: true),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
                                                 ],
+                                                controller: weightController,
+                                                maxLength: 4,
+                                                onChanged: (value) {
+                                                  if (value.length > 1) {
+                                                    mystate(() {
+                                                      _currentHorizontalIntValue =
+                                                          double.parse(
+                                                              weightController
+                                                                  .text);
+                                                    });
+                                                  }
+                                                },
+                                                textAlign: TextAlign.center,
+                                                textInputAction:
+                                                    TextInputAction.next,
+                                                decoration: InputDecoration(
+                                                    contentPadding:
+                                                        EdgeInsets.zero,
+                                                    filled: true,
+                                                    //<-- SEE HERE
+                                                    fillColor: Colors.white,
+                                                    border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5),
+                                                        borderSide: BorderSide(
+                                                            width: 1)),
+                                                    hintText: '',
+                                                    labelText: "",
+                                                    counterText: ""),
+                                                style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight:
+                                                        FontWeight.w500),
                                               ),
                                             ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: ElevatedButton(
-                                                  child: const Text('Submit'),
-                                                  onPressed: () {
-                                                    _adduserWeight(
-                                                        weightController.text,
-                                                        _weight);
-                                                    Navigator.pop(context);
-                                                  }),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 10.0,
                                             ),
-                                          ],
-                                        ),
-                                      )),
-                                );
-                              }
-                            );
-                          });
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                MyRadioListTile2<String>(
+                                                    value: 'kg',
+                                                    leading: 'kg',
+                                                    groupValue: _weight,
+                                                    fontSize: 10,
+                                                    customHeight: 22,
+                                                    customWidth: 35,
+                                                    weight: FontWeight.w500,
+                                                    onChanged: (value) {
+                                                      mystate(() {
+                                                        _weight = value!;
+
+                                                        _currentHorizontalIntValue =
+                                                            double.parse(
+                                                                (_currentHorizontalIntValue *
+                                                                        0.453)
+                                                                    .toStringAsFixed(
+                                                                        1));
+                                                        weightController.text =
+                                                            _currentHorizontalIntValue
+                                                                .toString();
+
+                                                        // _adduserWeight(
+                                                        //     _currentHorizontalIntValue
+                                                        //         .toString(),
+                                                        //     _weight);
+                                                      });
+                                                      // setState(() {
+                                                      //   _weight = value!;
+
+                                                      //   // _currentHorizontalIntValue =
+                                                      //   //     double.parse(
+                                                      //   //         (_currentHorizontalIntValue *
+                                                      //   //                 0.453)
+                                                      //   //             .toStringAsFixed(
+                                                      //   //                 1));
+                                                      //   // weightController.text =
+                                                      //   //     _currentHorizontalIntValue
+                                                      //   //         .toString();
+                                                      // });
+                                                    }),
+                                                MyRadioListTile2<String>(
+                                                    value: 'lbs',
+                                                    leading: 'lbs',
+                                                    groupValue: _weight,
+                                                    fontSize: 10,
+                                                    customHeight: 22,
+                                                    customWidth: 35,
+                                                    weight: FontWeight.w400,
+                                                    onChanged: (value) {
+                                                      mystate(() {
+                                                        _weight = value!;
+                                                        _currentHorizontalIntValue =
+                                                            double.parse(
+                                                                (_currentHorizontalIntValue /
+                                                                        0.453)
+                                                                    .toStringAsFixed(
+                                                                        1));
+                                                        weightController.text =
+                                                            _currentHorizontalIntValue
+                                                                .toString();
+                                                        // _adduserWeight(
+                                                        //     _currentHorizontalIntValue
+                                                        //         .toString(),
+                                                        //     _weight);
+                                                      });
+
+                                                      // setState(() {
+                                                      //   _weight = value!;
+
+                                                      //   // _currentHorizontalIntValue =
+                                                      //   //     double.parse(
+                                                      //   //         (_currentHorizontalIntValue /
+                                                      //   //                 0.453)
+                                                      //   //             .toStringAsFixed(
+                                                      //   //                 1));
+                                                      //   // weightController.text =
+                                                      //   //     _currentHorizontalIntValue
+                                                      //   //         .toString();
+                                                      // });
+                                                    }),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: ElevatedButton(
+                                                child: const Text('Submit'),
+                                                onPressed: () {
+                                                  _adduserWeight(
+                                                      weightController.text,
+                                                      _weight);
+                                                  Navigator.pop(context);
+                                                }),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                              );
+                            });
+                          }).then((value) => _dashboard());
                     },
                     child: Container(
                         padding: EdgeInsets.all(5),
