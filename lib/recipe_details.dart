@@ -292,7 +292,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("Protiens",
+                        Text("Proteins",
                             style: TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.bold)),
                         SizedBox(
