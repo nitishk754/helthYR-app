@@ -13,6 +13,7 @@ class _HealthDataState extends State<HealthData> {
   // create a HealthFactory for use in the app, choose if HealthConnect should be used or not
   HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
   List<HealthDataPoint> _healthDataList = [];
+  List<HealthWorkoutActivityType> _activityList = [];
   bool _spinner = false;
 
   // define the types to get
@@ -24,6 +25,7 @@ class _HealthDataState extends State<HealthData> {
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.WORKOUT
   ];
   var BLOOD_PRESSURE_DIASTOLIC;
   var BLOOD_PRESSURE_SYSTOLIC;
@@ -32,9 +34,11 @@ class _HealthDataState extends State<HealthData> {
   var BLOOD_OXYGEN;
   var ACTIVE_ENERGY_BURNED;
   var STEPS;
-  // var actTyp = [
-  //   HealthWorkoutActivityType.WALKING
-  // ];
+
+  var actTyp = [
+    HealthWorkoutActivityType.WALKING,
+    HealthWorkoutActivityType.BIKING
+  ];
 
   @override
   void initState() {
@@ -42,12 +46,35 @@ class _HealthDataState extends State<HealthData> {
     getHealthData();
   }
 
+  final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
+
   Future<void> getHealthData() async {
+    await Permission.activityRecognition.request();
+
+    bool? hasPermissions =
+        await health.hasPermissions(types, permissions: permissions);
+
+    // hasPermissions = false because the hasPermission cannot disclose if WRITE access exists.
+    // Hence, we have to request with WRITE as well.
+    hasPermissions = false;
+
+    bool authorized = false;
+    if (!hasPermissions) {
+      // requesting access to the data types before reading them
+      try {
+        authorized =
+            await health.requestAuthorization(types, permissions: permissions);
+      } catch (error) {
+        print("Exception in authorize: $error");
+      }
+    }
+
     setState(() {
       _spinner = true;
     });
 // requesting access to the data types before reading them
     bool requested = await health.requestAuthorization(types);
+    health.hasPermissions(types);
 
     var now = DateTime.now();
 
@@ -57,15 +84,21 @@ class _HealthDataState extends State<HealthData> {
     _healthDataList.addAll(
         (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
 
+    bool isAvail = health.isDataTypeAvailable(HealthDataType.WORKOUT);
+
+    // _activityList.addAll()
+
     // get the number of steps for today
     var midnight = DateTime(now.year, now.month, now.day);
     int? steps = await health.getTotalStepsInInterval(
-        now.subtract(const Duration(days: 6)), now);
-    _healthDataList = HealthFactory.removeDuplicates(_healthDataList);
+        now.subtract(const Duration(days: 7)), now);
+    STEPS = steps.toString();
+    print("Steps ${steps.toString()}  ${isAvail}");
+    // _healthDataList = HealthFactory.removeDuplicates(_healthDataList);
 
     // print the results
     _healthDataList.forEach((x) {
-      print("Steps: ${x.value} ${x.typeString}");
+      print("Steps: ${x.value} ${x.type.name}");
     });
     for (int i = 0; i < _healthDataList.length; i++) {
       if (_healthDataList[i].typeString == "BLOOD_PRESSURE_DIASTOLIC") {
@@ -90,31 +123,33 @@ class _HealthDataState extends State<HealthData> {
         break;
       }
     }
-    STEPS = steps.toString();
-    print("Steps ${steps.toString()}");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _spinner
-        ? SizedBox(
-            width: 30,
-            height: 40,
-            child: Center(child: CircularProgressIndicator()))
-        : Center(
-          child: ListView(
-              children: [
-                // Text("BLOOD_PRESSURE_SYSTOLIC:  ${BLOOD_PRESSURE_SYSTOLIC} mm hg",style: TextStyle(fontSize: 18)),
-                // Text("BLOOD_PRESSURE_DIASTOLIC:  ${BLOOD_PRESSURE_DIASTOLIC} mm hg" ,style: TextStyle(fontSize: 18)),
-                Text("HEART_RATE:  ${HEART_RATE} bpm" ,style: TextStyle(fontSize: 18)),
-                Text("SLEEP_ASLEEP:  ${SLEEP_ASLEEP} min" ,style: TextStyle(fontSize: 18)),
-                Text("BLOOD_OXYGEN:  ${BLOOD_OXYGEN} Spo2%" ,style: TextStyle(fontSize: 18)),
-                Text("ACTIVE_ENERGY_BURNED:  ${ACTIVE_ENERGY_BURNED} kcal" ,style: TextStyle(fontSize: 18)),
-                Text("STEPS:  ${STEPS}",style: TextStyle(fontSize: 18))
-              ],
+          ? SizedBox(
+              width: 30,
+              height: 40,
+              child: Center(child: CircularProgressIndicator()))
+          : Center(
+              child: ListView(
+                children: [
+                  // Text("BLOOD_PRESSURE_SYSTOLIC:  ${BLOOD_PRESSURE_SYSTOLIC} mm hg",style: TextStyle(fontSize: 18)),
+                  // Text("BLOOD_PRESSURE_DIASTOLIC:  ${BLOOD_PRESSURE_DIASTOLIC} mm hg" ,style: TextStyle(fontSize: 18)),
+                  Text("HEART_RATE:  ${HEART_RATE} bpm",
+                      style: TextStyle(fontSize: 18)),
+                  Text("SLEEP_ASLEEP:  ${SLEEP_ASLEEP} min",
+                      style: TextStyle(fontSize: 18)),
+                  Text("BLOOD_OXYGEN:  ${BLOOD_OXYGEN} Spo2%",
+                      style: TextStyle(fontSize: 18)),
+                  Text("ACTIVE_ENERGY_BURNED:  ${ACTIVE_ENERGY_BURNED} kcal",
+                      style: TextStyle(fontSize: 18)),
+                  Text("STEPS:  ${STEPS}", style: TextStyle(fontSize: 18))
+                ],
+              ),
             ),
-        ),
     );
   }
 }
