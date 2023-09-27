@@ -233,7 +233,8 @@ class _MealPlanState extends State<MealPlan>
         itemBuilder: (BuildContext context, int index) {
           return ExpansionTile(
             title: Text(
-                "${weeklyMealPlanData['data'][index]['weekDay']} ( ${weeklyMealPlanData['data'][index]['date']} )",
+              
+                "${capitalizeFirstLetter(weeklyMealPlanData['data'][index]['weekDay'])} ( ${weeklyMealPlanData['data'][index]['date']} )",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             subtitle: Text("${caloryVal[index].roundToDouble().round()} cal",
                 style: TextStyle(
@@ -270,7 +271,7 @@ class _MealPlanState extends State<MealPlan>
                             padding:
                                 const EdgeInsets.fromLTRB(20.0, 2.5, 20.0, 2.5),
                             child: Text(
-                                "${weeklyMealPlanData['data'][index]['mealData'][index1]['meal_type']}",
+                                "${capitalizeFirstLetter(weeklyMealPlanData['data'][index]['mealData'][index1]['meal_type'])}",
                                 style: TextStyle(
                                     fontSize: 18,
                                     color: Colors.black,
@@ -356,7 +357,7 @@ class _MealPlanState extends State<MealPlan>
                                                             child: Container(
                                                               // width: 150,
                                                               child: Text(
-                                                                "${weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['recepie']['name']}",
+                                                                "${capitalizeFirstLetter(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][index2]['recepie']['name'])}",
                                                                 style: TextStyle(
                                                                     fontSize:
                                                                         14,

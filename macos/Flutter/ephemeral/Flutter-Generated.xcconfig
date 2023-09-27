@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/Users/codenia/Documents/extention/flutter-3.10.1
-FLUTTER_APPLICATION_PATH=/Users/codenia/Documents/extention/buy/git/helthYR-app
+FLUTTER_ROOT=E:\src\flutter
+FLUTTER_APPLICATION_PATH=D:\my_flutter_projects\health_wellness_project\health_wellness
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0

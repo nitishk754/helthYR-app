@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:health_wellness/activity_screen.dart';
 import 'package:health_wellness/dashboard_screen.dart';
+import 'package:health_wellness/health_controller.dart';
 import 'package:health_wellness/login.dart';
 import 'package:health_wellness/meal_plan.dart';
 import 'package:health_wellness/question_section.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter/services.dart';
 
 var userInput = <String, dynamic>{};
+
+
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -70,10 +73,12 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  void initState() {
+  void initState(){
     //Timer(const Duration(seconds: 3), () => _auth());
     _auth();
     super.initState();
+    
+
   }
 
   _auth() async {
@@ -102,6 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
           //debugPrint('user token ==> $userInput');
           return (login_histories.length == 1 && !prefs.getBool("_isLoggedIn")!)
               ? ResetPass(result)
+              // :HealthData();
               : DashboardScreen(result);
         }),
       );

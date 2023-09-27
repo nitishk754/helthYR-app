@@ -11,6 +11,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health_wellness/activity_screen.dart';
 import 'package:health_wellness/animatedPos.dart';
 import 'package:health_wellness/custom_radio_button_2.dart';
+import 'package:health_wellness/health_controller.dart';
+import 'package:health_wellness/health_data.dart';
 import 'package:health_wellness/login.dart';
 import 'package:health_wellness/main.dart';
 import 'package:health_wellness/meal_plan.dart';
@@ -1015,7 +1017,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => NutrientTracker()))
+                                builder: (context) => HealthData()))
                         .then(onGoBack);
                   });
                 },
@@ -1047,7 +1049,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onChartTouchInteractionUp: (ChartTouchInteractionArgs args) {
           setState(() {
             Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => NutrientTracker()))
+                    MaterialPageRoute(builder: (context) => HealthData()))
                 .then(onGoBack);
           });
         },

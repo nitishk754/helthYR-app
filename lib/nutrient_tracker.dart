@@ -308,7 +308,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                     child: Card(
                                       child: ExpansionTile(
                                         title: Text(
-                                            "${nutrientData["food_log"][index]["meal_type"]}",
+                                            "${capitalizeFirstLetter(nutrientData["food_log"][index]["meal_type"])}",
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.w600)),
@@ -964,6 +964,9 @@ class _NutrientTrackerState extends State<NutrientTracker>
   //   return nutrientData;
   // }
 }
+
+String capitalizeFirstLetter(String s) =>
+    (s.isNotEmpty ?? false) ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
 
 class NutrientData {
   NutrientData(this.nutrient, this.value, this.color);
