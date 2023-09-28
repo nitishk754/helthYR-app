@@ -19,26 +19,22 @@ class _HealthDataState extends State<HealthData> {
   // define the types to get
   static var types = [
     HealthDataType.STEPS,
-    HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
     HealthDataType.HEART_RATE,
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.WORKOUT
   ];
-  var BLOOD_PRESSURE_DIASTOLIC;
-  var BLOOD_PRESSURE_SYSTOLIC;
-  var HEART_RATE;
-  var SLEEP_ASLEEP;
-  var BLOOD_OXYGEN;
-  var ACTIVE_ENERGY_BURNED;
-  var STEPS;
 
-  var actTyp = [
-    HealthWorkoutActivityType.WALKING,
-    HealthWorkoutActivityType.BIKING
-  ];
+  var HEART_RATE = "0 bpm";
+  var SLEEP_ASLEEP = "0 min";
+  var BLOOD_OXYGEN = "0 Spo2%";
+  var ACTIVE_ENERGY_BURNED ="0 kcal";
+  var STEPS ="0";
+
+  // var actTyp = [
+  //   HealthWorkoutActivityType.WALKING,
+  //   HealthWorkoutActivityType.BIKING
+  // ];
 
   @override
   void initState() {
@@ -84,7 +80,7 @@ class _HealthDataState extends State<HealthData> {
     _healthDataList.addAll(
         (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
 
-    bool isAvail = health.isDataTypeAvailable(HealthDataType.WORKOUT);
+    bool isAvail = health.isDataTypeAvailable(HealthDataType.STEPS);
 
     // _activityList.addAll()
 
@@ -98,15 +94,13 @@ class _HealthDataState extends State<HealthData> {
 
     // print the results
     _healthDataList.forEach((x) {
+      print("Steps: ${x.platform}");
+    });
+    _healthDataList.forEach((x) {
       print("Steps: ${x.value} ${x.type.name}");
     });
     for (int i = 0; i < _healthDataList.length; i++) {
-      if (_healthDataList[i].typeString == "BLOOD_PRESSURE_DIASTOLIC") {
-        BLOOD_PRESSURE_DIASTOLIC = _healthDataList[i].value.toString();
-      }
-      if (_healthDataList[i].typeString == "BLOOD_PRESSURE_SYSTOLIC") {
-        BLOOD_PRESSURE_SYSTOLIC = _healthDataList[i].value.toString();
-      }
+      
       if (_healthDataList[i].typeString == "HEART_RATE") {
         HEART_RATE = _healthDataList[i].value.toString();
       }
