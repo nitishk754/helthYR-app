@@ -353,12 +353,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 waterTracker(context),
                 recipeWidget(context),
                 weightTracker(context),
-                discountSupplements(context)
+                discountSupplements(context),
+                smartWatchWidget(context)
                 // recipeWidget(context),
                 // recipeWidget(context)
               ],
             )),
       ],
+    );
+  }
+
+  InkWell smartWatchWidget(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => HealthData()))
+              .then(onGoBack);
+        });
+      },
+      child: Container(
+                   width: MediaQuery.of(context).size.width * 0.45,
+      height: 170,
+      child: Card(
+         elevation: 2.5,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color(blueColor),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        color: Colors.white,
+        child: 
+      Column(children: [
+         Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Watch Data",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            ),
+             Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Center(
+                    child: Image(
+                  height: 55,
+                  width: 55,
+                  image: AssetImage("assets/Images/smart_watch.png"),
+                )),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  
+                ),
+              ),
+            ),
+      ],)
+        ,
+      ),
+                ),
     );
   }
 
@@ -1017,7 +1081,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => HealthData()))
+                                builder: (context) => NutrientTracker()))
                         .then(onGoBack);
                   });
                 },
@@ -1049,7 +1113,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onChartTouchInteractionUp: (ChartTouchInteractionArgs args) {
           setState(() {
             Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HealthData()))
+                    MaterialPageRoute(builder: (context) => NutrientTracker()))
                 .then(onGoBack);
           });
         },
