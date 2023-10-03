@@ -19,6 +19,9 @@ const String educationalContent = 'api/app/educational-content?type=';
 const String weeklyActivity = 'api/app/weekly-activity';
 const String weeklyMealPlan = 'api/app/weekly-meal-plan';
 const String addWeight = 'api/app/add-weight';
+const String getWatchData = 'api/app/get-watch-data';
+
+
 
 // const String saveAnswer = 'api/save-answer';
 // const String saveResult = 'api/save-result';
