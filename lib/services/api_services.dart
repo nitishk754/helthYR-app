@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:health_wellness/fit_health_app.dart';
 import 'package:health_wellness/model/question_model.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -166,8 +167,29 @@ class ApiService {
       "duration": duration == "" ? "0" : duration,
       "intensity": intensity
     });
-    print(formData);
+    print("activityData: ${formData}");
     Response userData = await dio.post(baseUrl + activity, data: formData);
+    return userData.data;
+  }
+
+  Future<Map> addHealthAppData(
+      String platform, List dataList) async {
+    dio.options.headers['X-Authorization'] = auth;
+final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+
+    // dio.options.headers['Authorization'] =
+    //     'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    print(dataList);
+    var formData = jsonEncode({
+      "date": getCurrentDate(),
+      "platform": platform,
+      "watch_data": dataList
+    });
+    debugPrint("watchApp ${formData}");
+    Response userData = await dio.post(baseUrl + storeWatchData , data: formData);
+    print("watchApp ${userData.data}");
     return userData.data;
   }
 
@@ -201,14 +223,19 @@ class ApiService {
     return weeklyMealPlanData.data;
   }
 
-Future<Map> getEducationalContent(String contentType, String contentCategory) async {
+  Future<Map> getEducationalContent(
+      String contentType, String contentCategory) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
-    Response educationalContentData = await dio.get(baseUrl + educationalContent + contentType + '&category=' + contentCategory);
+    Response educationalContentData = await dio.get(baseUrl +
+        educationalContent +
+        contentType +
+        '&category=' +
+        contentCategory);
 
     print("eduData: ${educationalContentData.data}");
     // print(jsonDecode(userData.data.toString()));
@@ -216,8 +243,7 @@ Future<Map> getEducationalContent(String contentType, String contentCategory) as
     return educationalContentData.data;
   }
 
-
-  Future<Map> saveMeals(String mealId,String recipeId, String mealType) async {
+  Future<Map> saveMeals(String mealId, String recipeId, String mealType) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
@@ -226,7 +252,7 @@ Future<Map> getEducationalContent(String contentType, String contentCategory) as
     var formData = jsonEncode({
       "recipe_id": recipeId, //"ernitish1993@gmail.com",
       "meal_type": mealType, //"nitish123",
-      "plan_id" : mealId,
+      "plan_id": mealId,
       // "role": "user"
     });
     print(dio.options.headers['Authorization']);
@@ -239,7 +265,7 @@ Future<Map> getEducationalContent(String contentType, String contentCategory) as
     return saveMealData.data;
   }
 
-    Future<Map> addWeightDash(String userWeight, String weightUnit) async {
+  Future<Map> addWeightDash(String userWeight, String weightUnit) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     dio.options.headers['X-Authorization'] = auth;
@@ -322,8 +348,7 @@ Future<Map> getEducationalContent(String contentType, String contentCategory) as
     // return (userData.data);
   }
 
-
-Future<Map> getRecipeDetails(String id) async {
+  Future<Map> getRecipeDetails(String id) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Accept'] = "application/json";
@@ -348,7 +373,8 @@ Future<Map> getRecipeDetails(String id) async {
     dio.options.headers['Accept'] = "application/json";
 
     try {
-      Response getRecipeSearch = await dio.get(baseUrl + recipeSearch + searchKey);
+      Response getRecipeSearch =
+          await dio.get(baseUrl + recipeSearch + searchKey);
       // log(dashboardData.data.toString());
       print("userRecipeSearch: ${getRecipeSearch.data}");
       return (getRecipeSearch.data);
@@ -360,7 +386,6 @@ Future<Map> getRecipeDetails(String id) async {
     }
   }
 
-  
   Future<Map> getNutrientData(String range) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
@@ -381,7 +406,7 @@ Future<Map> getRecipeDetails(String id) async {
     }
   }
 
-   Future<Map> getWeeklyActivityData() async {
+  Future<Map> getWeeklyActivityData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Accept'] = "application/json";
@@ -401,9 +426,6 @@ Future<Map> getRecipeDetails(String id) async {
     }
   }
 }
-
-
-
 
 String getCurrentDate() {
   var date = DateTime.now();

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health/health.dart';
+import 'package:health_wellness/fit_health_app.dart';
+import 'package:health_wellness/services/api_services.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -14,10 +17,13 @@ class HealthData extends StatefulWidget {
 
 class _HealthDataState extends State<HealthData> {
   // create a HealthFactory for use in the app, choose if HealthConnect should be used or not
+  // late Map userWatchdata;
+  List dataList = [];
   HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
   List<HealthDataPoint> _healthDataList = [];
   List<HealthWorkoutActivityType> _activityList = [];
   bool _spinner = false;
+  String platformName = "";
 
   // define the types to get
   static var types = [
@@ -43,6 +49,16 @@ class _HealthDataState extends State<HealthData> {
   void initState() {
     super.initState();
     getHealthData();
+  }
+
+  Future<void> addWatchData() async {
+    await ApiService().addHealthAppData(platformName, dataList).then((value) {
+      var resource = value["data"];
+      if(resource['status']=="success"){
+      Fluttertoast.showToast(msg: '${resource['message']}');
+
+      }
+    });
   }
 
   final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
@@ -77,21 +93,17 @@ class _HealthDataState extends State<HealthData> {
     health.hasPermissions(types);
 
     var now = DateTime.now();
-    final midnight = DateTime(now.year, now.month, now.day);
 
     try {
       await health.getHealthDataFromTypes(
-          // now.subtract(Duration(days: 1))
-          midnight, now, types);
-
+          now.subtract(Duration(days: 1)), now, types);
     } catch (error) {
       print(error);
     }
 
     // fetch health data from the last 24 hours
     List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-        // now.subtract(Duration(days: 1))
-        midnight, now, types);
+        now.subtract(Duration(days: 1)), now, types);
     _healthDataList.addAll(
         (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
 
@@ -100,40 +112,75 @@ class _HealthDataState extends State<HealthData> {
     // _activityList.addAll()
 
     // get the number of steps for today
-    // var midnight = DateTime(now.year, now.month, now.day);
+    var midnight = DateTime(now.year, now.month, now.day);
     int? steps = await health.getTotalStepsInInterval(
-        // now.subtract(Duration(days: 1))
-        midnight, now);
+        now.subtract(Duration(days: 1)), now);
     STEPS = steps.toString();
+    Map map = {"key": "Steps", "value": STEPS, "unit": "Steps"};
+    dataList.add(map);
+
     print("Steps ${steps.toString()}  ${isAvail}");
     // _healthDataList = HealthFactory.removeDuplicates(_healthDataList);
 
     // print the results
     _healthDataList.forEach((x) {
+      if (x.platform.toString().contains("ANDROID")) {
+        platformName = "android";
+      } else {
+        platformName = "ios";
+      }
       print("Steps: ${x.platform}");
     });
     _healthDataList.forEach((x) {
-      print("Steps: ${x.value} ${x.type.name}");
+      print("Steps: ${x.value} ${x.type.name} ${x.unitString} ${x.platform}");
     });
     for (int i = 0; i < _healthDataList.length; i++) {
       if (_healthDataList[i].typeString == "HEART_RATE") {
         HEART_RATE = _healthDataList[i].value.toString();
+        Map map = {
+          "key": "Heart Rate",
+          "value": HEART_RATE,
+          "unit": _healthDataList[i].unitString.toString()
+        };
+        dataList.add(map);
       }
       if (_healthDataList[i].typeString == "SLEEP_ASLEEP") {
         SLEEP_ASLEEP = _healthDataList[i].value.toString();
+        final startIndex = SLEEP_ASLEEP.indexOf(".");
+        SLEEP_ASLEEP = SLEEP_ASLEEP.substring(0, startIndex);
+        Map map = {
+          "key": "Sleep Time",
+          "value": SLEEP_ASLEEP,
+          "unit": _healthDataList[i].unitString.toString()
+        };
+        dataList.add(map);
       }
       if (_healthDataList[i].typeString == "BLOOD_OXYGEN") {
         BLOOD_OXYGEN = _healthDataList[i].value.toString();
+        Map map = {
+          "key": "Blood Oxygen",
+          "value": BLOOD_OXYGEN,
+          "unit": _healthDataList[i].unitString.toString()
+        };
+        dataList.add(map);
       }
       if (_healthDataList[i].typeString == "ACTIVE_ENERGY_BURNED") {
         ACTIVE_ENERGY_BURNED = _healthDataList[i].value.toString();
         final startIndex = ACTIVE_ENERGY_BURNED.indexOf(".");
         ACTIVE_ENERGY_BURNED = ACTIVE_ENERGY_BURNED.substring(0, startIndex);
+        Map map = {
+          "key": "Calories Burned",
+          "value": ACTIVE_ENERGY_BURNED,
+          "unit": _healthDataList[i].unitString.toString()
+        };
+        dataList.add(map);
 
         break;
       }
       setState(() => _spinner = false);
     }
+      addWatchData();
+
   }
 
   String convertMinutesToHoursMinutes(int minutes) {

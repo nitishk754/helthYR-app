@@ -171,7 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  _addWaterIntake() async {
+  _addWaterIntake() async { 
     setState(() => _spinner = true);
 
     await ApiService().addWaterIntake(waterIntake.toString()).then((value) {
