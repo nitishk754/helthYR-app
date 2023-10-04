@@ -158,7 +158,7 @@ class _HealthDataState extends State<HealthData> {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
           BLOOD_OXYGEN = _healthDataList[i].value.toString();
           final startIndex = BLOOD_OXYGEN.indexOf(".");
-          BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex);
+          BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex+1);
         } else {
           BLOOD_OXYGEN = _healthDataList[i].value.toString();
         }
