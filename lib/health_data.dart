@@ -54,9 +54,8 @@ class _HealthDataState extends State<HealthData> {
   Future<void> addWatchData() async {
     await ApiService().addHealthAppData(platformName, dataList).then((value) {
       var resource = value["data"];
-      if(resource['status']=="success"){
-      Fluttertoast.showToast(msg: '${resource['message']}');
-
+      if (resource['status'] == "success") {
+        Fluttertoast.showToast(msg: '${resource['message']}');
       }
     });
   }
@@ -156,7 +155,13 @@ class _HealthDataState extends State<HealthData> {
         dataList.add(map);
       }
       if (_healthDataList[i].typeString == "BLOOD_OXYGEN") {
-        BLOOD_OXYGEN = _healthDataList[i].value.toString();
+        if (_healthDataList[i].platform.toString().contains("IOS")) {
+          BLOOD_OXYGEN = _healthDataList[i].value.toString();
+          final startIndex = BLOOD_OXYGEN.indexOf(".");
+          BLOOD_OXYGEN = SLEEP_ASLEEP.substring(startIndex);
+        } else {
+          BLOOD_OXYGEN = _healthDataList[i].value.toString();
+        }
         Map map = {
           "key": "Blood Oxygen",
           "value": BLOOD_OXYGEN,
@@ -179,8 +184,7 @@ class _HealthDataState extends State<HealthData> {
       }
       setState(() => _spinner = false);
     }
-      addWatchData();
-
+    addWatchData();
   }
 
   String convertMinutesToHoursMinutes(int minutes) {
