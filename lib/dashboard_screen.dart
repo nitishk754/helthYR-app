@@ -20,6 +20,8 @@ import 'package:health_wellness/nutrient_tracker.dart';
 import 'package:health_wellness/profile_view.dart';
 import 'package:health_wellness/recipes.dart';
 import 'package:health_wellness/services/api_services.dart';
+import 'package:health_wellness/sleep.dart';
+import 'package:health_wellness/steps.dart';
 import 'package:health_wellness/water_tracker.dart';
 import 'package:intl/intl.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -354,12 +356,153 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 recipeWidget(context),
                 weightTracker(context),
                 discountSupplements(context),
+                stepsWidget(context),
+                sleepWidget(context),
                 smartWatchWidget(context)
                 // recipeWidget(context),
                 // recipeWidget(context)
               ],
             )),
       ],
+    );
+  }
+
+
+  InkWell sleepWidget(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SleepData()))
+              .then(onGoBack);
+        });
+      },
+      child: Container(
+                   width: MediaQuery.of(context).size.width * 0.45,
+      height: 170,
+      child: Card(
+         elevation: 2.5,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color(blueColor),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        color: Colors.white,
+        child: 
+      Column(children: [
+         Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Sleep",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            ),
+             Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Center(
+                    child: Image(
+                  height: 55,
+                  width: 55,
+                  image: AssetImage("assets/Images/sleep.png"),
+                )),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  child: Text(
+                        "520 min",
+                        style: TextStyle(
+                            color: Color(orangeShade),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                      ),
+                ),
+              ),
+            ),
+      ],)
+        ,
+      ),
+                ),
+    );
+  }
+
+  InkWell stepsWidget(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => StepsData()))
+              .then(onGoBack);
+        });
+      },
+      child: Container(
+                   width: MediaQuery.of(context).size.width * 0.45,
+      height: 170,
+      child: Card(
+         elevation: 2.5,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Color(blueColor),
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        color: Colors.white,
+        child: 
+      Column(children: [
+         Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Steps",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            ),
+             Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Center(
+                    child: Image(
+                  height: 55,
+                  width: 55,
+                  image: AssetImage("assets/Images/steps.png"),
+                )),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  child: Text(
+                        "2510",
+                        style: TextStyle(
+                            color: Color(orangeShade),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                      ),
+                ),
+              ),
+            ),
+      ],)
+        ,
+      ),
+                ),
     );
   }
 
