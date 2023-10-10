@@ -20,6 +20,9 @@ const String weeklyActivity = 'api/app/weekly-activity';
 const String weeklyMealPlan = 'api/app/weekly-meal-plan';
 const String addWeight = 'api/app/add-weight';
 const String storeWatchData = 'api/app/store-watch-data';
+const String getStepsData = 'api/app/get-step-data';
+const String getSleepData = 'api/app/get-sleep-data';
+
 
 
 

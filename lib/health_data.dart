@@ -24,6 +24,7 @@ class _HealthDataState extends State<HealthData> {
   List<HealthWorkoutActivityType> _activityList = [];
   bool _spinner = false;
   String platformName = "";
+  bool _exerciseTime = false;
 
   // define the types to get
   static var types = [
@@ -31,6 +32,7 @@ class _HealthDataState extends State<HealthData> {
     HealthDataType.HEART_RATE,
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.BLOOD_OXYGEN,
+    HealthDataType.EXERCISE_TIME,
     HealthDataType.ACTIVE_ENERGY_BURNED,
   ];
 
@@ -39,6 +41,7 @@ class _HealthDataState extends State<HealthData> {
   var BLOOD_OXYGEN = "0";
   var ACTIVE_ENERGY_BURNED = "0";
   var STEPS = "0";
+  var EXERCISE_TIME = "0";
 
   // var actTyp = [
   //   HealthWorkoutActivityType.WALKING,
@@ -115,8 +118,7 @@ class _HealthDataState extends State<HealthData> {
     int? steps = await health.getTotalStepsInInterval(
         now.subtract(Duration(days: 1)), now);
     STEPS = steps.toString();
-    Map map = {"key": "Steps", "value": STEPS, "unit": "Steps"};
-    dataList.add(map);
+    // Map map = {"key": "Steps", "value": STEPS, "unit": "Steps"};
 
     print("Steps ${steps.toString()}  ${isAvail}");
     // _healthDataList = HealthFactory.removeDuplicates(_healthDataList);
@@ -127,19 +129,32 @@ class _HealthDataState extends State<HealthData> {
         platformName = "android";
       } else {
         platformName = "ios";
+        _exerciseTime = true;
       }
       print("Steps: ${x.platform}");
+      print("steps: ${x.deviceId}");
     });
     _healthDataList.forEach((x) {
       print("Steps: ${x.value} ${x.type.name} ${x.unitString} ${x.platform}");
     });
+    Map map1;
     for (int i = 0; i < _healthDataList.length; i++) {
+      if (_healthDataList[i].typeString == "STEPS") {
+        map1 = {
+          "key": "Steps",
+          "value": STEPS,
+          "unit": "Steps",
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
+        };
+        dataList.add(map1);
+      }
       if (_healthDataList[i].typeString == "HEART_RATE") {
         HEART_RATE = _healthDataList[i].value.toString();
         Map map = {
           "key": "Heart Rate",
           "value": HEART_RATE,
-          "unit": _healthDataList[i].unitString.toString()
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
       }
@@ -150,7 +165,8 @@ class _HealthDataState extends State<HealthData> {
         Map map = {
           "key": "Sleep Time",
           "value": SLEEP_ASLEEP,
-          "unit": _healthDataList[i].unitString.toString()
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
       }
@@ -158,16 +174,31 @@ class _HealthDataState extends State<HealthData> {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
           BLOOD_OXYGEN = _healthDataList[i].value.toString();
           final startIndex = BLOOD_OXYGEN.indexOf(".");
-          BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex+1);
+          BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex + 1);
         } else {
           BLOOD_OXYGEN = _healthDataList[i].value.toString();
         }
         Map map = {
           "key": "Blood Oxygen",
           "value": BLOOD_OXYGEN,
-          "unit": _healthDataList[i].unitString.toString()
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
+      }
+       if (_healthDataList[i].typeString == "EXERCISE_TIME") {
+        if (_healthDataList[i].platform.toString().contains("IOS")) {
+          Map map = {
+          "key": "Exercise Time",
+          "value": EXERCISE_TIME,
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
+        };
+        dataList.add(map);
+        } else {
+         
+        }
+      
       }
       if (_healthDataList[i].typeString == "ACTIVE_ENERGY_BURNED") {
         ACTIVE_ENERGY_BURNED = _healthDataList[i].value.toString();
@@ -176,7 +207,8 @@ class _HealthDataState extends State<HealthData> {
         Map map = {
           "key": "Calories Burned",
           "value": ACTIVE_ENERGY_BURNED,
-          "unit": _healthDataList[i].unitString.toString()
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
 
@@ -292,6 +324,62 @@ class _HealthDataState extends State<HealthData> {
               // ),
               // Center(child: Text("STEPS:  ${STEPS}", style: TextStyle(fontSize: 18)))
             ),
+    );
+  }
+
+  SizedBox exerciseTime(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      child: Card(
+        elevation: 2.5,
+        shape: RoundedRectangleBorder(
+            //<-- SEE HERE
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: BorderRadius.circular(12.0)),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Image(
+                        width: 50,
+                        height: 50,
+                        image: AssetImage("assets/Images/exercise.png")),
+                  ),
+                  Text("Exercise Time",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      )),
+                ],
+              ),
+            ),
+            Expanded(
+                flex: 1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text("${(SLEEP_ASLEEP)} min",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          )),
+                    ),
+                    // Text("${convertMinutesToHoursMinutes(int.parse(SLEEP_ASLEEP))}"),
+                  ],
+                )),
+          ],
+        ),
+      ),
     );
   }
 

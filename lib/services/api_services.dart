@@ -425,7 +425,31 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
       return returnError;
     }
   }
+
+  Future<Map> getSevenStepsData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    Response stepsData = await dio.get(baseUrl + getStepsData);
+    return stepsData.data;
+  }
+
+  Future<Map> getSevenSleepData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    dio.options.headers['X-Authorization'] = auth;
+    dio.options.headers['Authorization'] =
+        'Bearer ${prefs.getString("_token")}';
+    // var formData = jsonEncode({"email": email, "password": pass});
+    Response sleepData = await dio.get(baseUrl + getSleepData);
+    return sleepData.data;
+  }
 }
+
+
 
 String getCurrentDate() {
   var date = DateTime.now();
