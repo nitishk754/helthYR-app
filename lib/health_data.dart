@@ -209,7 +209,7 @@ class _HealthDataState extends State<HealthData> {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
           Map map = {
           "key": "Walking Running Distance",
-          "value": EXERCISE_TIME,
+          "value": DISTANCE_WALKING_RUNNING,
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -377,9 +377,9 @@ class _HealthDataState extends State<HealthData> {
                     child: Image(
                         width: 50,
                         height: 50,
-                        image: AssetImage("assets/Images/exercise.png")),
+                        image: AssetImage("assets/Images/running_distance.png")),
                   ),
-                  Text("Exercise Time",
+                  Text("Running & Walking Distance",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -395,7 +395,7 @@ class _HealthDataState extends State<HealthData> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Text("${(EXERCISE_TIME)} m",
+                      child: Text("${(DISTANCE_WALKING_RUNNING)} m",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
