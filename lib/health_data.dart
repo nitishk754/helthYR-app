@@ -25,6 +25,7 @@ class _HealthDataState extends State<HealthData> {
   bool _spinner = false;
   String platformName = "";
   bool _exerciseTime = false;
+  bool _dsitanceRunning = false;
 
   // define the types to get
   static var types = [
@@ -33,6 +34,7 @@ class _HealthDataState extends State<HealthData> {
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.EXERCISE_TIME,
+    HealthDataType.DISTANCE_WALKING_RUNNING,
     HealthDataType.ACTIVE_ENERGY_BURNED,
   ];
 
@@ -42,6 +44,7 @@ class _HealthDataState extends State<HealthData> {
   var ACTIVE_ENERGY_BURNED = "0";
   var STEPS = "0";
   var EXERCISE_TIME = "0";
+  var DISTANCE_WALKING_RUNNING = "0";
 
   // var actTyp = [
   //   HealthWorkoutActivityType.WALKING,
@@ -130,6 +133,7 @@ class _HealthDataState extends State<HealthData> {
       } else {
         platformName = "ios";
         _exerciseTime = true;
+        _dsitanceRunning = true;
       }
       print("Steps: ${x.platform}");
       print("steps: ${x.deviceId}");
@@ -188,8 +192,23 @@ class _HealthDataState extends State<HealthData> {
       }
        if (_healthDataList[i].typeString == "EXERCISE_TIME") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
+          
           Map map = {
           "key": "Exercise Time",
+          "value": EXERCISE_TIME,
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
+        };
+        dataList.add(map);
+        } else {
+         
+        }
+      
+      }
+       if (_healthDataList[i].typeString == "DISTANCE_WALKING_RUNNING") {
+        if (_healthDataList[i].platform.toString().contains("IOS")) {
+          Map map = {
+          "key": "Walking Running Distance",
           "value": EXERCISE_TIME,
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
@@ -303,6 +322,14 @@ class _HealthDataState extends State<HealthData> {
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: sleepLevel(context),
                 ),
+                (_exerciseTime)? Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                  child: exerciseTime(context),
+                ):Container(),
+                 (_dsitanceRunning)? Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                  child: distanceRunWalk(context),
+                ):Container(),
               ],
 
               // Text("${convertMinutesToHoursMinutes(150)}"),
@@ -324,6 +351,62 @@ class _HealthDataState extends State<HealthData> {
               // ),
               // Center(child: Text("STEPS:  ${STEPS}", style: TextStyle(fontSize: 18)))
             ),
+    );
+  }
+
+  SizedBox distanceRunWalk(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      child: Card(
+        elevation: 2.5,
+        shape: RoundedRectangleBorder(
+            //<-- SEE HERE
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: BorderRadius.circular(12.0)),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Image(
+                        width: 50,
+                        height: 50,
+                        image: AssetImage("assets/Images/exercise.png")),
+                  ),
+                  Text("Exercise Time",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      )),
+                ],
+              ),
+            ),
+            Expanded(
+                flex: 1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text("${(EXERCISE_TIME)} m",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          )),
+                    ),
+                    // Text("${convertMinutesToHoursMinutes(int.parse(SLEEP_ASLEEP))}"),
+                  ],
+                )),
+          ],
+        ),
+      ),
     );
   }
 
@@ -368,7 +451,7 @@ class _HealthDataState extends State<HealthData> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Text("${(SLEEP_ASLEEP)} min",
+                      child: Text("${(EXERCISE_TIME)} min",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
