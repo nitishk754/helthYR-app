@@ -192,7 +192,7 @@ class _HealthDataState extends State<HealthData> {
       }
        if (_healthDataList[i].typeString == "EXERCISE_TIME") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
-          
+          EXERCISE_TIME = _healthDataList[i].value.toString();
           Map map = {
           "key": "Exercise Time",
           "value": EXERCISE_TIME,
@@ -207,6 +207,7 @@ class _HealthDataState extends State<HealthData> {
       }
        if (_healthDataList[i].typeString == "DISTANCE_WALKING_RUNNING") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
+          DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
           Map map = {
           "key": "Walking Running Distance",
           "value": DISTANCE_WALKING_RUNNING,
