@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:health/health.dart';
@@ -28,13 +30,23 @@ class _HealthDataState extends State<HealthData> {
   bool _dsitanceRunning = false;
 
   // define the types to get
-  static var types = [
+  static var typesIos = [
     HealthDataType.STEPS,
     HealthDataType.HEART_RATE,
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.EXERCISE_TIME,
     HealthDataType.DISTANCE_WALKING_RUNNING,
+    HealthDataType.ACTIVE_ENERGY_BURNED,
+  ];
+
+  static var typesAndroid = [
+    HealthDataType.STEPS,
+    HealthDataType.HEART_RATE,
+    HealthDataType.SLEEP_ASLEEP,
+    HealthDataType.BLOOD_OXYGEN,
+    HealthDataType.MOVE_MINUTES,
+    HealthDataType.DISTANCE_DELTA,
     HealthDataType.ACTIVE_ENERGY_BURNED,
   ];
 
@@ -66,9 +78,17 @@ class _HealthDataState extends State<HealthData> {
     });
   }
 
-  final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
-
   Future<void> getHealthData() async {
+    bool isIOS = Platform.isIOS;
+
+    if (isIOS) {
+      final permissions =
+          typesIos.map((e) => HealthDataAccess.READ_WRITE).toList();
+    } else {
+      final permissions =
+          typesAndroid.map((e) => HealthDataAccess.READ_WRITE).toList();
+    }
+
     await Permission.activityRecognition.request();
 
     // bool? hasPermissions =
@@ -94,9 +114,19 @@ class _HealthDataState extends State<HealthData> {
     });
     // health.requestAuthorization(types).catchError((error, stackTrace) => print(error));
 // requesting access to the data types before reading them
-    bool requested = await health.requestAuthorization(types);
-    health.hasPermissions(types);
 
+    if (isIOS) {
+      bool requested = await health.requestAuthorization(typesIos);
+      health.hasPermissions(typesIos);
+      getVitals(typesIos);
+    } else {
+      bool requested = await health.requestAuthorization(typesAndroid);
+      health.hasPermissions(typesAndroid);
+      getVitals(typesAndroid);
+    }
+  }
+
+  Future<void> getVitals(var types) async {
     var now = DateTime.now();
 
     try {
@@ -107,8 +137,10 @@ class _HealthDataState extends State<HealthData> {
     }
 
     // fetch health data from the last 24 hours
-    List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-        now.subtract(Duration(days: 1)), now, types);
+    var midnight = DateTime(now.year, now.month, now.day);
+
+    List<HealthDataPoint> healthData =
+        await health.getHealthDataFromTypes(midnight, now, types);
     _healthDataList.addAll(
         (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
 
@@ -117,13 +149,12 @@ class _HealthDataState extends State<HealthData> {
     // _activityList.addAll()
 
     // get the number of steps for today
-    var midnight = DateTime(now.year, now.month, now.day);
-    int? steps = await health.getTotalStepsInInterval(
-        now.subtract(Duration(days: 1)), now);
-    STEPS = steps.toString();
+    // int? steps = await health.getTotalStepsInInterval(
+    //     now.subtract(Duration(days: 1)), now);
+    // STEPS = steps.toString();
     // Map map = {"key": "Steps", "value": STEPS, "unit": "Steps"};
 
-    print("Steps ${steps.toString()}  ${isAvail}");
+    // print("Steps ${steps.toString()}  ${isAvail}");
     // _healthDataList = HealthFactory.removeDuplicates(_healthDataList);
 
     // print the results
@@ -139,18 +170,26 @@ class _HealthDataState extends State<HealthData> {
       print("steps: ${x.deviceId}");
     });
     _healthDataList.forEach((x) {
-      print("Steps: ${x.value} ${x.type.name} ${x.unitString} ${x.platform}");
+      print(
+          "Steps: ${x.value} ${x.type.name} ${x.unitString} ${x.dateFrom} ${x.platform} ");
     });
-    Map map1;
+    double stepVal = 0.0;
+    double distanceWalk = 0.0;
+    double energyBurn = 0.0;
+    double exerciseTime = 0.0;
+
     for (int i = 0; i < _healthDataList.length; i++) {
-      if (_healthDataList[i].typeString == "STEPS") {
-        map1 = {
+      if (_healthDataList[i].type.name == "STEPS") {
+        stepVal = stepVal + double.parse(_healthDataList[i].value.toString());
+        STEPS =
+            stepVal.toString().substring(0, stepVal.toString().indexOf('.'));
+        Map map = {
           "key": "Steps",
           "value": STEPS,
           "unit": "Steps",
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
-        dataList.add(map1);
+        dataList.add(map);
       }
       if (_healthDataList[i].typeString == "HEART_RATE") {
         HEART_RATE = _healthDataList[i].value.toString();
@@ -190,40 +229,75 @@ class _HealthDataState extends State<HealthData> {
         };
         dataList.add(map);
       }
-       if (_healthDataList[i].typeString == "EXERCISE_TIME") {
+      if (_healthDataList[i].typeString == "EXERCISE_TIME") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
           EXERCISE_TIME = _healthDataList[i].value.toString();
           Map map = {
-          "key": "Exercise Time",
-          "value": EXERCISE_TIME,
-          "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
-        };
-        dataList.add(map);
-        } else {
-         
-        }
-      
+            "key": "Exercise Time",
+            "value": EXERCISE_TIME,
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        } else {}
       }
-       if (_healthDataList[i].typeString == "DISTANCE_WALKING_RUNNING") {
+      if (_healthDataList[i].typeString == "DISTANCE_WALKING_RUNNING") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
-          DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
+          distanceWalk =
+              distanceWalk + double.parse(_healthDataList[i].value.toString());
+          DISTANCE_WALKING_RUNNING = distanceWalk
+              .toString()
+              .substring(0, stepVal.toString().indexOf('.'));
+          // DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
           Map map = {
-          "key": "Walking Running Distance",
-          "value": DISTANCE_WALKING_RUNNING,
-          "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
-        };
-        dataList.add(map);
-        } else {
-         
-        }
-      
+            "key": "Walking Running Distance",
+            "value": DISTANCE_WALKING_RUNNING,
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        } else {}
+      }
+
+      if (_healthDataList[i].typeString == "MOVE_MINUTES") {
+        if (_healthDataList[i].platform.toString().contains("ANDROID")) {
+          exerciseTime =
+              exerciseTime + double.parse(_healthDataList[i].value.toString());
+          EXERCISE_TIME = exerciseTime
+              .toString()
+              .substring(0, exerciseTime.toString().indexOf('.'));
+          // EXERCISE_TIME = _healthDataList[i].value.toString();
+          Map map = {
+            "key": "Exercise Time",
+            "value": EXERCISE_TIME,
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        } else {}
+      }
+      if (_healthDataList[i].typeString == "DISTANCE_DELTA") {
+        if (_healthDataList[i].platform.toString().contains("ANDROID")) {
+          distanceWalk =
+              distanceWalk + double.parse(_healthDataList[i].value.toString());
+          DISTANCE_WALKING_RUNNING = distanceWalk
+              .toString()
+              .substring(0, distanceWalk.toString().indexOf('.'));
+          Map map = {
+            "key": "Walking Running Distance",
+            "value": DISTANCE_WALKING_RUNNING,
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        } else {}
       }
       if (_healthDataList[i].typeString == "ACTIVE_ENERGY_BURNED") {
-        ACTIVE_ENERGY_BURNED = _healthDataList[i].value.toString();
-        final startIndex = ACTIVE_ENERGY_BURNED.indexOf(".");
-        ACTIVE_ENERGY_BURNED = ACTIVE_ENERGY_BURNED.substring(0, startIndex);
+           energyBurn = energyBurn + double.parse(_healthDataList[i].value.toString());
+        ACTIVE_ENERGY_BURNED = energyBurn.toString().substring(0,energyBurn.toString().indexOf('.'));
+        // ACTIVE_ENERGY_BURNED = _healthDataList[i].value.toString();
+        // final startIndex = ACTIVE_ENERGY_BURNED.indexOf(".");
+        // ACTIVE_ENERGY_BURNED = ACTIVE_ENERGY_BURNED.substring(0, startIndex);
         Map map = {
           "key": "Calories Burned",
           "value": ACTIVE_ENERGY_BURNED,
@@ -232,10 +306,11 @@ class _HealthDataState extends State<HealthData> {
         };
         dataList.add(map);
 
-        break;
+        // break;
       }
       setState(() => _spinner = false);
     }
+
     addWatchData();
   }
 
@@ -323,14 +398,25 @@ class _HealthDataState extends State<HealthData> {
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: sleepLevel(context),
                 ),
-                (_exerciseTime)? Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: exerciseTime(context),
-                ):Container(),
-                 (_dsitanceRunning)? Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: distanceRunWalk(context),
-                ):Container(),
+                (_exerciseTime)
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                        child: exerciseTime(context, "Exercise Time"),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                        child: exerciseTime(context, "Move Minutes"),
+                      ),
+                (_dsitanceRunning)
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                        child: distanceRunWalk(
+                            context, "Distance Walking & Running"),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                        child: distanceRunWalk(context, "Distance"),
+                      ),
               ],
 
               // Text("${convertMinutesToHoursMinutes(150)}"),
@@ -355,7 +441,7 @@ class _HealthDataState extends State<HealthData> {
     );
   }
 
-  SizedBox distanceRunWalk(BuildContext context) {
+  SizedBox distanceRunWalk(BuildContext context, String vitalVal) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: 100,
@@ -378,9 +464,10 @@ class _HealthDataState extends State<HealthData> {
                     child: Image(
                         width: 50,
                         height: 50,
-                        image: AssetImage("assets/Images/running_distance.png")),
+                        image:
+                            AssetImage("assets/Images/running_distance.png")),
                   ),
-                  Text("Running & Walking Distance",
+                  Text("${vitalVal}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -411,7 +498,7 @@ class _HealthDataState extends State<HealthData> {
     );
   }
 
-  SizedBox exerciseTime(BuildContext context) {
+  SizedBox exerciseTime(BuildContext context, String vitalVal) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: 100,
@@ -436,7 +523,7 @@ class _HealthDataState extends State<HealthData> {
                         height: 50,
                         image: AssetImage("assets/Images/exercise.png")),
                   ),
-                  Text("Exercise Time",
+                  Text("${vitalVal}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,

@@ -21,6 +21,7 @@ class _StepsDataState extends State<StepsData>
   late TooltipBehavior _tooltip;
   bool _spinner = false;
   String todayStepVal = "";
+  double maxSteps = 0.0;
 
   @override
   void initState() {
@@ -48,6 +49,14 @@ class _StepsDataState extends State<StepsData>
       for (int i = 0; i < value['week_steps'].length; i++) {
         data.add(_ChartData(value['week_steps'][i]['activity_day'],
             double.parse(value['week_steps'][i]['total_steps'])));
+            if(i+1<=value['week_steps'].length-1){
+              if(double.parse(value['week_steps'][i]['total_steps'])>double.parse(value['week_steps'][i+1]['total_steps'])){
+                maxSteps=double.parse(value['week_steps'][i]['total_steps']);
+              }else{
+                maxSteps=double.parse(value['week_steps'][i+1]['total_steps']);
+
+              }
+            }
       }
 
       setState(() {
@@ -210,17 +219,20 @@ class _StepsDataState extends State<StepsData>
                                   const BorderRadius.all(Radius.circular(12)),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(20.0),
+                              padding: const EdgeInsets.only(top:20.0,right: 20.0),
                               child: Container(
                                 height: 240,
                                 child: SizedBox(
                                     width: 10,
                                     height: 240,
                                     child: SfCartesianChart(
-                                        primaryXAxis: CategoryAxis(),
+                                        primaryXAxis: CategoryAxis(
+                                          title: AxisTitle(text: "Days")
+                                        ),
                                         primaryYAxis: NumericAxis(
+                                          title: AxisTitle(text: 'Steps'),
                                             minimum: 0,
-                                            maximum: 1000,
+                                            maximum: maxSteps,
                                             interval: 100),
                                         tooltipBehavior: _tooltip,
                                         series: <ChartSeries<_ChartData,
@@ -233,7 +245,7 @@ class _StepsDataState extends State<StepsData>
                                               yValueMapper:
                                                   (_ChartData data, _) =>
                                                       data.y,
-                                              name: 'Gold',
+                                              name: 'Steps',
                                               color: Color(blueColor))
                                         ])),
                               ),

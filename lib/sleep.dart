@@ -21,6 +21,7 @@ class _SleepDataState extends State<SleepData>
   late TooltipBehavior _tooltip;
   bool _spinner = false;
   String todaySleepVal = "";
+  double maxSleep =0.0;
 
   @override
   void initState() {
@@ -48,6 +49,14 @@ class _SleepDataState extends State<SleepData>
       for (int i = 0; i < res['data']['week_sleep'].length; i++) {
         data.add(_ChartData(res['data']['week_sleep'][i]['activity_day'],
             double.parse(res['data']['week_sleep'][i]['total_sleep'])));
+             if(i+1<=res['data']['week_sleep'].length-1){
+              if(double.parse(res['data']['week_sleep'][i]['total_sleep'])>double.parse(res['data']['week_sleep'][i+1]['total_sleep'])){
+                maxSleep=double.parse(res['data']['week_sleep'][i]['total_sleep']);
+              }else{
+                maxSleep=double.parse(res['data']['week_sleep'][i+1]['total_sleep']);
+
+              }
+            }
       }
 
       setState(() {
@@ -210,18 +219,21 @@ class _SleepDataState extends State<SleepData>
                                   const BorderRadius.all(Radius.circular(12)),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(20.0),
+                              padding: const EdgeInsets.only(top:20.0,right: 20.0),
                               child: Container(
                                 height: 240,
                                 child: SizedBox(
                                     width: 10,
                                     height: 240,
                                     child: SfCartesianChart(
-                                        primaryXAxis: CategoryAxis(),
+                                        primaryXAxis: CategoryAxis(
+                                          title: AxisTitle(text: "Days")
+                                        ),
                                         primaryYAxis: NumericAxis(
+                                          title: AxisTitle(text: "Minutes"),
                                             minimum: 0,
-                                            maximum: 650,
-                                            interval: 100),
+                                            maximum: maxSleep,
+                                            interval: 50),
                                         tooltipBehavior: _tooltip,
                                         series: <ChartSeries<_ChartData,
                                             String>>[
@@ -233,7 +245,7 @@ class _SleepDataState extends State<SleepData>
                                               yValueMapper:
                                                   (_ChartData data, _) =>
                                                       data.y,
-                                              name: 'Gold',
+                                              name: 'Sleep',
                                               color: Color(blueColor))
                                         ])),
                               ),

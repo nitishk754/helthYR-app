@@ -351,7 +351,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 nutrientTracker(context),
                 activityTracker(context),
-                educationContent(context),
+                habitBuilder(context),
                 waterTracker(context),
                 recipeWidget(context),
                 weightTracker(context),
@@ -421,7 +421,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.all(5.0),
                 child: Container(
                   child: Text(
-                        "520 min",
+                        "${dashboardData['today_sleep']} min",
                         style: TextStyle(
                             color: Color(orangeShade),
                             fontSize: 20,
@@ -490,7 +490,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.all(5.0),
                 child: Container(
                   child: Text(
-                        "2510",
+                        "${dashboardData['today_step']}",
                         style: TextStyle(
                             color: Color(orangeShade),
                             fontSize: 20,
@@ -535,7 +535,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      "Watch Data",
+                      "Health Vitals",
                       style: TextStyle(
                           color: Colors.black87,
                           fontSize: 15,
@@ -1101,7 +1101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  InkWell educationContent(BuildContext context) {
+  InkWell habitBuilder(BuildContext context) {
     return InkWell(
       onTap: () {
         setState(() {
@@ -1130,7 +1130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Align(
                       alignment: Alignment.topLeft,
                       child: Text(
-                        "Educational Content",
+                        "Habit Builder",
                         style: TextStyle(
                             color: Colors.black87,
                             fontSize: 15,
