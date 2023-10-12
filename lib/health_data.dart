@@ -424,7 +424,7 @@ class _HealthDataState extends State<HealthData> {
                     ? Padding(
                         padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                         child: distanceRunWalk(
-                            context, "Distance Walking & Running"),
+                            context, "Distance \nWalking + Running"),
                       )
                     : Padding(
                         padding: const EdgeInsets.only(left: 15.0, right: 15.0),
