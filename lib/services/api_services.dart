@@ -173,7 +173,7 @@ class ApiService {
   }
 
   Future<Map> addHealthAppData(
-      String platform, List dataList) async {
+      String platform, List dataList, String device_id) async {
     dio.options.headers['X-Authorization'] = auth;
 final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -185,7 +185,8 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     var formData = jsonEncode({
       "date": getCurrentDate(),
       "platform": platform,
-      "watch_data": dataList
+      "watch_data": dataList,
+      "device_id": device_id
     });
     debugPrint("watchApp ${formData}");
     Response userData = await dio.post(baseUrl + storeWatchData , data: formData);

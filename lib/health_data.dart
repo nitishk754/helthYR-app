@@ -28,12 +28,13 @@ class _HealthDataState extends State<HealthData> {
   String platformName = "";
   bool _exerciseTime = false;
   bool _dsitanceRunning = false;
+  String device_id = "";
 
   // define the types to get
   static var typesIos = [
     HealthDataType.STEPS,
     HealthDataType.HEART_RATE,
-    HealthDataType.SLEEP_ASLEEP,
+    HealthDataType.SLEEP_IN_BED,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.EXERCISE_TIME,
     HealthDataType.DISTANCE_WALKING_RUNNING,
@@ -70,7 +71,9 @@ class _HealthDataState extends State<HealthData> {
   }
 
   Future<void> addWatchData() async {
-    await ApiService().addHealthAppData(platformName, dataList).then((value) {
+    await ApiService()
+        .addHealthAppData(platformName, dataList, device_id)
+        .then((value) {
       var resource = value["data"];
       if (resource['status'] == "success") {
         Fluttertoast.showToast(msg: '${resource['message']}');
@@ -166,6 +169,7 @@ class _HealthDataState extends State<HealthData> {
         _exerciseTime = true;
         _dsitanceRunning = true;
       }
+      device_id = x.deviceId;
       print("Steps: ${x.platform}");
       print("steps: ${x.deviceId}");
     });
@@ -177,6 +181,7 @@ class _HealthDataState extends State<HealthData> {
     double distanceWalk = 0.0;
     double energyBurn = 0.0;
     double exerciseTime = 0.0;
+    double sleepVal = 0.0;
 
     for (int i = 0; i < _healthDataList.length; i++) {
       if (_healthDataList[i].type.name == "STEPS") {
@@ -185,7 +190,7 @@ class _HealthDataState extends State<HealthData> {
             stepVal.toString().substring(0, stepVal.toString().indexOf('.'));
         Map map = {
           "key": "Steps",
-          "value": STEPS,
+          "value": _healthDataList[i].value.toString(),
           "unit": "Steps",
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -195,19 +200,20 @@ class _HealthDataState extends State<HealthData> {
         HEART_RATE = _healthDataList[i].value.toString();
         Map map = {
           "key": "Heart Rate",
-          "value": HEART_RATE,
+          "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
       }
       if (_healthDataList[i].typeString == "SLEEP_ASLEEP") {
-        SLEEP_ASLEEP = _healthDataList[i].value.toString();
-        final startIndex = SLEEP_ASLEEP.indexOf(".");
-        SLEEP_ASLEEP = SLEEP_ASLEEP.substring(0, startIndex);
+        sleepVal = sleepVal + double.parse(_healthDataList[i].value.toString());
+        SLEEP_ASLEEP =
+            sleepVal.toString().substring(0, sleepVal.toString().indexOf('.'));
+
         Map map = {
           "key": "Sleep Time",
-          "value": SLEEP_ASLEEP,
+          "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -223,7 +229,7 @@ class _HealthDataState extends State<HealthData> {
         }
         Map map = {
           "key": "Blood Oxygen",
-          "value": BLOOD_OXYGEN,
+          "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -231,10 +237,14 @@ class _HealthDataState extends State<HealthData> {
       }
       if (_healthDataList[i].typeString == "EXERCISE_TIME") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
-          EXERCISE_TIME = _healthDataList[i].value.toString();
+          exerciseTime =
+              exerciseTime + double.parse(_healthDataList[i].value.toString());
+          EXERCISE_TIME = exerciseTime
+              .toString()
+              .substring(0, exerciseTime.toString().indexOf('.'));
           Map map = {
             "key": "Exercise Time",
-            "value": EXERCISE_TIME,
+            "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
             "watch_date_time": _healthDataList[i].dateFrom.toString()
           };
@@ -251,7 +261,7 @@ class _HealthDataState extends State<HealthData> {
           // DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
           Map map = {
             "key": "Walking Running Distance",
-            "value": DISTANCE_WALKING_RUNNING,
+            "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
             "watch_date_time": _healthDataList[i].dateFrom.toString()
           };
@@ -269,7 +279,7 @@ class _HealthDataState extends State<HealthData> {
           // EXERCISE_TIME = _healthDataList[i].value.toString();
           Map map = {
             "key": "Exercise Time",
-            "value": EXERCISE_TIME,
+            "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
             "watch_date_time": _healthDataList[i].dateFrom.toString()
           };
@@ -285,7 +295,7 @@ class _HealthDataState extends State<HealthData> {
               .substring(0, distanceWalk.toString().indexOf('.'));
           Map map = {
             "key": "Walking Running Distance",
-            "value": DISTANCE_WALKING_RUNNING,
+            "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
             "watch_date_time": _healthDataList[i].dateFrom.toString()
           };
@@ -293,14 +303,17 @@ class _HealthDataState extends State<HealthData> {
         } else {}
       }
       if (_healthDataList[i].typeString == "ACTIVE_ENERGY_BURNED") {
-           energyBurn = energyBurn + double.parse(_healthDataList[i].value.toString());
-        ACTIVE_ENERGY_BURNED = energyBurn.toString().substring(0,energyBurn.toString().indexOf('.'));
+        energyBurn =
+            energyBurn + double.parse(_healthDataList[i].value.toString());
+        ACTIVE_ENERGY_BURNED = energyBurn
+            .toString()
+            .substring(0, energyBurn.toString().indexOf('.'));
         // ACTIVE_ENERGY_BURNED = _healthDataList[i].value.toString();
         // final startIndex = ACTIVE_ENERGY_BURNED.indexOf(".");
         // ACTIVE_ENERGY_BURNED = ACTIVE_ENERGY_BURNED.substring(0, startIndex);
         Map map = {
           "key": "Calories Burned",
-          "value": ACTIVE_ENERGY_BURNED,
+          "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };

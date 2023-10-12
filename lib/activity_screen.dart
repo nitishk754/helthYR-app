@@ -88,8 +88,19 @@ class _ActivityWidgetState extends State<ActivityWidget>
   }
 
   _weeklyData() async {
-    setState(() => _spinner = true);
+
+     setState(() {
+        
+        _spinner = true;
+     });
     await ApiService().getWeeklyActivityData().then((value) {
+      setState(() {
+        weeklyActivityData={};
+        data = [];
+        walkingData = [];
+        runningData = [];
+      });
+      
       var res = value["data"];
       setState(() => _spinner = false);
       if (res["status"] == "success") {
@@ -1328,6 +1339,7 @@ class _ActivityWidgetState extends State<ActivityWidget>
           if (tabIndex == 0) {
             _loadActivity();
           } else {
+            weeklyActivityData = {};
             _weeklyData();
           }
           print(tabIndex);

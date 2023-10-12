@@ -49,13 +49,17 @@ class _SleepDataState extends State<SleepData>
       for (int i = 0; i < res['data']['week_sleep'].length; i++) {
         data.add(_ChartData(res['data']['week_sleep'][i]['activity_day'],
             double.parse(res['data']['week_sleep'][i]['total_sleep'])));
-             if(i+1<=res['data']['week_sleep'].length-1){
+            if(res['data']['week_sleep'].length>1){
+               if(i+1<=res['data']['week_sleep'].length-1){
               if(double.parse(res['data']['week_sleep'][i]['total_sleep'])>double.parse(res['data']['week_sleep'][i+1]['total_sleep'])){
                 maxSleep=double.parse(res['data']['week_sleep'][i]['total_sleep']);
               }else{
                 maxSleep=double.parse(res['data']['week_sleep'][i+1]['total_sleep']);
 
               }
+            }
+            }else{
+               maxSleep=double.parse(res['data']['week_sleep'][i]['total_sleep']);
             }
       }
 

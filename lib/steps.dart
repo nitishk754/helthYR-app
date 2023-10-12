@@ -44,19 +44,28 @@ class _StepsDataState extends State<StepsData>
     setState(() => _spinner = true);
     await ApiService().getSevenStepsData().then((value) {
       var res = value["data"];
-      todayStepVal = value['today_steps'];
+      todayStepVal = value['today_steps'].toString();
       // _spinner = false;
       for (int i = 0; i < value['week_steps'].length; i++) {
         data.add(_ChartData(value['week_steps'][i]['activity_day'],
-            double.parse(value['week_steps'][i]['total_steps'])));
-            if(i+1<=value['week_steps'].length-1){
-              if(double.parse(value['week_steps'][i]['total_steps'])>double.parse(value['week_steps'][i+1]['total_steps'])){
-                maxSteps=double.parse(value['week_steps'][i]['total_steps']);
-              }else{
-                maxSteps=double.parse(value['week_steps'][i+1]['total_steps']);
-
-              }
+            double.parse(value['week_steps'][i]['total_steps'].toString())));
+        if (value['week_steps'].length > 1) {
+          if (i + 1 <= value['week_steps'].length - 1) {
+            if (double.parse(
+                    (value['week_steps'][i]['total_steps']).toString()) >
+                double.parse(
+                    (value['week_steps'][i + 1]['total_steps']).toString())) {
+              maxSteps = double.parse(
+                  (value['week_steps'][i]['total_steps']).toString());
+            } else {
+              maxSteps = double.parse(
+                  (value['week_steps'][i + 1]['total_steps']).toString());
             }
+          }
+        } else {
+          maxSteps =
+              double.parse((value['week_steps'][i]['total_steps']).toString());
+        }
       }
 
       setState(() {
@@ -219,7 +228,8 @@ class _StepsDataState extends State<StepsData>
                                   const BorderRadius.all(Radius.circular(12)),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.only(top:20.0,right: 20.0),
+                              padding:
+                                  const EdgeInsets.only(top: 20.0, right: 20.0),
                               child: Container(
                                 height: 240,
                                 child: SizedBox(
@@ -227,10 +237,9 @@ class _StepsDataState extends State<StepsData>
                                     height: 240,
                                     child: SfCartesianChart(
                                         primaryXAxis: CategoryAxis(
-                                          title: AxisTitle(text: "Days")
-                                        ),
+                                            title: AxisTitle(text: "Days")),
                                         primaryYAxis: NumericAxis(
-                                          title: AxisTitle(text: 'Steps'),
+                                            title: AxisTitle(text: 'Steps'),
                                             minimum: 0,
                                             maximum: maxSteps,
                                             interval: 100),
