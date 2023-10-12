@@ -206,7 +206,9 @@ class _HealthDataState extends State<HealthData> {
         };
         dataList.add(map);
       }
-      if (_healthDataList[i].typeString == "SLEEP_ASLEEP") {
+
+     if(_healthDataList[i].platform.toString().contains("IOS")){
+       if (_healthDataList[i].typeString == "SLEEP_IN_BED") {
         sleepVal = sleepVal + double.parse(_healthDataList[i].value.toString());
         SLEEP_ASLEEP =
             sleepVal.toString().substring(0, sleepVal.toString().indexOf('.'));
@@ -218,6 +220,22 @@ class _HealthDataState extends State<HealthData> {
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
         dataList.add(map);
+      }
+     }
+      if(_healthDataList[i].platform.toString().contains("ANDROID")){
+        if (_healthDataList[i].typeString == "SLEEP_ASLEEP") {
+        sleepVal = sleepVal + double.parse(_healthDataList[i].value.toString());
+        SLEEP_ASLEEP =
+            sleepVal.toString().substring(0, sleepVal.toString().indexOf('.'));
+
+        Map map = {
+          "key": "Sleep Time",
+          "value": _healthDataList[i].value.toString(),
+          "unit": _healthDataList[i].unitString.toString(),
+          "watch_date_time": _healthDataList[i].dateFrom.toString()
+        };
+        dataList.add(map);
+      }
       }
       if (_healthDataList[i].typeString == "BLOOD_OXYGEN") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
