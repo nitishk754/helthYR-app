@@ -56,8 +56,8 @@ class _WaterTrackerState extends State<WaterTracker>
         });
       }
 
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // final snackBar = SnackBar(content: Text(res["message"]));
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 

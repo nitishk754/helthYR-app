@@ -59,8 +59,8 @@ class _ActivityWidgetState extends State<ActivityWidget>
       if (!res.containsKey('errors')) {
         _loadActivity();
       }
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // final snackBar = SnackBar(content: Text(res["message"]));
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
@@ -82,8 +82,8 @@ class _ActivityWidgetState extends State<ActivityWidget>
         }
       }
 
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // final snackBar = SnackBar(content: Text(res["message"]));
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 

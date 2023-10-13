@@ -166,9 +166,9 @@ class _StepsDataState extends State<StepsData>
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(child: Container()),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Expanded(
+                                  Expanded(
+                                    child: Padding(
+                                       padding: const EdgeInsets.only(bottom: 8.0),
                                       child: Center(
                                           child: Image(
                                         height: 75,

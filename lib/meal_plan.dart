@@ -59,8 +59,8 @@ class _MealPlanState extends State<MealPlan>
           }
         });
 
-        final snackBar = SnackBar(content: Text(res["message"]));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // final snackBar = SnackBar(content: Text(res["message"]));
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
     });
   }
@@ -97,8 +97,8 @@ class _MealPlanState extends State<MealPlan>
         }
         // double.parse(weeklyMealPlanData['data'][index]['mealData'][index1]['data'][0]['recepie']['recipe_nutritions']['calories']).toStringAsFixed(2)
 
-        final snackBar = SnackBar(content: Text(res["message"]));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // final snackBar = SnackBar(content: Text(res["message"]));
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
     });
   }

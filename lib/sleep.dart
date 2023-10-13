@@ -48,18 +48,18 @@ class _SleepDataState extends State<SleepData>
       // _spinner = false;
       for (int i = 0; i < res['data']['week_sleep'].length; i++) {
         data.add(_ChartData(res['data']['week_sleep'][i]['activity_day'],
-            double.parse(res['data']['week_sleep'][i]['total_sleep'])));
+            double.parse((res['data']['week_sleep'][i]['total_sleep']).toString())));
             if(res['data']['week_sleep'].length>1){
                if(i+1<=res['data']['week_sleep'].length-1){
-              if(double.parse(res['data']['week_sleep'][i]['total_sleep'])>double.parse(res['data']['week_sleep'][i+1]['total_sleep'])){
-                maxSleep=double.parse(res['data']['week_sleep'][i]['total_sleep']);
+              if(double.parse((res['data']['week_sleep'][i]['total_sleep']).toString())>double.parse((res['data']['week_sleep'][i+1]['total_sleep']).toString())){
+                maxSleep=double.parse((res['data']['week_sleep'][i]['total_sleep']).toString());
               }else{
-                maxSleep=double.parse(res['data']['week_sleep'][i+1]['total_sleep']);
+                maxSleep=double.parse((res['data']['week_sleep'][i+1]['total_sleep']).toString());
 
               }
             }
             }else{
-               maxSleep=double.parse(res['data']['week_sleep'][i]['total_sleep']);
+               maxSleep=double.parse((res['data']['week_sleep'][i]['total_sleep']).toString());
             }
       }
 
@@ -161,9 +161,9 @@ class _SleepDataState extends State<SleepData>
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(child: Container()),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
-                                    child: Expanded(
+                                  Expanded(
+                                    child: Padding(
+                                       padding: const EdgeInsets.only(bottom: 8.0),
                                       child: Center(
                                           child: Image(
                                         height: 75,

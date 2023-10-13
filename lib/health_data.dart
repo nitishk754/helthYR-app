@@ -76,7 +76,7 @@ class _HealthDataState extends State<HealthData> {
         .then((value) {
       var resource = value["data"];
       if (resource['status'] == "success") {
-        Fluttertoast.showToast(msg: '${resource['message']}');
+        // Fluttertoast.showToast(msg: '${resource['message']}');
       }
     });
   }

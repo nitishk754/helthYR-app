@@ -126,6 +126,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 // }
 
   _dashboard() async {
+    DateTime dateTime = DateTime.now();
+ print("Time Zone: ${dateTime.timeZoneName}");
+ print("Time Zone Offset: ${dateTime.timeZoneOffset}");
     setState(() => _spinner = true);
     await ApiService().getDashboard().then((value) {
       var resource = value["data"];
@@ -186,8 +189,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
 
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // final snackBar = SnackBar(content: Text(res["message"]));
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
@@ -204,8 +207,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
 
-      final snackBar = SnackBar(content: Text(res["message"]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // final snackBar = SnackBar(content: Text(res["message"]));
+      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
     });
   }
 
