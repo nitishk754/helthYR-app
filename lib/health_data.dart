@@ -197,7 +197,7 @@ class _HealthDataState extends State<HealthData> {
         dataList.add(map);
       }
       if (_healthDataList[i].typeString == "HEART_RATE") {
-        HEART_RATE = _healthDataList[i].value.toString();
+        HEART_RATE =  _healthDataList[i].value.toString().substring(0,_healthDataList[i].value.toString().indexOf('.'));
         Map map = {
           "key": "Heart Rate",
           "value": _healthDataList[i].value.toString(),
@@ -243,11 +243,11 @@ class _HealthDataState extends State<HealthData> {
           final startIndex = BLOOD_OXYGEN.indexOf(".");
           BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex + 1);
         } else {
-          BLOOD_OXYGEN = _healthDataList[i].value.toString();
+          BLOOD_OXYGEN =  _healthDataList[i].value.toString().substring(0,_healthDataList[i].value.toString().indexOf('.'));
         }
         Map map = {
           "key": "Blood Oxygen",
-          "value": _healthDataList[i].value.toString(),
+          "value":_healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -382,7 +382,7 @@ class _HealthDataState extends State<HealthData> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(35.0, 5.0, 10.0, 5.0),
                     child: Text(
-                      "Watch",
+                      "Health Vitals",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey[800],

@@ -421,7 +421,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.all(5.0),
                 child: Container(
                   child: Text(
-                        "${dashboardData['today_sleep']} min",
+                    // 
+                        "${convertMinutesToHoursMinutes(int.parse(dashboardData['today_sleep'].toString()))}",
                         style: TextStyle(
                             color: Color(orangeShade),
                             fontSize: 20,
@@ -1494,18 +1495,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Flexible(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                waterIntake = -1;
-                                _addWaterIntake();
-                              });
-                            },
-                            icon: Icon(
-                              Icons.indeterminate_check_box,
-                              color: Color(lightGreyShadeColor),
-                              size: 25,
-                            )),
+                        child: Visibility(
+                          maintainSize: true, 
+  maintainAnimation: true,
+  maintainState: true,
+                          visible: (dashboardData["water_intake"]["glass_to_take"] == 0)?false:true,
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  waterIntake = -1;
+                                  _addWaterIntake();
+                                });
+                              },
+                              icon: Icon(
+                                Icons.indeterminate_check_box,
+                                color: Color(lightGreyShadeColor),
+                                size: 25,
+                              )),
+                        ),
                       ),
                       Flexible(
                         child: Padding(
@@ -1520,18 +1527,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                       Flexible(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                waterIntake = 1;
-                                _addWaterIntake();
-                              });
-                            },
-                            icon: Icon(
-                              Icons.add_box,
-                              color: Color(blueColor),
-                              size: 25,
-                            )),
+                        child: Visibility(
+                          maintainSize: true, 
+  maintainAnimation: true,
+  maintainState: true,
+                          visible: (dashboardData["water_intake"]["today_intake"] == 8)?false:true,
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  waterIntake = 1;
+                                  _addWaterIntake();
+                                });
+                              },
+                              icon: Icon(
+                                Icons.add_box,
+                                color: Color(blueColor),
+                                size: 25,
+                              )),
+                        ),
                       ),
                     ],
                   ),
@@ -1546,16 +1559,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          dashboardData["water_intake"]["today_intake"] > 8
+                          dashboardData["water_intake"]["glass_to_take"] == 0
                               ? ""
-                              : "${dashboardData["water_intake"]["ideal_water_intake_a_day"] - dashboardData["water_intake"]["today_intake"]} ",
+                              : "${dashboardData["water_intake"]["glass_to_take"]} ",
                           style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w500,
                               color: Color(orangeShade)),
                         ),
                         Text(
-                          dashboardData["water_intake"]["today_intake"] > 8
+                          dashboardData["water_intake"]["today_intake"] == 8
                               ? "Done for the day"
                               : "more glasses to go",
                           maxLines: 2,
@@ -1650,6 +1663,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
     return formatter.format(date);
+  }
+
+   String convertMinutesToHoursMinutes(int minutes) {
+    int hours = minutes ~/ 60;
+    int remainingMinutes = minutes % 60;
+    String hoursStr = hours.toString().padLeft(2, '0');
+    String minutesStr = remainingMinutes.toString().padLeft(2, '0');
+    return '${hoursStr}h ${minutesStr}m';
   }
 }
 

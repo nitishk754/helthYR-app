@@ -43,7 +43,7 @@ class _EducationContentState extends State<EducationContent> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(35.0, 0.0, 10.0, 0.0),
               child: Text(
-                "Learning Module",
+                "Habit Builder",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey[800],

@@ -14,13 +14,14 @@ class WaterTracker extends StatefulWidget {
   State<WaterTracker> createState() => _WaterTrackerState();
 }
 
-
 class _WaterTrackerState extends State<WaterTracker>
     with SingleTickerProviderStateMixin {
   int tabIndex = 0;
   late TabController tabController;
   bool _isLoading = false;
   int waterIntake = 1;
+  String glassesToTake = "";
+  String todayIntake = "";
 
   List<Map<String, dynamic>> _graphData = [
     {
@@ -44,36 +45,41 @@ class _WaterTrackerState extends State<WaterTracker>
 
   _addWaterIntake() async {
     setState(() => _isLoading = true);
-   
+
     await ApiService().addWaterIntake(waterIntake.toString()).then((value) {
       var res = value["data"];
-      if(res["status"] == "success"){
+      if (res["status"] == "success") {
         _pastSevenDaysGraph();
-      }else{
+      } else {
         setState(() {
-            _isLoading = false;
+          _isLoading = false;
         });
       }
 
       final snackBar = SnackBar(content: Text(res["message"]));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
     });
   }
 
   _pastSevenDaysGraph() async {
     setState(() => _isLoading = true);
     var originalGraphData = [];
-    await ApiService().getSevenDaysWaterIntake(waterIntake.toString()).then((value) {
+    await ApiService()
+        .getSevenDaysWaterIntake(waterIntake.toString())
+        .then((value) {
       var res = value["data"]["data"];
-      for(var i=0; i<res.length; i++){    
-        originalGraphData.add({'domain': res[i]["intake_weekday"], 'measure': res[i]["total_intake"]});
+      glassesToTake = res['today']['glass_to_take'].toString();
+      todayIntake = res['today']['today_intake'].toString();
+      for (var i = 0; i < res['graph_data'].length; i++) {
+        originalGraphData.add({
+          'domain': res['graph_data'][i]["intake_weekday"],
+          'measure': res['graph_data'][i]["total_intake"]
+        });
       }
       setState(() {
-          _graphData[0]["data"] = originalGraphData.cast<Map<String, dynamic>>();
-          _isLoading = false;
+        _graphData[0]["data"] = originalGraphData.cast<Map<String, dynamic>>();
+        _isLoading = false;
       });
-        
     });
   }
 
@@ -82,26 +88,25 @@ class _WaterTrackerState extends State<WaterTracker>
     return Scaffold(
       appBar: null,
       body: ListView(
-        children: [ 
-          
+        children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 20,
-                  color: Color(blueColor),
-                ))),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 20,
+                      color: Color(blueColor),
+                    ))),
           ),
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(35.0, 0.0, 10.0,0.0),
+              padding: const EdgeInsets.fromLTRB(35.0, 0.0, 10.0, 0.0),
               child: Text(
                 "Water Tracker",
                 textAlign: TextAlign.center,
@@ -131,9 +136,7 @@ class _WaterTrackerState extends State<WaterTracker>
           SizedBox(
             height: 10,
           ),
-          SizedBox(
-            height: 45,
-            child: Card(child: Center(child: tabbar()))),
+          SizedBox(height: 45, child: Card(child: Center(child: tabbar()))),
           SizedBox(
             height: 40,
           ),
@@ -170,18 +173,26 @@ class _WaterTrackerState extends State<WaterTracker>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              waterIntake = -1;
-                                              _addWaterIntake();
-                                            });
-                                          },
-                                          icon: Icon(
-                                            Icons.indeterminate_check_box,
-                                            color: Color(lightGreyShadeColor),
-                                            size: 30,
-                                          )),
+                                      Visibility(
+                                        maintainSize: true,
+                                        maintainAnimation: true,
+                                        maintainState: true,
+                                        visible: (glassesToTake == "0")
+                                            ? false
+                                            : true,
+                                        child: IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                waterIntake = -1;
+                                                _addWaterIntake();
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.indeterminate_check_box,
+                                              color: Color(lightGreyShadeColor),
+                                              size: 30,
+                                            )),
+                                      ),
                                       SizedBox(
                                         width: 10,
                                       ),
@@ -199,26 +210,63 @@ class _WaterTrackerState extends State<WaterTracker>
                                                       image: AssetImage(
                                                           "assets/Images/waterDashboard.png"))),
                                             ),
-                                        
                                           ],
                                         ),
                                       ),
                                       SizedBox(
                                         width: 5,
                                       ),
-                                      IconButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              waterIntake = 1;
-                                              _addWaterIntake();
-                                            });
-                                          },
-                                          icon: Icon(
-                                            Icons.add_box,
-                                            color: Color(blueColor),
-                                            size: 30,
-                                          )),
+                                      Visibility(
+                                        maintainSize: true,
+                                        maintainAnimation: true,
+                                        maintainState: true,
+                                        visible:
+                                            (todayIntake == "8") ? false : true,
+                                        child: IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                waterIntake = 1;
+                                                _addWaterIntake();
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.add_box,
+                                              color: Color(blueColor),
+                                              size: 30,
+                                            )),
+                                      ),
                                     ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Visibility(
+                                            visible: (glassesToTake == "0")
+                                                ? false
+                                                : true,
+                                            child: Text("$glassesToTake ",
+                                                style: TextStyle(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(orangeShade))),
+                                          ),
+                                          Text(
+                                              (glassesToTake == "0")
+                                                  ? "Done for the day"
+                                                  : " more glasses to go",
+                                              style: TextStyle(
+                                                  color: Colors.grey[400],
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500))
+                                        ]),
                                   ),
                                 )
                               ],
@@ -244,13 +292,14 @@ class _WaterTrackerState extends State<WaterTracker>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0,5.0,20.0,5.0),
+                    padding: const EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
                     child: Card(
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
                           color: Color(blueColor),
                         ),
-                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12)),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
@@ -259,18 +308,20 @@ class _WaterTrackerState extends State<WaterTracker>
                           child: SizedBox(
                             width: 10,
                             height: 240,
-                            child: _isLoading ? Center(child: CircularProgressIndicator()) : DChartBar(
-                              data: _graphData,
-                              domainLabelPaddingToAxisLine: 20,
-                              axisLineTick: 2,
-                              axisLinePointTick: 2,
-                              axisLinePointWidth: 10,
-                              axisLineColor: Color(blueColor),
-                              measureLabelPaddingToAxisLine: 16,
-                              barColor: (barData, index, id) => Color(blueColor),
-                              showBarValue: true,
-                              
-                            ),
+                            child: _isLoading
+                                ? Center(child: CircularProgressIndicator())
+                                : DChartBar(
+                                    data: _graphData,
+                                    domainLabelPaddingToAxisLine: 20,
+                                    axisLineTick: 2,
+                                    axisLinePointTick: 2,
+                                    axisLinePointWidth: 10,
+                                    axisLineColor: Color(blueColor),
+                                    measureLabelPaddingToAxisLine: 16,
+                                    barColor: (barData, index, id) =>
+                                        Color(blueColor),
+                                    showBarValue: true,
+                                  ),
                           ),
                         ),
                       ),
@@ -308,7 +359,7 @@ class _WaterTrackerState extends State<WaterTracker>
           child: Tab(
             child: Text(
               "Today",
-              style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
         ),
@@ -324,6 +375,4 @@ class _WaterTrackerState extends State<WaterTracker>
     // var formattedDate = "${dateParse.day}-${dateParse.month}-${dateParse.year}";
     return formatter.format(date);
   }
-  
-  
 }
