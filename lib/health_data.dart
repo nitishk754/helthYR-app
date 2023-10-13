@@ -275,7 +275,8 @@ class _HealthDataState extends State<HealthData> {
               distanceWalk + double.parse(_healthDataList[i].value.toString());
           DISTANCE_WALKING_RUNNING = distanceWalk
               .toString()
-              .substring(0, stepVal.toString().indexOf('.'));
+              .substring(0, distanceWalk.toString().indexOf('.'));
+              print("dwr: ${distanceWalk}");
           // DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
           Map map = {
             "key": "Walking Running Distance",
