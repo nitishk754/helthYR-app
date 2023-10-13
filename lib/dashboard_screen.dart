@@ -126,9 +126,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 // }
 
   _dashboard() async {
-    DateTime dateTime = DateTime.now();
- print("Time Zone: ${dateTime.timeZoneName}");
- print("Time Zone Offset: ${dateTime.timeZoneOffset}");
+//     DateTime dateTime = DateTime.now();
+//  print("Time Zone: ${dateTime.timeZoneName}");
+//  print("Time Zone Offset: ${dateTime.timeZoneOffset}");
     setState(() => _spinner = true);
     await ApiService().getDashboard().then((value) {
       var resource = value["data"];
@@ -176,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  _addWaterIntake() async { 
+  _addWaterIntake() async {
     setState(() => _spinner = true);
 
     await ApiService().addWaterIntake(waterIntake.toString()).then((value) {
@@ -370,74 +370,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
   InkWell sleepWidget(BuildContext context) {
     return InkWell(
       onTap: () {
         setState(() {
-          Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SleepData()))
+          Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => SleepData()))
               .then(onGoBack);
         });
       },
       child: Container(
-                   width: MediaQuery.of(context).size.width * 0.45,
-      height: 170,
-      child: Card(
-         elevation: 2.5,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Color(blueColor),
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
-        color: Colors.white,
-        child: 
-      Column(children: [
-         Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
-                child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Sleep",
-                      style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    )),
-              ),
-            ),
-             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Center(
-                    child: Image(
-                  height: 55,
-                  width: 55,
-                  image: AssetImage("assets/Images/sleep.png"),
-                )),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  child: Text(
-                    // 
-                        "${convertMinutesToHoursMinutes(int.parse(dashboardData['today_sleep'].toString()))}",
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Sleep",
                         style: TextStyle(
-                            color: Color(orangeShade),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600),
-                      ),
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
                 ),
               ),
-            ),
-      ],)
-        ,
-      ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Center(
+                      child: Image(
+                    height: 55,
+                    width: 55,
+                    image: AssetImage("assets/Images/sleep.png"),
+                  )),
                 ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Container(
+                    child: Text(
+                      //
+                      "${convertMinutesToHoursMinutes(int.parse(dashboardData['today_sleep'].toString()))}",
+                      style: TextStyle(
+                          color: Color(orangeShade),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -445,68 +444,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return InkWell(
       onTap: () {
         setState(() {
-          Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => StepsData()))
+          Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => StepsData()))
               .then(onGoBack);
         });
       },
       child: Container(
-                   width: MediaQuery.of(context).size.width * 0.45,
-      height: 170,
-      child: Card(
-         elevation: 2.5,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Color(blueColor),
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
-        color: Colors.white,
-        child: 
-      Column(children: [
-         Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
-                child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Steps",
-                      style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    )),
-              ),
-            ),
-             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Center(
-                    child: Image(
-                  height: 55,
-                  width: 55,
-                  image: AssetImage("assets/Images/steps.png"),
-                )),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  child: Text(
-                        "${dashboardData['today_step']}",
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Steps",
                         style: TextStyle(
-                            color: Color(orangeShade),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600),
-                      ),
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
                 ),
               ),
-            ),
-      ],)
-        ,
-      ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Center(
+                      child: Image(
+                    height: 55,
+                    width: 55,
+                    image: AssetImage("assets/Images/steps.png"),
+                  )),
                 ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Container(
+                    child: Text(
+                      "${dashboardData['today_step']}",
+                      style: TextStyle(
+                          color: Color(orangeShade),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -520,56 +519,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       },
       child: Container(
-                   width: MediaQuery.of(context).size.width * 0.45,
-      height: 170,
-      child: Card(
-         elevation: 2.5,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Color(blueColor),
+        width: MediaQuery.of(context).size.width * 0.45,
+        height: 170,
+        child: Card(
+          elevation: 2.5,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color(blueColor),
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          color: Colors.white,
+          child: Column(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
+                  child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Health Vitals",
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold),
+                      )),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Center(
+                      child: Image(
+                    height: 55,
+                    width: 55,
+                    image: AssetImage("assets/Images/smart_watch.png"),
+                  )),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Container(),
+                ),
+              ),
+            ],
+          ),
         ),
-        color: Colors.white,
-        child: 
-      Column(children: [
-         Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 0.0),
-                child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Health Vitals",
-                      style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    )),
-              ),
-            ),
-             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Center(
-                    child: Image(
-                  height: 55,
-                  width: 55,
-                  image: AssetImage("assets/Images/smart_watch.png"),
-                )),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  
-                ),
-              ),
-            ),
-      ],)
-        ,
       ),
-                ),
     );
   }
 
@@ -1499,10 +1496,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Flexible(
                         child: Visibility(
-                          maintainSize: true, 
-  maintainAnimation: true,
-  maintainState: true,
-                          visible: (dashboardData["water_intake"]["glass_to_take"] == 0)?false:true,
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          visible: ((dashboardData["water_intake"]
+                                      ["glass_to_take"] ==
+                                  0)||(dashboardData["water_intake"]
+                                      ["glass_to_take"] == 8))
+                              ? false
+                              : true,
                           child: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -1531,10 +1533,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       Flexible(
                         child: Visibility(
-                          maintainSize: true, 
-  maintainAnimation: true,
-  maintainState: true,
-                          visible: (dashboardData["water_intake"]["today_intake"] == 8)?false:true,
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          visible: (dashboardData["water_intake"]
+                                      ["today_intake"] ==
+                                  8)
+                              ? false
+                              : true,
                           child: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -1668,7 +1674,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return formatter.format(date);
   }
 
-   String convertMinutesToHoursMinutes(int minutes) {
+  String convertMinutesToHoursMinutes(int minutes) {
     int hours = minutes ~/ 60;
     int remainingMinutes = minutes % 60;
     String hoursStr = hours.toString().padLeft(2, '0');

@@ -20,7 +20,7 @@ class _SleepDataState extends State<SleepData>
   late List<_ChartData> data = [];
   late TooltipBehavior _tooltip;
   bool _spinner = false;
-  String todaySleepVal = "";
+  int todaySleepVal = 0;
   double maxSleep =0.0;
 
   @override
@@ -44,7 +44,7 @@ class _SleepDataState extends State<SleepData>
     setState(() => _spinner = true);
     await ApiService().getSevenSleepData().then((value) {
       var res = value["data"];
-      todaySleepVal = res['data']['today_sleep'].toString();
+      todaySleepVal = int.parse(res['data']['today_sleep'].toString());
       // _spinner = false;
       for (int i = 0; i < res['data']['week_sleep'].length; i++) {
         data.add(_ChartData(res['data']['week_sleep'][i]['activity_day'],
@@ -178,7 +178,7 @@ class _SleepDataState extends State<SleepData>
                                       padding: const EdgeInsets.all(8.0),
                                       child: Container(
                                         child: Text(
-                                          "${todaySleepVal} min",
+                                          "${convertMinutesToHoursMinutes(todaySleepVal)}",
                                           style: TextStyle(
                                               color: Color(orangeShade),
                                               fontSize: 25,
@@ -294,6 +294,14 @@ class _SleepDataState extends State<SleepData>
         ),
       ],
     );
+  }
+
+  String convertMinutesToHoursMinutes(int minutes) {
+    int hours = minutes ~/ 60;
+    int remainingMinutes = minutes % 60;
+    String hoursStr = hours.toString().padLeft(2, '0');
+    String minutesStr = remainingMinutes.toString().padLeft(2, '0');
+    return '${hoursStr}h ${minutesStr}m';
   }
 
   String getCurrentDate() {

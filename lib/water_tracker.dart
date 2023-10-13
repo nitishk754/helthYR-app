@@ -177,7 +177,7 @@ class _WaterTrackerState extends State<WaterTracker>
                                         maintainSize: true,
                                         maintainAnimation: true,
                                         maintainState: true,
-                                        visible: (glassesToTake == "0")
+                                        visible: ((glassesToTake == "0")||(glassesToTake == "8"))
                                             ? false
                                             : true,
                                         child: IconButton(
