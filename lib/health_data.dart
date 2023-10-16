@@ -132,12 +132,12 @@ class _HealthDataState extends State<HealthData> {
   Future<void> getVitals(var types) async {
     var now = DateTime.now();
 
-    try {
-      await health.getHealthDataFromTypes(
-          now.subtract(Duration(days: 1)), now, types);
-    } catch (error) {
-      print(error);
-    }
+    // try {
+    //   await health.getHealthDataFromTypes(
+    //       now.subtract(Duration(days: 1)), now, types);
+    // } catch (error) {
+    //   print(error);
+    // }
 
     // fetch health data from the last 24 hours
     var midnight = DateTime(now.year, now.month, now.day);
