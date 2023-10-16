@@ -90,31 +90,31 @@ class _HealthDataState extends State<HealthData> {
       bool? hasPermissions =
           await health.hasPermissions(typesIos, permissions: permissions);
 
-      bool authorized = false;
-      if (!hasPermissions!) {
-        // requesting access to the data types before reading them
-        try {
-          authorized = await health.requestAuthorization(typesIos,
-              permissions: permissions);
-        } catch (error) {
-          print("Exception in authorize: $error");
-        }
-      }
+      // bool authorized = false;
+      // if (!hasPermissions!) {
+      //   // requesting access to the data types before reading them
+      //   try {
+      //     authorized = await health.requestAuthorization(typesIos,
+      //         permissions: permissions);
+      //   } catch (error) {
+      //     print("Exception in authorize: $error");
+      //   }
+      // }
     } else {
       final permissions =
           typesAndroid.map((e) => HealthDataAccess.READ_WRITE).toList();
       bool? hasPermissions =
           await health.hasPermissions(typesAndroid, permissions: permissions);
-      bool authorized = false;
-      if (!hasPermissions!) {
-        // requesting access to the data types before reading them
-        try {
-          authorized = await health.requestAuthorization(typesAndroid,
-              permissions: permissions);
-        } catch (error) {
-          print("Exception in authorize: $error");
-        }
-      }
+      // bool authorized = false;
+      // if (!hasPermissions!) {
+      //   // requesting access to the data types before reading them
+      //   try {
+      //     authorized = await health.requestAuthorization(typesAndroid,
+      //         permissions: permissions);
+      //   } catch (error) {
+      //     print("Exception in authorize: $error");
+      //   }
+      // }
     }
 
     await Permission.activityRecognition.request();
