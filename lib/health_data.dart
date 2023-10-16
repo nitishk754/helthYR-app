@@ -87,15 +87,37 @@ class _HealthDataState extends State<HealthData> {
     if (isIOS) {
       final permissions =
           typesIos.map((e) => HealthDataAccess.READ_WRITE).toList();
+      bool? hasPermissions =
+          await health.hasPermissions(typesIos, permissions: permissions);
+
+      bool authorized = false;
+      if (!hasPermissions!) {
+        // requesting access to the data types before reading them
+        try {
+          authorized = await health.requestAuthorization(typesIos,
+              permissions: permissions);
+        } catch (error) {
+          print("Exception in authorize: $error");
+        }
+      }
     } else {
       final permissions =
           typesAndroid.map((e) => HealthDataAccess.READ_WRITE).toList();
+      bool? hasPermissions =
+          await health.hasPermissions(typesAndroid, permissions: permissions);
+      bool authorized = false;
+      if (!hasPermissions!) {
+        // requesting access to the data types before reading them
+        try {
+          authorized = await health.requestAuthorization(typesAndroid,
+              permissions: permissions);
+        } catch (error) {
+          print("Exception in authorize: $error");
+        }
+      }
     }
 
     await Permission.activityRecognition.request();
-
-    // bool? hasPermissions =
-    //     await health.hasPermissions(types, permissions: permissions);
 
     // // hasPermissions = false because the hasPermission cannot disclose if WRITE access exists.
     // // Hence, we have to request with WRITE as well.
@@ -197,7 +219,10 @@ class _HealthDataState extends State<HealthData> {
         dataList.add(map);
       }
       if (_healthDataList[i].typeString == "HEART_RATE") {
-        HEART_RATE =  _healthDataList[i].value.toString().substring(0,_healthDataList[i].value.toString().indexOf('.'));
+        HEART_RATE = _healthDataList[i]
+            .value
+            .toString()
+            .substring(0, _healthDataList[i].value.toString().indexOf('.'));
         Map map = {
           "key": "Heart Rate",
           "value": _healthDataList[i].value.toString(),
@@ -207,35 +232,39 @@ class _HealthDataState extends State<HealthData> {
         dataList.add(map);
       }
 
-     if(_healthDataList[i].platform.toString().contains("IOS")){
-       if (_healthDataList[i].typeString == "SLEEP_IN_BED") {
-        sleepVal = sleepVal + double.parse(_healthDataList[i].value.toString());
-        SLEEP_ASLEEP =
-            sleepVal.toString().substring(0, sleepVal.toString().indexOf('.'));
+      if (_healthDataList[i].platform.toString().contains("IOS")) {
+        if (_healthDataList[i].typeString == "SLEEP_IN_BED") {
+          sleepVal =
+              sleepVal + double.parse(_healthDataList[i].value.toString());
+          SLEEP_ASLEEP = sleepVal
+              .toString()
+              .substring(0, sleepVal.toString().indexOf('.'));
 
-        Map map = {
-          "key": "Sleep Time",
-          "value": _healthDataList[i].value.toString(),
-          "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
-        };
-        dataList.add(map);
+          Map map = {
+            "key": "Sleep Time",
+            "value": _healthDataList[i].value.toString(),
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        }
       }
-     }
-      if(_healthDataList[i].platform.toString().contains("ANDROID")){
+      if (_healthDataList[i].platform.toString().contains("ANDROID")) {
         if (_healthDataList[i].typeString == "SLEEP_ASLEEP") {
-        sleepVal = sleepVal + double.parse(_healthDataList[i].value.toString());
-        SLEEP_ASLEEP =
-            sleepVal.toString().substring(0, sleepVal.toString().indexOf('.'));
+          sleepVal =
+              sleepVal + double.parse(_healthDataList[i].value.toString());
+          SLEEP_ASLEEP = sleepVal
+              .toString()
+              .substring(0, sleepVal.toString().indexOf('.'));
 
-        Map map = {
-          "key": "Sleep Time",
-          "value": _healthDataList[i].value.toString(),
-          "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
-        };
-        dataList.add(map);
-      }
+          Map map = {
+            "key": "Sleep Time",
+            "value": _healthDataList[i].value.toString(),
+            "unit": _healthDataList[i].unitString.toString(),
+            "watch_date_time": _healthDataList[i].dateFrom.toString()
+          };
+          dataList.add(map);
+        }
       }
       if (_healthDataList[i].typeString == "BLOOD_OXYGEN") {
         if (_healthDataList[i].platform.toString().contains("IOS")) {
@@ -243,11 +272,14 @@ class _HealthDataState extends State<HealthData> {
           final startIndex = BLOOD_OXYGEN.indexOf(".");
           BLOOD_OXYGEN = BLOOD_OXYGEN.substring(startIndex + 1);
         } else {
-          BLOOD_OXYGEN =  _healthDataList[i].value.toString().substring(0,_healthDataList[i].value.toString().indexOf('.'));
+          BLOOD_OXYGEN = _healthDataList[i]
+              .value
+              .toString()
+              .substring(0, _healthDataList[i].value.toString().indexOf('.'));
         }
         Map map = {
           "key": "Blood Oxygen",
-          "value":_healthDataList[i].value.toString(),
+          "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
           "watch_date_time": _healthDataList[i].dateFrom.toString()
         };
@@ -276,7 +308,7 @@ class _HealthDataState extends State<HealthData> {
           DISTANCE_WALKING_RUNNING = distanceWalk
               .toString()
               .substring(0, distanceWalk.toString().indexOf('.'));
-              print("dwr: ${distanceWalk}");
+          print("dwr: ${distanceWalk}");
           // DISTANCE_WALKING_RUNNING = _healthDataList[i].value.toString();
           Map map = {
             "key": "Walking Running Distance",
