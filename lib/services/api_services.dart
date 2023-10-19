@@ -476,12 +476,12 @@ class ApiService {
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     DateTime dateTime = DateTime.now();
-    final queryParameters = {
-      'date': dateTime,
-    };
+    var formData = jsonEncode({
+      "date" : "${dateTime.year}-${dateTime.month}-${dateTime.day}"
+    });
     // var formData = jsonEncode({"email": email, "password": pass});
     Response stepsData =
-        await dio.get(baseUrl + getStepsData, queryParameters: queryParameters);
+        await dio.get(baseUrl + getStepsData, data: formData);
     print("stepsData: ${stepsData.data.toString()}");
     return stepsData.data;
   }
@@ -494,8 +494,10 @@ class ApiService {
         'Bearer ${prefs.getString("_token")}';
     DateTime dateTime = DateTime.now();
     var formData = jsonEncode({
-      "date" : "${dateTime.year}-${dateTime.month}-${dateTime.day}${dateTime.hour}:${dateTime.minute}:${dateTime.second}"
+      "date" : "${dateTime.year}-${dateTime.month}-${dateTime.day}"
     });
+    print( formData.toString());
+
 
     // var formData = jsonEncode({"email": email, "password": pass});
     Response sleepData = await dio.get(
@@ -503,10 +505,6 @@ class ApiService {
           getSleepData,
          data: formData
     );
-    print( baseUrl +
-          getSleepData +
-          "?date=" +
-          "${dateTime.year}-${dateTime.month}-${dateTime.day}${dateTime.hour}:${dateTime.minute}:${dateTime.second}");
     return sleepData.data;
   }
 }
