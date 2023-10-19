@@ -43,29 +43,31 @@ class _StepsDataState extends State<StepsData>
   Future<void> getStepsData() async {
     setState(() => _spinner = true);
     await ApiService().getSevenStepsData().then((value) {
-      var res = value["data"];
-      todayStepVal = value['today_steps'].toString();
+      var res = value["data"]["data"];
+      todayStepVal = res['today_steps'].toString();
       // _spinner = false;
-      for (int i = 0; i < value['week_steps'].length; i++) {
-        data.add(_ChartData(value['week_steps'][i]['activity_day'],
-            double.parse(value['week_steps'][i]['total_steps'].toString())));
-        if (value['week_steps'].length > 1) {
-          if (i + 1 <= value['week_steps'].length - 1) {
+      if(res['week_steps'].length>0){
+        for (int i = 0; i < res['week_steps'].length; i++) {
+        data.add(_ChartData(res['week_steps'][i]['activity_day'],
+            double.parse(res['week_steps'][i]['total_steps'].toString())));
+        if (res['week_steps'].length > 1) {
+          if (i + 1 <= res['week_steps'].length - 1) {
             if (double.parse(
-                    (value['week_steps'][i]['total_steps']).toString()) >
+                    (res['week_steps'][i]['total_steps']).toString()) >
                 double.parse(
-                    (value['week_steps'][i + 1]['total_steps']).toString())) {
+                    (res['week_steps'][i + 1]['total_steps']).toString())) {
               maxSteps = double.parse(
-                  (value['week_steps'][i]['total_steps']).toString());
+                  (res['week_steps'][i]['total_steps']).toString());
             } else {
               maxSteps = double.parse(
-                  (value['week_steps'][i + 1]['total_steps']).toString());
+                  (res['week_steps'][i + 1]['total_steps']).toString());
             }
           }
         } else {
           maxSteps =
-              double.parse((value['week_steps'][i]['total_steps']).toString());
+              double.parse((res['week_steps'][i]['total_steps']).toString());
         }
+      }
       }
 
       setState(() {
@@ -242,7 +244,7 @@ class _StepsDataState extends State<StepsData>
                                             title: AxisTitle(text: 'Steps'),
                                             minimum: 0,
                                             maximum: maxSteps,
-                                            interval: 100),
+                                            interval: 500),
                                         tooltipBehavior: _tooltip,
                                         series: <ChartSeries<_ChartData,
                                             String>>[

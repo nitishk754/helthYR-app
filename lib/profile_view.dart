@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:health_wellness/login.dart';
+import 'package:health_wellness/welcome_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'services/api_services.dart';
@@ -50,7 +51,7 @@ class _ProfileViewState extends State<ProfileView> {
      Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) {
-            return  Login();
+            return  WelcomePage();
           }),
         );
 

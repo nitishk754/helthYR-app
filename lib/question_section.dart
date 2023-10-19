@@ -35,6 +35,9 @@ class _QuestionSectionState extends State<QuestionSection> {
   final goalWeightController = TextEditingController();
   ScrollController _controllerScroll = new ScrollController();
 
+  var controllerFt = TextEditingController();
+  var controllerIn = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -229,12 +232,20 @@ class _QuestionSectionState extends State<QuestionSection> {
                             child: ElevatedButton(
                               onPressed: () {
                                 print("weightValue: $_weight");
-                                FocusManager.instance.primaryFocus?.unfocus();
+                                // FocusManager.instance.primaryFocus?.unfocus();
                                 var page = controller.page?.toInt() ?? 0;
                                 var length = userInput.values.length;
 
                                 debugPrint('page => $page, length => $length');
                                 if (length > page) {
+                                  if (controllerFt.text == "" && page == 2) {
+                                    Fluttertoast.showToast(
+                                        msg: 'Please enter your height');
+                                  }
+                                  if (controllerIn.text == "" && page == 2) {
+                                    Fluttertoast.showToast(
+                                        msg: 'Please enter your height');
+                                  }
                                   if (goalWeightController.text == "" &&
                                       page == 3) {
                                     Fluttertoast.showToast(
@@ -473,7 +484,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                       groupValue: _weight,
                       customHeight: 30,
                       fontSize: 15,
-                       customWidth: 40,
+                      customWidth: 40,
                       weight: FontWeight.w500,
                       onChanged: (value) {
                         setState(() {
@@ -501,7 +512,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                       groupValue: _weight,
                       fontSize: 15,
                       weight: FontWeight.w500,
-                       customWidth: 40,
+                      customWidth: 40,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -619,7 +630,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                       groupValue: _weight,
                       customHeight: 30,
                       fontSize: 15,
-                       customWidth: 40,
+                      customWidth: 40,
                       weight: FontWeight.w500,
                       onChanged: (value) {
                         setState(() {
@@ -646,7 +657,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                       customHeight: 30,
                       fontSize: 15,
                       weight: FontWeight.w500,
-                       customWidth: 40,
+                      customWidth: 40,
                       onChanged: (value) {
                         setState(() {
                           _weight = value!;
@@ -675,8 +686,6 @@ class _QuestionSectionState extends State<QuestionSection> {
   }
 
   Padding heightScreen(Datum model) {
-    var controllerFt = TextEditingController();
-    var controllerIn = TextEditingController();
     // var textFromValue = '';
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -746,7 +755,7 @@ class _QuestionSectionState extends State<QuestionSection> {
                 groupValue: _height,
                 customHeight: 30,
                 fontSize: 15,
-                 customWidth: 40,
+                customWidth: 40,
                 weight: FontWeight.w500,
                 onChanged: (value) => setState(() => _height = value!),
               ),

@@ -61,6 +61,7 @@ dependencies:
   webview_flutter: ^4.2.4
   health: ^8.0.0
   permission_handler: ^11.0.0
+  timezone: ^0.9.2
  
 
 dev_dependencies:

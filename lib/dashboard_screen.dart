@@ -126,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 // }
 
   _dashboard() async {
-//     DateTime dateTime = DateTime.now();
+   
 //  print("Time Zone: ${dateTime.timeZoneName}");
 //  print("Time Zone Offset: ${dateTime.timeZoneOffset}");
     setState(() => _spinner = true);
@@ -1277,7 +1277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     color: Color(orangeShade),
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 16 ,
                   )))
         ],
         series: <CircularSeries>[

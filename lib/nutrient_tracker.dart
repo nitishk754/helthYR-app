@@ -313,7 +313,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.w600)),
                                         subtitle: Text(
-                                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()}",
+                                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()} Cals",
                                             style: TextStyle(
                                                 fontSize: 13,
                                                 color: Colors.orange,
@@ -514,7 +514,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             )),
                         CircularChartAnnotation(
                             widget: Text(
-                                "${nutrientData["graph_data"]["toal_calories"].roundToDouble().round()}",
+                                " ${nutrientData["graph_data"]["toal_calories"].roundToDouble().round()}\nCals",
                                 style: TextStyle(
                                   color: Color(orangeShade),
                                   fontWeight: FontWeight.bold,
@@ -632,7 +632,7 @@ class _NutrientTrackerState extends State<NutrientTracker>
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600)),
                         subtitle: Text(
-                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()}",
+                            "${(nutrientData["food_log"][index]["total_calories"]).roundToDouble().round()} Cals",
                             style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.orange,

@@ -119,9 +119,13 @@ class ApiService {
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
     // var formData = jsonEncode({"email": email, "password": pass});
-    var formData = jsonEncode(
-        {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
+    var formData = jsonEncode({
+      "intake_amount": intakeAmount,
+      "intake_measurement": "ltr",
+      "intake_date": dateTime.toString()
+    });
     debugPrint(formData.toString());
     Response userData = await dio.post(baseUrl + waterIntake, data: formData);
     return userData.data;
@@ -133,10 +137,16 @@ class ApiService {
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
+
     // var formData = jsonEncode({"email": email, "password": pass});
     var formData = jsonEncode(
         {"intake_amount": intakeAmount, "intake_measurement": "ltr"});
-    Response userData = await dio.get(baseUrl + waterIntake, data: formData);
+    Response userData = await dio.get(baseUrl + waterIntake,
+        queryParameters: queryParameters, data: formData);
     return userData.data;
   }
 
@@ -175,8 +185,7 @@ class ApiService {
   Future<Map> addHealthAppData(
       String platform, List dataList, String device_id) async {
     dio.options.headers['X-Authorization'] = auth;
-final SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // dio.options.headers['Authorization'] =
     //     'Bearer ${prefs.getString("_token")}';
@@ -189,7 +198,8 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
       "device_id": device_id
     });
     debugPrint("watchApp ${formData}");
-    Response userData = await dio.post(baseUrl + storeWatchData , data: formData);
+    Response userData =
+        await dio.post(baseUrl + storeWatchData, data: formData);
     print("watchApp ${userData.data}");
     return userData.data;
   }
@@ -200,8 +210,13 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
     print(dio.options.headers['Authorization']);
-    Response userData = await dio.get(baseUrl + mealPlan + "?range=" + range);
+    Response userData = await dio.get(baseUrl + mealPlan + "?range=" + range,
+        queryParameters: queryParameters);
 
     print(userData.data);
     // print(jsonDecode(userData.data.toString()));
@@ -215,8 +230,13 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
     print(dio.options.headers['Authorization']);
-    Response weeklyMealPlanData = await dio.get(baseUrl + weeklyMealPlan);
+    Response weeklyMealPlanData = await dio.get(baseUrl + weeklyMealPlan,
+        queryParameters: queryParameters);
 
     print(weeklyMealPlanData.data);
     // print(jsonDecode(userData.data.toString()));
@@ -250,10 +270,14 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+
     var formData = jsonEncode({
       "recipe_id": recipeId, //"ernitish1993@gmail.com",
       "meal_type": mealType, //"nitish123",
       "plan_id": mealId,
+      'date': dateTime.toString(),
+
       // "role": "user"
     });
     print(dio.options.headers['Authorization']);
@@ -272,9 +296,12 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+
     var formData = jsonEncode({
       "user_weight": userWeight, //"ernitish1993@gmail.com",
-      "unit": weightUnit, //"nitish123",
+      "unit": weightUnit,
+      'date': dateTime.toString(), //"nitish123",
       // "role": "user"
     });
     print(dio.options.headers['Authorization']);
@@ -310,9 +337,14 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
     print(dio.options.headers['Authorization']);
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
 
     try {
-      Response dashboardData = await dio.get(baseUrl + dashboard);
+      Response dashboardData =
+          await dio.get(baseUrl + dashboard, queryParameters: queryParameters);
       print("dashboard: ${(dashboardData.data.toString())}");
 
       return dashboardData.data;
@@ -393,9 +425,14 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['Accept'] = "application/json";
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
 
     try {
-      Response userNutrientData = await dio.get(baseUrl + nutrientData + range);
+      Response userNutrientData = await dio.get(baseUrl + nutrientData + range,
+          queryParameters: queryParameters);
       // log(dashboardData.data.toString());
       print("getNutData: ${userNutrientData.data}");
       return (userNutrientData.data);
@@ -413,9 +450,14 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['Accept'] = "application/json";
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
 
     try {
-      Response userWeeklyActivity = await dio.get(baseUrl + weeklyActivity);
+      Response userWeeklyActivity = await dio.get(baseUrl + weeklyActivity,
+          queryParameters: queryParameters);
       // log(dashboardData.data.toString());
       print("weekActivity: ${userWeeklyActivity.data}");
       return (userWeeklyActivity.data);
@@ -433,8 +475,14 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    final queryParameters = {
+      'date': dateTime,
+    };
     // var formData = jsonEncode({"email": email, "password": pass});
-    Response stepsData = await dio.get(baseUrl + getStepsData);
+    Response stepsData =
+        await dio.get(baseUrl + getStepsData, queryParameters: queryParameters);
+    print("stepsData: ${stepsData.data.toString()}");
     return stepsData.data;
   }
 
@@ -444,13 +492,24 @@ final SharedPreferences prefs = await SharedPreferences.getInstance();
     dio.options.headers['X-Authorization'] = auth;
     dio.options.headers['Authorization'] =
         'Bearer ${prefs.getString("_token")}';
+    DateTime dateTime = DateTime.now();
+    var formData = jsonEncode({
+      "date" : "${dateTime.year}-${dateTime.month}-${dateTime.day}${dateTime.hour}:${dateTime.minute}:${dateTime.second}"
+    });
+
     // var formData = jsonEncode({"email": email, "password": pass});
-    Response sleepData = await dio.get(baseUrl + getSleepData);
+    Response sleepData = await dio.get(
+      baseUrl +
+          getSleepData,
+         data: formData
+    );
+    print( baseUrl +
+          getSleepData +
+          "?date=" +
+          "${dateTime.year}-${dateTime.month}-${dateTime.day}${dateTime.hour}:${dateTime.minute}:${dateTime.second}");
     return sleepData.data;
   }
 }
-
-
 
 String getCurrentDate() {
   var date = DateTime.now();

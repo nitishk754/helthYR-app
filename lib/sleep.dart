@@ -43,23 +43,24 @@ class _SleepDataState extends State<SleepData>
   Future<void> getSleepData() async {
     setState(() => _spinner = true);
     await ApiService().getSevenSleepData().then((value) {
-      var res = value["data"];
-      todaySleepVal = int.parse(res['data']['today_sleep'].toString());
+      var res = value["data"]['data'];
+      print("res: $res");
+      todaySleepVal = int.parse(res['today_sleep'].toString());
       // _spinner = false;
-      for (int i = 0; i < res['data']['week_sleep'].length; i++) {
-        data.add(_ChartData(res['data']['week_sleep'][i]['activity_day'],
-            double.parse((res['data']['week_sleep'][i]['total_sleep']).toString())));
-            if(res['data']['week_sleep'].length>1){
-               if(i+1<=res['data']['week_sleep'].length-1){
-              if(double.parse((res['data']['week_sleep'][i]['total_sleep']).toString())>double.parse((res['data']['week_sleep'][i+1]['total_sleep']).toString())){
-                maxSleep=double.parse((res['data']['week_sleep'][i]['total_sleep']).toString());
+      for (int i = 0; i < res['week_sleep'].length; i++) {
+        data.add(_ChartData(res['week_sleep'][i]['activity_day'],
+            double.parse((res['week_sleep'][i]['total_sleep']).toString())));
+            if(res['week_sleep'].length>1){
+               if(i+1<=res['week_sleep'].length-1){
+              if(double.parse((res['week_sleep'][i]['total_sleep']).toString())>double.parse((res['week_sleep'][i+1]['total_sleep']).toString())){
+                maxSleep=double.parse((res['week_sleep'][i]['total_sleep']).toString());
               }else{
-                maxSleep=double.parse((res['data']['week_sleep'][i+1]['total_sleep']).toString());
+                maxSleep=double.parse((res['week_sleep'][i+1]['total_sleep']).toString());
 
               }
             }
             }else{
-               maxSleep=double.parse((res['data']['week_sleep'][i]['total_sleep']).toString());
+               maxSleep=double.parse((res['week_sleep'][i]['total_sleep']).toString());
             }
       }
 
@@ -237,7 +238,7 @@ class _SleepDataState extends State<SleepData>
                                           title: AxisTitle(text: "Minutes"),
                                             minimum: 0,
                                             maximum: maxSleep,
-                                            interval: 50),
+                                            interval: 500),
                                         tooltipBehavior: _tooltip,
                                         series: <ChartSeries<_ChartData,
                                             String>>[

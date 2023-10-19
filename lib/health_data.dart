@@ -29,7 +29,8 @@ class _HealthDataState extends State<HealthData> {
   bool _exerciseTime = false;
   bool _dsitanceRunning = false;
   String device_id = "";
-
+  bool isSelectedToday = true;
+  bool isSelectedYes = false;
   // define the types to get
   static var typesIos = [
     HealthDataType.STEPS,
@@ -67,7 +68,7 @@ class _HealthDataState extends State<HealthData> {
   @override
   void initState() {
     super.initState();
-    getHealthData();
+    getHealthData("today");
   }
 
   Future<void> addWatchData() async {
@@ -81,7 +82,7 @@ class _HealthDataState extends State<HealthData> {
     });
   }
 
-  Future<void> getHealthData() async {
+  Future<void> getHealthData(String dayVal) async {
     bool isIOS = Platform.isIOS;
 
     if (isIOS) {
@@ -105,6 +106,7 @@ class _HealthDataState extends State<HealthData> {
           typesAndroid.map((e) => HealthDataAccess.READ_WRITE).toList();
       bool? hasPermissions =
           await health.hasPermissions(typesAndroid, permissions: permissions);
+      print("permission: $hasPermissions");
       // bool authorized = false;
       // if (!hasPermissions!) {
       //   // requesting access to the data types before reading them
@@ -143,15 +145,16 @@ class _HealthDataState extends State<HealthData> {
     if (isIOS) {
       bool requested = await health.requestAuthorization(typesIos);
       health.hasPermissions(typesIos);
-      getVitals(typesIos);
+      getVitals(typesIos, dayVal);
     } else {
       bool requested = await health.requestAuthorization(typesAndroid);
       health.hasPermissions(typesAndroid);
-      getVitals(typesAndroid);
+      getVitals(typesAndroid, dayVal);
     }
   }
 
-  Future<void> getVitals(var types) async {
+  Future<void> getVitals(var types, String dayVal) async {
+    List<HealthDataPoint> _healthDataList = [];
     var now = DateTime.now();
 
     // try {
@@ -164,10 +167,19 @@ class _HealthDataState extends State<HealthData> {
     // fetch health data from the last 24 hours
     var midnight = DateTime(now.year, now.month, now.day);
 
-    List<HealthDataPoint> healthData =
-        await health.getHealthDataFromTypes(midnight, now, types);
-    _healthDataList.addAll(
-        (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
+    var yesterDay = DateTime(now.year, now.month, now.day - 1);
+
+    if (dayVal == "today") {
+      List<HealthDataPoint> healthData =
+          await health.getHealthDataFromTypes(midnight, now, types);
+      _healthDataList.addAll(
+          (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
+    } else {
+      List<HealthDataPoint> healthData =
+          await health.getHealthDataFromTypes(yesterDay, midnight, types);
+      _healthDataList.addAll(
+          (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
+    }
 
     bool isAvail = health.isDataTypeAvailable(HealthDataType.STEPS);
 
@@ -214,7 +226,8 @@ class _HealthDataState extends State<HealthData> {
           "key": "Steps",
           "value": _healthDataList[i].value.toString(),
           "unit": "Steps",
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
+          "watch_date_time": _healthDataList[i].dateFrom.toString(),
+          "data_source": _healthDataList[i].sourceName.toString()
         };
         dataList.add(map);
       }
@@ -227,7 +240,8 @@ class _HealthDataState extends State<HealthData> {
           "key": "Heart Rate",
           "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
+          "watch_date_time": _healthDataList[i].dateFrom.toString(),
+          "data_source": _healthDataList[i].sourceName.toString()
         };
         dataList.add(map);
       }
@@ -244,7 +258,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Sleep Time",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         }
@@ -261,7 +276,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Sleep Time",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         }
@@ -281,7 +297,8 @@ class _HealthDataState extends State<HealthData> {
           "key": "Blood Oxygen",
           "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
+          "watch_date_time": _healthDataList[i].dateFrom.toString(),
+          "data_source": _healthDataList[i].sourceName.toString()
         };
         dataList.add(map);
       }
@@ -296,7 +313,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Exercise Time",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         } else {}
@@ -314,7 +332,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Walking Running Distance",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         } else {}
@@ -332,7 +351,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Exercise Time",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         } else {}
@@ -348,7 +368,8 @@ class _HealthDataState extends State<HealthData> {
             "key": "Walking Running Distance",
             "value": _healthDataList[i].value.toString(),
             "unit": _healthDataList[i].unitString.toString(),
-            "watch_date_time": _healthDataList[i].dateFrom.toString()
+            "watch_date_time": _healthDataList[i].dateFrom.toString(),
+            "data_source": _healthDataList[i].sourceName.toString()
           };
           dataList.add(map);
         } else {}
@@ -366,7 +387,8 @@ class _HealthDataState extends State<HealthData> {
           "key": "Calories Burned",
           "value": _healthDataList[i].value.toString(),
           "unit": _healthDataList[i].unitString.toString(),
-          "watch_date_time": _healthDataList[i].dateFrom.toString()
+          "watch_date_time": _healthDataList[i].dateFrom.toString(),
+          "data_source": _healthDataList[i].sourceName.toString()
         };
         dataList.add(map);
 
@@ -374,8 +396,9 @@ class _HealthDataState extends State<HealthData> {
       }
       setState(() => _spinner = false);
     }
-
-    addWatchData();
+    if (dayVal == "today") {
+      addWatchData();
+    }
   }
 
   String convertMinutesToHoursMinutes(int minutes) {
@@ -441,6 +464,57 @@ class _HealthDataState extends State<HealthData> {
                 ),
                 SizedBox(
                   height: 10,
+                ),
+                Container(
+                  height: 40,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            isSelectedYes = true;
+                            isSelectedToday = false;
+                            getHealthData("yesterday");
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Yesterday",
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: (isSelectedYes)
+                                  ? Color(orangeShade)
+                                  : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            isSelectedToday = true;
+                            isSelectedYes = false;
+                            getHealthData("today");
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("Today",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: (isSelectedToday)
+                                    ? Color(orangeShade)
+                                    : Colors.black,
+                              )),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
